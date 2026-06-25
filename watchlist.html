@@ -168,7 +168,7 @@
     .filter-btn.active { background:#e8681a; border-color:#e8681a; color:#fff; }
 
     /* ── VISTA TOGGLE ── */
-    .view-toggle { display: flex; gap: 2px; margin-left: 8px; }
+    .view-toggle { display: flex; gap: 2px; }
     .view-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; font-size: 13px; transition: all 0.15s; }
     .view-btn:hover { color: var(--text); border-color: var(--text-muted); }
     .view-btn.active { background: var(--surface2); color: var(--text); border-color: var(--text-muted); }
@@ -565,8 +565,7 @@
       + '<button class="filter-btn" data-sort="gainers">% Gainers</button>'
       + '<button class="filter-btn active" data-sort="value">Price ↑</button>'
       + '<button class="filter-btn" data-sort="custom">Custom ⠿</button>'
-      + '</div>'
-      + '<div class="view-toggle">'
+      + '<span style="width:1px;background:var(--border);height:20px;margin:0 4px"></span>'
       + '<button class="view-btn active" data-view="grid" title="Vista tarjetas">⊞</button>'
       + '<button class="view-btn" data-view="list" title="Vista lista">≡</button>'
       + '</div>'
