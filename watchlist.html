@@ -453,7 +453,7 @@
     const img = item.image || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2236%22 height=%2236%22%3E%3Crect fill=%22%23111%22 width=%2236%22 height=%2236%22/%3E%3C/svg%3E';
     return '<div class="list-row" data-id="' + item.id + '" draggable="false">'
       + '<span class="list-rank">' + rank + '</span>'
-      + '<img class="list-img" src="' + img + '" alt="' + item.name + '" onerror="this.style.opacity='0.2'"/>'
+      + '<img class="list-img" src="' + img + '" alt="' + item.name + '" onerror="this.style.opacity=0.2"/>'
       + '<div style="flex:1;min-width:0"><div class="list-name">' + item.name + '</div>'
       + '<div class="list-set">' + (item.set||'unknown') + (item.condition==='Sealed'?' · Sealed':'') + '</div></div>'
       + (salesTxt ? '<span class="list-sales">' + salesTxt + '</span>' : '')
