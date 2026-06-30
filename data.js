@@ -11,7 +11,7 @@ const CM_FILTERS = '?language=1&minCondition=3&sellerCountry=3%2C4%2C5%2C6%2C7%2
 const CM = 'https://www.cardmarket.com';
 
 window.portfolioData = {
-  updatedAt: "2026-06-29",
+  updatedAt: "2026-06-30",
 
   cards: [
 
@@ -33,7 +33,8 @@ window.portfolioData = {
         { date: "2026-06-22", price: 860 },
         { date: "2026-06-23", price: 1995 },
         { date: "2026-06-24", price: 1890 },
-        { date: "2026-06-26", price: 1995 }
+        { date: "2026-06-26", price: 1995 },
+        { date: "2026-06-30", price: 1995 }
       ]
     },
 
@@ -54,7 +55,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 60 },
         { date: "2026-06-24", price: 60 },
         { date: "2026-06-26", price: 62.95 },
-        { date: "2026-06-29", price: 62.5 }
+        { date: "2026-06-29", price: 62.5 },
+        { date: "2026-06-30", price: 62.5 }
       ]
     },
 
@@ -66,7 +68,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 55,
-      currentPrice: 60,
+      currentPrice: 55,
       image: "https://static.dotgg.gg/riftbound/cards/OGN-246b.webp",
       cardNumber: "OGN-246b",
       cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Origins-Promos/Viktor-Leader-V2-Showcase" + CM_FILTERS,
@@ -75,7 +77,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 70 },
         { date: "2026-06-24", price: 70 },
         { date: "2026-06-26", price: 60 },
-        { date: "2026-06-29", price: 60 }
+        { date: "2026-06-29", price: 60 },
+        { date: "2026-06-30", price: 55 }
       ]
     },
 
@@ -87,7 +90,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 37,
-      currentPrice: 29.95,
+      currentPrice: 29,
       image: "https://static.dotgg.gg/riftbound/cards/OGN-302.webp",
       cardNumber: "OGN-302",
       cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Origins/Darius-Hand-of-Noxus-V2-Overnumbered" + CM_FILTERS,
@@ -96,7 +99,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 29.95 },
         { date: "2026-06-24", price: 29.95 },
         { date: "2026-06-26", price: 30 },
-        { date: "2026-06-29", price: 29.95 }
+        { date: "2026-06-29", price: 29.95 },
+        { date: "2026-06-30", price: 29 }
       ]
     },
 
@@ -108,7 +112,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 35,
-      currentPrice: 24.99,
+      currentPrice: 24.5,
       image: "https://static.dotgg.gg/riftbound/cards/OGN-151b.webp",
       cardNumber: "OGN-151b",
       cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Origins-Promos/Lee-Sin-Centered" + CM_FILTERS,
@@ -117,7 +121,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 24.99 },
         { date: "2026-06-24", price: 24.5 },
         { date: "2026-06-26", price: 24.5 },
-        { date: "2026-06-29", price: 24.99 }
+        { date: "2026-06-29", price: 24.99 },
+        { date: "2026-06-30", price: 24.5 }
       ]
     },
 
@@ -131,7 +136,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 88,
-      currentPrice: 68,
+      currentPrice: 63,
       image: "https://static.dotgg.gg/riftbound/cards/UNL-235.webp",
       cardNumber: "UNL-235",
       cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Unleashed/Leblanc-Deceiver-V2-Showcase" + CM_FILTERS,
@@ -139,7 +144,8 @@ window.portfolioData = {
         { date: "2026-06-22", price: 70 },
         { date: "2026-06-23", price: 68 },
         { date: "2026-06-24", price: 68 },
-        { date: "2026-06-26", price: 68 }
+        { date: "2026-06-26", price: 68 },
+        { date: "2026-06-30", price: 63 }
       ]
     },
 
@@ -160,7 +166,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 70 },
         { date: "2026-06-24", price: 70 },
         { date: "2026-06-26", price: 60 },
-        { date: "2026-06-29", price: 60 }
+        { date: "2026-06-29", price: 60 },
+        { date: "2026-06-30", price: 60 }
       ]
     },
 
@@ -181,7 +188,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 70 },
         { date: "2026-06-24", price: 70 },
         { date: "2026-06-26", price: 60 },
-        { date: "2026-06-29", price: 60 }
+        { date: "2026-06-29", price: 60 },
+        { date: "2026-06-30", price: 60 }
       ]
     },
 
@@ -193,14 +201,15 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 40,
-      currentPrice: 79.5,
+      currentPrice: 77,
       image: "https://static.dotgg.gg/riftbound/cards/UNL-220.webp",
       cardNumber: "UNL-220",
       cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Unleashed/Pouty-Poro" + CM_FILTERS,
       priceHistory: [
         { date: "2026-06-22", price: 45 },
         { date: "2026-06-23", price: 45 },
-        { date: "2026-06-29", price: 79.5 }
+        { date: "2026-06-29", price: 79.5 },
+        { date: "2026-06-30", price: 77 }
       ]
     },
 
@@ -212,7 +221,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 45,
-      currentPrice: 73.99,
+      currentPrice: 70,
       image: "https://static.dotgg.gg/riftbound/cards/UNL-222.webp",
       cardNumber: "UNL-222",
       cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Unleashed/Plundering-Poro" + CM_FILTERS,
@@ -221,7 +230,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 72 },
         { date: "2026-06-24", price: 72 },
         { date: "2026-06-26", price: 78 },
-        { date: "2026-06-29", price: 73.99 }
+        { date: "2026-06-29", price: 73.99 },
+        { date: "2026-06-30", price: 70 }
       ]
     },
 
@@ -233,7 +243,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 27.99,
-      currentPrice: 57.21,
+      currentPrice: 65,
       image: "https://static.dotgg.gg/riftbound/cards/UNL-223.webp",
       cardNumber: "UNL-223",
       cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Unleashed/Veteran-Poro" + CM_FILTERS,
@@ -242,7 +252,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 70 },
         { date: "2026-06-24", price: 70 },
         { date: "2026-06-26", price: 73 },
-        { date: "2026-06-29", price: 57.21 }
+        { date: "2026-06-29", price: 57.21 },
+        { date: "2026-06-30", price: 65 }
       ]
     },
 
@@ -254,7 +265,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 36.5,
-      currentPrice: 74.95,
+      currentPrice: 69.99,
       image: "https://static.dotgg.gg/riftbound/cards/UNL-225.webp",
       cardNumber: "UNL-225",
       cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Unleashed/Daring-Poro" + CM_FILTERS,
@@ -263,7 +274,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 70 },
         { date: "2026-06-24", price: 70 },
         { date: "2026-06-26", price: 75 },
-        { date: "2026-06-29", price: 74.95 }
+        { date: "2026-06-29", price: 74.95 },
+        { date: "2026-06-30", price: 69.99 }
       ]
     },
 
@@ -284,7 +296,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 89 },
         { date: "2026-06-24", price: 89.99 },
         { date: "2026-06-26", price: 89.99 },
-        { date: "2026-06-29", price: 89.99 }
+        { date: "2026-06-29", price: 89.99 },
+        { date: "2026-06-30", price: 89.99 }
       ]
     },
 
@@ -305,7 +318,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 89 },
         { date: "2026-06-24", price: 89.99 },
         { date: "2026-06-26", price: 89.99 },
-        { date: "2026-06-29", price: 89.99 }
+        { date: "2026-06-29", price: 89.99 },
+        { date: "2026-06-30", price: 89.99 }
       ]
     },
 
@@ -319,13 +333,14 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 50,
-      currentPrice: 28,
+      currentPrice: 24,
       image: "https://static.dotgg.gg/riftbound/cards/SFD-245.webp",
       cardNumber: "SFD-245",
       cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Spiritforged/Jax-Grandmaster-at-Arms-V2-Showcase" + CM_FILTERS,
       priceHistory: [
         { date: "2026-06-22", price: 28 },
-        { date: "2026-06-23", price: 28 }
+        { date: "2026-06-23", price: 28 },
+        { date: "2026-06-30", price: 24 }
       ]
     },
 
@@ -346,7 +361,25 @@ window.portfolioData = {
         { date: "2026-06-23", price: 55 },
         { date: "2026-06-24", price: 52 },
         { date: "2026-06-26", price: 50 },
-        { date: "2026-06-29", price: 50 }
+        { date: "2026-06-29", price: 50 },
+        { date: "2026-06-30", price: 50 }
+      ]
+    },
+
+    {
+      id: "OGN-305",
+      name: "Yasuo, Unforgiven (V.2 — Overnumbered)",
+      set: "Origins",
+      condition: "Raw",
+      status: "Holding",
+      qty: 1,
+      buyPrice: 38,
+      currentPrice: 38,
+      image: "https://static.dotgg.gg/riftbound/cards/OGN-305.webp",
+      cardNumber: "OGN-305",
+      cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Origins/Yasuo-Unforgiven-V2-Overnumbered" + CM_FILTERS,
+      priceHistory: [
+        { date: "2026-06-30", price: 38 }
       ]
     },
 
@@ -360,7 +393,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 590,
-      currentPrice: 642,
+      currentPrice: 636.5,
       image: "https://cdn.sanity.io/images/dsfx7636/consumer_products_live/46c776a96cc14227a260d24489f10b4090cd2cd9-2560x2560.png",
       cardNumber: "UNL Case (6x)",
       cardmarketUrl: CM + "/en/Riftbound/Products/Booster-Boxes/Unleashed-Case-6x-Booster-Box?language=1&sortBy=price_asc&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4",
@@ -368,7 +401,8 @@ window.portfolioData = {
         { date: "2026-06-22", price: 595 },
         { date: "2026-06-23", price: 643.9 },
         { date: "2026-06-24", price: 643.9 },
-        { date: "2026-06-26", price: 642 }
+        { date: "2026-06-26", price: 642 },
+        { date: "2026-06-30", price: 636.5 }
       ]
     },
 
@@ -380,7 +414,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 128,
-      currentPrice: 157,
+      currentPrice: 156.94,
       image: "https://cdn.sanity.io/images/dsfx7636/consumer_products_live/e026ee1a44bc86095f9afc5949c5fdb519b29c66-2560x2560.png",
       cardNumber: "OGN Box",
       cardmarketUrl: CM + "/en/Riftbound/Products/Booster-Boxes/Origins-Booster-Box?language=1&sortBy=price_asc&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4",
@@ -389,7 +423,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 155.19 },
         { date: "2026-06-24", price: 161.89 },
         { date: "2026-06-26", price: 159.94 },
-        { date: "2026-06-29", price: 157 }
+        { date: "2026-06-29", price: 157 },
+        { date: "2026-06-30", price: 156.94 }
       ]
     },
 
@@ -401,7 +436,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 45,
-      currentPrice: 60.5,
+      currentPrice: 58.8,
       image: "https://cdn.sanity.io/images/dsfx7636/consumer_products_live/a2ca8f9bc247fc5435432e9a97c4efc5b79020c4-2560x2560.png",
       cardNumber: "PG Box",
       cardmarketUrl: CM + "/en/Riftbound/Products/Box-Sets/Proving-Grounds?language=1&sortBy=price_asc&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4",
@@ -409,7 +444,47 @@ window.portfolioData = {
         { date: "2026-06-22", price: 35 },
         { date: "2026-06-23", price: 59.89 },
         { date: "2026-06-24", price: 59.89 },
-        { date: "2026-06-26", price: 60.5 }
+        { date: "2026-06-26", price: 60.5 },
+        { date: "2026-06-30", price: 58.8 }
+      ]
+    },
+
+    {
+      id: "WORLDS-BOX",
+      name: "Worlds Bundle 2025",
+      set: "Origins",
+      condition: "Sealed",
+      status: "Holding",
+      qty: 1,
+      buyPrice: 190,
+      currentPrice: 284.59,
+      image: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20300%20420%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22bg2%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23080808%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230d0a0a%22/%3E%0A%20%20%20%20%3C/linearGradient%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22gold2%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23d4a843%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%238b6512%22/%3E%0A%20%20%20%20%3C/linearGradient%3E%0A%20%20%3C/defs%3E%0A%20%20%3Crect%20width%3D%22300%22%20height%3D%22420%22%20fill%3D%22url%28%23bg2%29%22/%3E%0A%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22284%22%20height%3D%22404%22%20rx%3D%2210%22%20fill%3D%22none%22%20stroke%3D%22url%28%23gold2%29%22%20stroke-width%3D%222%22/%3E%0A%20%20%3Crect%20x%3D%2216%22%20y%3D%2216%22%20width%3D%22268%22%20height%3D%22388%22%20rx%3D%228%22%20fill%3D%22none%22%20stroke%3D%22%23d4a843%22%20stroke-width%3D%220.5%22%20opacity%3D%220.3%22/%3E%0A%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22160%22%20r%3D%2260%22%20fill%3D%22none%22%20stroke%3D%22%23d4a843%22%20stroke-width%3D%221%22%20opacity%3D%220.5%22/%3E%0A%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22160%22%20r%3D%2245%22%20fill%3D%22%23d4a843%22%20opacity%3D%220.06%22/%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22155%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2242%22%20fill%3D%22%23d4a843%22%20opacity%3D%220.8%22%3E%F0%9F%8C%8D%3C/text%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22195%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2210%22%20fill%3D%22%23d4a843%22%20letter-spacing%3D%223%22%3EWORLDS%202025%3C/text%3E%0A%20%20%3Crect%20x%3D%2230%22%20y%3D%22300%22%20width%3D%22240%22%20height%3D%2260%22%20rx%3D%224%22%20fill%3D%22%23d4a843%22%20opacity%3D%220.07%22/%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22325%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2214%22%20font-weight%3D%22bold%22%20fill%3D%22%23d4a843%22%3EWorlds%20Bundle%202025%3C/text%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22348%22%20text-anchor%3D%22middle%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20fill%3D%22%23d4a843%22%20opacity%3D%220.5%22%20letter-spacing%3D%221%22%3ERIFTBOUND%20%C2%B7%20SEALED%3C/text%3E%0A%3C/svg%3E",
+      cardNumber: "Worlds Bundle",
+      cardmarketUrl: "https://www.cardmarket.com/es/Riftbound/Products/Box-Sets/Worlds-Bundle-2025?sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&language=1",
+      priceHistory: [
+        { date: "2026-06-26", price: 221.06 },
+        { date: "2026-06-30", price: 284.59 }
+      ]
+    },
+
+    {
+      id: "ARCANE-BOX",
+      name: "Arcane Box Set",
+      set: "Origins",
+      condition: "Sealed",
+      status: "Holding",
+      qty: 1,
+      buyPrice: 190,
+      currentPrice: 226.65,
+      image: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20420%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230d1117%22%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231a1206%22%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22gold%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23c9a84c%22%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%238b6914%22%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Crect%20width%3D%22300%22%20height%3D%22420%22%20fill%3D%22url(%23bg)%22%2F%3E%0A%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22284%22%20height%3D%22404%22%20rx%3D%2210%22%20fill%3D%22none%22%20stroke%3D%22url(%23gold)%22%20stroke-width%3D%222%22%2F%3E%0A%20%20%3Crect%20x%3D%2216%22%20y%3D%2216%22%20width%3D%22268%22%20height%3D%22388%22%20rx%3D%228%22%20fill%3D%22none%22%20stroke%3D%22%23c9a84c%22%20stroke-width%3D%220.5%22%20opacity%3D%220.4%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M8%2C40%20Q8%2C8%2040%2C8%22%20fill%3D%22none%22%20stroke%3D%22%23c9a84c%22%20stroke-width%3D%222%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M260%2C8%20Q292%2C8%20292%2C40%22%20fill%3D%22none%22%20stroke%3D%22%23c9a84c%22%20stroke-width%3D%222%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M8%2C380%20Q8%2C412%2040%2C412%22%20fill%3D%22none%22%20stroke%3D%22%23c9a84c%22%20stroke-width%3D%222%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M260%2C412%20Q292%2C412%20292%2C380%22%20fill%3D%22none%22%20stroke%3D%22%23c9a84c%22%20stroke-width%3D%222%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22175%22%20r%3D%2255%22%20fill%3D%22none%22%20stroke%3D%22%23c9a84c%22%20stroke-width%3D%221.5%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22175%22%20r%3D%2245%22%20fill%3D%22%23c9a84c%22%20opacity%3D%220.08%22%2F%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22168%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2236%22%20fill%3D%22%23c9a84c%22%20opacity%3D%220.9%22%3E%E2%9A%9C%3C%2Ftext%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22200%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2211%22%20fill%3D%22%23c9a84c%22%20letter-spacing%3D%223%22%3EARCANE%3C%2Ftext%3E%0A%20%20%3Crect%20x%3D%2230%22%20y%3D%22300%22%20width%3D%22240%22%20height%3D%2260%22%20rx%3D%224%22%20fill%3D%22%23c9a84c%22%20opacity%3D%220.08%22%2F%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22325%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2215%22%20font-weight%3D%22bold%22%20fill%3D%22%23c9a84c%22%3EArcane%20Box%20Set%3C%2Ftext%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22348%22%20text-anchor%3D%22middle%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20fill%3D%22%23c9a84c%22%20opacity%3D%220.6%22%20letter-spacing%3D%221%22%3ERIFTBOUND%20%C2%B7%20LIMITED%20EDITION%3C%2Ftext%3E%0A%3C%2Fsvg%3E",
+      cardNumber: "",
+      cardmarketUrl: "https://www.cardmarket.com/es/Riftbound/Products/Box-Sets/Arcane-Box-Set?sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&language=1",
+      priceHistory: [
+        { date: "2026-06-22", price: 200 },
+        { date: "2026-06-24", price: 179 },
+        { date: "2026-06-26", price: 184 },
+        { date: "2026-06-29", price: 216.65 },
+        { date: "2026-06-30", price: 226.65 }
       ]
     },
 
@@ -570,26 +645,6 @@ window.portfolioData = {
       priceHistory: [{ date: "2026-06-22", price: 900 },
         { date: "2026-06-24", price: 870 },
         { date: "2026-06-26", price: 850 }
-      ]
-    },
-
-    {
-      id: "WL-ARCANE-BOX",
-      name: "Arcane Box Set",
-      set: "Origins",
-      condition: "Sealed",
-      status: "Watchlist",
-      qty: 1,
-      buyPrice: 0,
-      currentPrice: 216.65,
-      image: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20300%20420%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%230d1117%22%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231a1206%22%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22gold%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23c9a84c%22%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%238b6914%22%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%20%20%3Crect%20width%3D%22300%22%20height%3D%22420%22%20fill%3D%22url(%23bg)%22%2F%3E%0A%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22284%22%20height%3D%22404%22%20rx%3D%2210%22%20fill%3D%22none%22%20stroke%3D%22url(%23gold)%22%20stroke-width%3D%222%22%2F%3E%0A%20%20%3Crect%20x%3D%2216%22%20y%3D%2216%22%20width%3D%22268%22%20height%3D%22388%22%20rx%3D%228%22%20fill%3D%22none%22%20stroke%3D%22%23c9a84c%22%20stroke-width%3D%220.5%22%20opacity%3D%220.4%22%2F%3E%0A%20%20%3C!--%20Decorative%20corner%20elements%20--%3E%0A%20%20%3Cpath%20d%3D%22M8%2C40%20Q8%2C8%2040%2C8%22%20fill%3D%22none%22%20stroke%3D%22%23c9a84c%22%20stroke-width%3D%222%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M260%2C8%20Q292%2C8%20292%2C40%22%20fill%3D%22none%22%20stroke%3D%22%23c9a84c%22%20stroke-width%3D%222%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M8%2C380%20Q8%2C412%2040%2C412%22%20fill%3D%22none%22%20stroke%3D%22%23c9a84c%22%20stroke-width%3D%222%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M260%2C412%20Q292%2C412%20292%2C380%22%20fill%3D%22none%22%20stroke%3D%22%23c9a84c%22%20stroke-width%3D%222%22%2F%3E%0A%20%20%3C!--%20Center%20emblem%20--%3E%0A%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22175%22%20r%3D%2255%22%20fill%3D%22none%22%20stroke%3D%22%23c9a84c%22%20stroke-width%3D%221.5%22%20opacity%3D%220.6%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22175%22%20r%3D%2245%22%20fill%3D%22%23c9a84c%22%20opacity%3D%220.08%22%2F%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22168%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2236%22%20fill%3D%22%23c9a84c%22%20opacity%3D%220.9%22%3E%E2%9A%9C%3C%2Ftext%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22200%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2211%22%20fill%3D%22%23c9a84c%22%20letter-spacing%3D%223%22%3EARCANE%3C%2Ftext%3E%0A%20%20%3C!--%20Title%20area%20--%3E%0A%20%20%3Crect%20x%3D%2230%22%20y%3D%22300%22%20width%3D%22240%22%20height%3D%2260%22%20rx%3D%224%22%20fill%3D%22%23c9a84c%22%20opacity%3D%220.08%22%2F%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22325%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2215%22%20font-weight%3D%22bold%22%20fill%3D%22%23c9a84c%22%3EArcane%20Box%20Set%3C%2Ftext%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22348%22%20text-anchor%3D%22middle%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20fill%3D%22%23c9a84c%22%20opacity%3D%220.6%22%20letter-spacing%3D%221%22%3ERIFTBOUND%20%C2%B7%20LIMITED%20EDITION%3C%2Ftext%3E%0A%3C%2Fsvg%3E",
-      cardNumber: "",
-      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Box-Sets/Arcane-Box-Set?sortBy=price_asc",
-      usSales: [],
-      priceHistory: [{ date: "2026-06-22", price: 200 },
-        { date: "2026-06-24", price: 179 },
-        { date: "2026-06-26", price: 184 },
-        { date: "2026-06-29", price: 216.65 }
       ]
     },
 
@@ -1017,23 +1072,6 @@ window.portfolioData = {
       priceHistory: [{ date: "2026-06-24", price: 14.90 },
         { date: "2026-06-26", price: 14.9 }
       ]
-    }
-,
-
-    {
-      id: "WL-WORLDS-BOX",
-      name: "Worlds Bundle 2025",
-      set: "Origins",
-      condition: "Sealed",
-      status: "Watchlist",
-      qty: 1,
-      buyPrice: 0,
-      currentPrice: 221.06,
-      image: "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20300%20420%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22bg2%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23080808%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230d0a0a%22/%3E%0A%20%20%20%20%3C/linearGradient%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22gold2%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23d4a843%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%238b6512%22/%3E%0A%20%20%20%20%3C/linearGradient%3E%0A%20%20%3C/defs%3E%0A%20%20%3Crect%20width%3D%22300%22%20height%3D%22420%22%20fill%3D%22url%28%23bg2%29%22/%3E%0A%20%20%3Crect%20x%3D%228%22%20y%3D%228%22%20width%3D%22284%22%20height%3D%22404%22%20rx%3D%2210%22%20fill%3D%22none%22%20stroke%3D%22url%28%23gold2%29%22%20stroke-width%3D%222%22/%3E%0A%20%20%3Crect%20x%3D%2216%22%20y%3D%2216%22%20width%3D%22268%22%20height%3D%22388%22%20rx%3D%228%22%20fill%3D%22none%22%20stroke%3D%22%23d4a843%22%20stroke-width%3D%220.5%22%20opacity%3D%220.3%22/%3E%0A%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22160%22%20r%3D%2260%22%20fill%3D%22none%22%20stroke%3D%22%23d4a843%22%20stroke-width%3D%221%22%20opacity%3D%220.5%22/%3E%0A%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22160%22%20r%3D%2245%22%20fill%3D%22%23d4a843%22%20opacity%3D%220.06%22/%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22155%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2242%22%20fill%3D%22%23d4a843%22%20opacity%3D%220.8%22%3E%F0%9F%8C%8D%3C/text%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22195%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2210%22%20fill%3D%22%23d4a843%22%20letter-spacing%3D%223%22%3EWORLDS%202025%3C/text%3E%0A%20%20%3Crect%20x%3D%2230%22%20y%3D%22300%22%20width%3D%22240%22%20height%3D%2260%22%20rx%3D%224%22%20fill%3D%22%23d4a843%22%20opacity%3D%220.07%22/%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22325%22%20text-anchor%3D%22middle%22%20font-family%3D%22serif%22%20font-size%3D%2214%22%20font-weight%3D%22bold%22%20fill%3D%22%23d4a843%22%3EWorlds%20Bundle%202025%3C/text%3E%0A%20%20%3Ctext%20x%3D%22150%22%20y%3D%22348%22%20text-anchor%3D%22middle%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20fill%3D%22%23d4a843%22%20opacity%3D%220.5%22%20letter-spacing%3D%221%22%3ERIFTBOUND%20%C2%B7%20SEALED%3C/text%3E%0A%3C/svg%3E",
-      cardNumber: "Worlds Bundle",
-      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Box-Sets/Worlds-Bundle-2025?language=1&sortBy=price_asc&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4",
-      usSales: [],
-      priceHistory: [{ date: "2026-06-26", price: 221.06 }]
     }
 
   ]
