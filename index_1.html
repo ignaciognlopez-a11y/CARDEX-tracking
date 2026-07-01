@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Riftbound — Portfolio</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #05050d; --surface: #0b0b1e; --surface2: #121232; --border: #1c1c3a;
+      --gold: #c9a84c; --gold-dim: #6a5528; --orange: #e8681a;
+      --text: #dde0ff; --text-muted: #48487a;
+      --green: #3ddc84; --green-bg: rgba(61,220,132,0.10);
+      --red: #ff5a5a; --red-bg: rgba(255,90,90,0.10);
+      --radius: 12px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; min-height: 100vh; padding-bottom: 60px; overflow-x: hidden; }
+
+    @keyframes slide-in-left  { from { opacity:0; transform:translateX(-48px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes slide-out-left { from { opacity:1; transform:translateX(0); } to { opacity:0; transform:translateX(-48px); } }
+    main { animation: slide-in-left 0.3s cubic-bezier(0.25,0.46,0.45,0.94) both; }
+    main.leaving { animation: slide-out-left 0.22s cubic-bezier(0.55,0,1,0.45) both; }
+
+    /* HEADER */
+    header { position:fixed; top:0; left:0; right:0; z-index:50; background:rgba(5,5,13,0.85); backdrop-filter:blur(16px); border-bottom:1px solid var(--border); padding:12px 28px; display:flex; align-items:center; gap:14px; }
+    .logo-svg { height:28px; width:auto; }
+    nav { display:flex; gap:4px; margin-left:20px; }
+    .nav-link { font-size:13px; font-weight:500; color:var(--text-muted); text-decoration:none; padding:5px 12px; border-radius:6px; transition:background 0.15s,color 0.15s; }
+    .nav-link:hover, .nav-link.active { background:var(--surface2); color:var(--text); }
+    .updated { margin-left:auto; font-size:11px; color:var(--text-muted); }
+
+    main { padding:22px 28px; padding-top:calc(22px + 55px); }
+
+    /* SUMMARY */
+    .summary-box { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:20px; }
+    .summary-metric { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 20px; display:flex; flex-direction:column; gap:4px; }
+    .sm-label { font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); font-weight:600; }
+    .sm-value { font-family:'DM Sans',sans-serif; font-size:24px; font-weight:800; letter-spacing:-0.8px; line-height:1.1; color:var(--text); }
+    .sm-value.pos { color:var(--green); } .sm-value.neg { color:var(--red); }
+    .sm-sub { font-size:11px; color:var(--text-muted); }
+    .sm-sub.pos { color:var(--green); } .sm-sub.neg { color:var(--red); }
+
+    /* P&L metric clickable */
+    .summary-metric.clickable { cursor:pointer; transition:border-color 0.15s, background 0.15s; }
+    .summary-metric.clickable:hover { border-color:var(--gold-dim); background:var(--surface2); }
+
+    /* P&L BREAKDOWN MODAL */
+    .pnl-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); z-index:200; align-items:center; justify-content:center; }
+    .pnl-overlay.open { display:flex; animation:overlay-in 0.18s ease both; }
+    @keyframes overlay-in { from{opacity:0} to{opacity:1} }
+    .pnl-modal { background:var(--surface); border:1px solid var(--border); border-radius:14px; width:460px; max-width:95vw; max-height:80vh; display:flex; flex-direction:column; box-shadow:0 24px 64px rgba(0,0,0,0.6); animation:pnl-in 0.25s cubic-bezier(0.34,1.4,0.64,1) both; }
+    @keyframes pnl-in { from{opacity:0;transform:scale(0.9) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+    .pnl-header { padding:16px 20px 12px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); flex-shrink:0; }
+    .pnl-title { font-size:15px; font-weight:800; letter-spacing:-0.3px; }
+    .pnl-totals { display:flex; gap:16px; align-items:baseline; }
+    .pnl-total-val { font-size:22px; font-weight:800; letter-spacing:-0.5px; }
+    .pnl-total-pct { font-size:12px; font-weight:700; }
+    .pnl-close { width:26px; height:26px; border-radius:50%; background:var(--surface2); border:1px solid var(--border); cursor:pointer; color:var(--text-muted); font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .pnl-list { overflow-y:auto; padding:8px 0; }
+    .pnl-row { display:flex; align-items:center; gap:10px; padding:8px 20px; transition:background 0.1s; }
+    .pnl-row:hover { background:var(--surface2); }
+    .pnl-rank { font-size:10px; color:var(--text-muted); width:16px; text-align:right; flex-shrink:0; }
+    .pnl-img { width:32px; height:32px; border-radius:4px; object-fit:cover; object-position:top; flex-shrink:0; }
+    .pnl-name { font-size:12px; font-weight:600; color:var(--text); flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .pnl-pct { font-size:12px; font-weight:800; flex-shrink:0; min-width:56px; text-align:right; }
+    .pnl-eur { font-size:12px; font-weight:600; color:var(--text); flex-shrink:0; min-width:70px; text-align:right; }
+    .pnl-pct.pos { color:var(--green); } .pnl-pct.neg { color:var(--red); }
+    .pnl-divider { height:1px; background:var(--border); margin:4px 20px; }
+
+    /* WATCHLIST STRIP */
+    .wl-strip { margin-bottom:28px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:12px 16px; }
+    .wl-strip-label { font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); font-weight:600; margin-bottom:10px; }
+    .wl-carousel-wrap { overflow:hidden; height:130px; cursor:grab; user-select:none; -webkit-user-select:none; }
+    .wl-carousel-wrap:active { cursor:grabbing; }
+    .wl-carousel-inner { display:flex; gap:12px; will-change:transform; }
+    .wl-img-slide { flex:0 0 auto; width:80px; display:flex; flex-direction:column; align-items:center; gap:4px; text-decoration:none; transition:opacity 0.15s; }
+    .wl-img-slide:hover { opacity:0.8; }
+    .wl-img-slide img { width:80px; height:80px; border-radius:5px; object-fit:cover; display:block; pointer-events:none; }
+    .wl-slide-price { font-size:11px; font-weight:700; color:var(--text); white-space:nowrap; }
+    .wl-slide-pct { font-size:10px; font-weight:700; white-space:nowrap; display:flex; align-items:center; gap:2px; }
+    .wl-slide-pct.pos { color:var(--green); } .wl-slide-pct.neg { color:var(--red); } .wl-slide-pct.neu { color:var(--text-muted); }
+    .wl-slide-name { font-size:9px; color:var(--text-muted); text-align:center; width:80px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+
+    /* FILTERS */
+    .section-wrap { margin-bottom:32px; }
+    .section-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+    .section-header h2 { font-size:17px; font-weight:800; letter-spacing:-0.3px; }
+    .section-count { font-size:11px; color:var(--text-muted); background:var(--surface2); border:1px solid var(--border); padding:2px 8px; border-radius:20px; }
+    .section-header::after { content:''; flex:1; height:1px; background:var(--border); min-width:20px; }
+    .filter-group { display:flex; gap:4px; margin-left:auto; order:3; }
+    .filter-btn { font-size:11px; font-weight:600; padding:4px 10px; border-radius:6px; border:1px solid var(--border); background:transparent; color:var(--text-muted); cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+    .filter-btn:hover { color:var(--text); border-color:var(--text-muted); }
+    .filter-btn.active { background:var(--orange); border-color:var(--orange); color:#fff; }
+
+    /* GRID */
+    .card-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; }
+
+    /* CARD */
+    .card { background:linear-gradient(170deg,#0e0e26 0%,#09091a 100%); border:1px solid rgba(255,255,255,0.06); border-radius:var(--radius); overflow:hidden; cursor:pointer; display:flex; flex-direction:column; transition:border-color 0.2s,box-shadow 0.25s; will-change:transform; position:relative;
+      box-shadow:0 10px 32px rgba(0,0,0,0.75),0 3px 8px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.04),inset 0 1px 0 rgba(255,255,255,0.05); }
+    .card:hover { border-color:rgba(201,168,76,0.35); }
+    /* Gloss overlay */
+    .card-gloss { position:absolute; inset:0; opacity:0; pointer-events:none; z-index:5; transition:opacity 0.25s; }
+    /* Gold shimmer ring on hover */
+    .card::after { content:''; position:absolute; inset:-1px; border-radius:calc(var(--radius)+1px); pointer-events:none; z-index:10; transition:box-shadow 0.3s; }
+    .card:hover::after { box-shadow:0 0 24px 3px rgba(201,168,76,0.2),inset 0 0 12px rgba(201,168,76,0.07); }
+    .pill { position:absolute; bottom:8px; right:8px; font-size:11px; font-weight:700; padding:3px 8px; border-radius:20px; line-height:1.3; white-space:nowrap; backdrop-filter:blur(6px); }
+    .pill.pos { background:rgba(61,220,132,0.18); color:var(--green); border:1px solid rgba(61,220,132,0.3); }
+    .pill.neg { background:rgba(255,90,90,0.18); color:var(--red); border:1px solid rgba(255,90,90,0.3); }
+    .pill.neu { background:rgba(30,30,60,0.6); color:var(--text-muted); border:1px solid var(--border); }
+    .card-cover { width:100%; aspect-ratio:5/7; overflow:hidden; background:#060613; position:relative; flex-shrink:0; }
+    .card-cover img { width:100%; height:100%; object-fit:contain; display:block; }
+    .card-body { padding:10px 11px 12px; display:flex; flex-direction:column; gap:5px; }
+    .card-name { font-size:14px; font-weight:700; line-height:1.3; color:var(--text); }
+    .card-badge-row { display:flex; gap:3px; flex-wrap:wrap; }
+    .badge { font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; padding:3px 7px; border-radius:4px; }
+    .badge-origins      { background:rgba(80,120,255,0.9); color:#fff; }
+    .badge-unleashed    { background:rgba(220,70,70,0.9); color:#fff; }
+    .badge-spiritforged { background:rgba(50,180,100,0.9); color:#fff; }
+    .badge-proving      { background:rgba(200,160,50,0.9); color:#000; }
+    .badge-sealed-tag   { background:rgba(80,200,255,0.9); color:#000; }
+    .card-price-block { display:flex; flex-direction:column; gap:4px; margin-top:5px; }
+    .card-price-row { display:flex; align-items:baseline; gap:6px; }
+    .card-price-label { font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); font-weight:600; min-width:76px; flex-shrink:0; }
+    .card-price-buy { font-size:13px; font-weight:600; color:var(--text); }
+    .card-price-main { font-size:18px; font-weight:800; color:#4fc3f7; letter-spacing:-0.3px; line-height:1.15; display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .card-var-inline { font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:2px; }
+    .var-arrow { font-size:9px; }
+    .cv-pos { color:var(--green); } .cv-neg { color:var(--red); } .cv-neu { color:var(--text-muted); }
+
+    /* MODAL */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); backdrop-filter:blur(12px); z-index:100; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; animation:overlay-in 0.2s ease both; }
+    @keyframes overlay-in { from{opacity:0;} to{opacity:1;} }
+    .modal { background:linear-gradient(170deg,#0d0d26 0%,#08081a 100%); border:1px solid rgba(255,255,255,0.07); border-radius:18px; width:440px; max-width:95vw; max-height:92vh; overflow-y:auto; overflow-x:hidden; position:relative; box-shadow:0 36px 90px rgba(0,0,0,0.95),0 0 0 1px rgba(201,168,76,0.12); animation:modal-in 0.32s cubic-bezier(0.34,1.4,0.64,1) both; }
+    @keyframes modal-in { from{opacity:0;transform:scale(0.86) translateY(28px);} to{opacity:1;transform:scale(1) translateY(0);} }
+    .modal-close-x { position:fixed; top:16px; right:16px; width:30px; height:30px; border-radius:50%; background:rgba(13,13,38,0.9); border:1px solid rgba(255,255,255,0.1); cursor:pointer; color:var(--text-muted); font-size:13px; display:flex; align-items:center; justify-content:center; z-index:10; transition:color 0.15s,border-color 0.15s; }
+    .modal-close-x:hover { color:var(--text); border-color:rgba(255,255,255,0.25); }
+
+    /* Stage: área de imagen de la carta con efecto 3D */
+    .modal-stage { display:flex; justify-content:center; align-items:center; padding:32px 20px 20px; perspective:900px; background:radial-gradient(ellipse at 50% 60%, rgba(201,168,76,0.07) 0%, transparent 70%); cursor:crosshair; flex-shrink:0; }
+    .modal-card-3d { position:relative; width:190px; border-radius:11px; overflow:hidden; transform-style:preserve-3d;
+      box-shadow:0 24px 60px rgba(0,0,0,0.9),0 8px 20px rgba(0,0,0,0.6),0 0 40px rgba(201,168,76,0.18),0 0 0 1px rgba(255,255,255,0.08); transition:box-shadow 0.3s; }
+    .modal-card-3d:hover { box-shadow:0 28px 70px rgba(0,0,0,0.9),0 10px 24px rgba(0,0,0,0.6),0 0 55px rgba(201,168,76,0.28),0 0 0 1px rgba(255,255,255,0.12); }
+    #modal-img { width:100%; height:auto; display:block; }
+    .modal-card-gloss { position:absolute; inset:0; opacity:0; pointer-events:none; border-radius:11px; transition:opacity 0.2s; }
+    .modal-card-shine { position:absolute; inset:0; pointer-events:none; border-radius:11px; background:linear-gradient(135deg,rgba(255,255,255,0.1) 0%,transparent 55%,rgba(201,168,76,0.06) 100%); mix-blend-mode:screen; }
+
+    /* Info debajo de la carta */
+    .modal-body { padding:4px 22px 24px; }
+    .modal-badges { display:flex; gap:5px; margin-bottom:6px; }
+    .modal-name { font-size:17px; font-weight:800; letter-spacing:-0.4px; line-height:1.25; margin-bottom:14px; }
+    .modal-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px; background:var(--border); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:16px; }
+    .modal-stat { display:flex; flex-direction:column; gap:3px; padding:12px 14px; background:var(--surface); }
+    .modal-stat-label { font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); font-weight:700; }
+    .modal-stat-value { font-size:18px; font-weight:800; letter-spacing:-0.5px; }
+    .modal-stat-value.pos { color:var(--green); } .modal-stat-value.neg { color:var(--red); }
+    .modal-stat-sub { font-size:10px; color:var(--text-muted); font-weight:600; }
+    .modal-stat-sub.pos { color:var(--green); } .modal-stat-sub.neg { color:var(--red); }
+
+    /* Gráfica interactiva */
+    .modal-chart-section { margin-bottom:16px; }
+    .modal-spark-label { font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); font-weight:700; display:block; margin-bottom:8px; }
+    .chart-wrap { position:relative; width:100%; height:88px; }
+    #modal-spark { width:100%; height:88px; display:block; cursor:crosshair; border-radius:6px; }
+    .chart-tip { display:none; position:absolute; top:6px; background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:4px 10px; font-size:11px; font-weight:700; color:var(--text); pointer-events:none; white-space:nowrap; z-index:10; box-shadow:0 4px 12px rgba(0,0,0,0.5); }
+    .modal-spark-empty { width:100%; height:88px; border:1px dashed var(--border); border-radius:6px; display:flex; align-items:center; justify-content:center; margin-bottom:0; }
+    .modal-spark-empty span { font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; }
+
+    .modal-actions { display:flex; gap:10px; }
+    .btn-cardmarket { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg,#c9a84c,#a8863a); color:#000; font-weight:800; font-size:13px; padding:11px 16px; border-radius:9px; text-decoration:none; transition:opacity 0.15s,box-shadow 0.15s; box-shadow:0 4px 14px rgba(201,168,76,0.3); }
+    .btn-cardmarket:hover { opacity:0.9; box-shadow:0 6px 20px rgba(201,168,76,0.45); }
+    .btn-close { background:var(--surface); border:1px solid var(--border); color:var(--text-muted); font-size:13px; font-weight:600; padding:11px 18px; border-radius:9px; cursor:pointer; transition:border-color 0.15s,color 0.15s; }
+    .btn-close:hover { border-color:rgba(255,255,255,0.2); color:var(--text); }
+
+    @media (max-width:1100px) { .card-grid { grid-template-columns:repeat(4,1fr); gap:12px; } .summary-box { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:860px)  { .card-grid { grid-template-columns:repeat(3,1fr); } }
+    @media (max-width:540px)  { .card-grid { grid-template-columns:repeat(2,1fr); } .summary-box { grid-template-columns:repeat(2,1fr); } }
+  </style>
+</head>
+<body>
+<header>
+  <svg class="logo-svg" viewBox="0 0 120 32" xmlns="http://www.w3.org/2000/svg">
+    <rect width="32" height="32" rx="5" fill="#0a0a0f"/>
+    <polyline points="4,25 10,19 16,21 22,11 26,7" fill="none" stroke="#3ddc84" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <polyline points="23,5 26,7 24,10" fill="none" stroke="#3ddc84" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="38" y="21" font-family="DM Sans,sans-serif" font-size="13" font-weight="800" fill="#e8681a" letter-spacing="-0.3">Riftbound</text>
+    <text x="38" y="30" font-family="DM Sans,sans-serif" font-size="8" font-weight="500" fill="#5a5a70" letter-spacing="0.5">STOCKS TRACKER</text>
+  </svg>
+  <nav>
+    <a class="nav-link active" href="index.html">Portfolio</a>
+    <a class="nav-link" href="watchlist.html">Watchlist</a>
+  </nav>
+  <span class="updated" id="updated-label"></span>
+</header>
+
+<main>
+  <div class="summary-box">
+    <div class="summary-metric">
+      <span class="sm-label">Invested</span>
+      <span class="sm-value" id="s-invested">—</span>
+      <span class="sm-sub">cost basis</span>
+    </div>
+    <div class="summary-metric">
+      <span class="sm-label">Market Value</span>
+      <span class="sm-value" id="s-market">—</span>
+      <span class="sm-sub">paid positions</span>
+    </div>
+    <div class="summary-metric clickable" id="pnl-metric" title="Ver desglose P&L">
+      <span class="sm-label">P&amp;L ↗</span>
+      <span class="sm-value" id="s-pnl">—</span>
+      <span class="sm-sub" id="s-pct">—</span>
+    </div>
+    <div class="summary-metric">
+      <span class="sm-label">Total Value</span>
+      <span class="sm-value" id="s-total">—</span>
+      <span class="sm-sub">all positions</span>
+    </div>
+  </div>
+
+  <div class="wl-strip">
+    <div class="wl-strip-label">Watchlist</div>
+    <div class="wl-carousel-wrap" id="wl-carousel">
+      <div class="wl-carousel-inner" id="wl-inner"></div>
+    </div>
+  </div>
+
+  <div class="section-wrap" id="singles-section">
+    <div class="section-header">
+      <h2>Singles</h2>
+      <span class="section-count" id="singles-count"></span>
+      <div class="filter-group" id="singles-filters">
+        <button class="filter-btn active" data-sort="gainers" data-target="singles">% Gainers</button>
+        <button class="filter-btn" data-sort="value" data-target="singles">Highest Value</button>
+      </div>
+    </div>
+    <div class="card-grid" id="singles-grid"></div>
+  </div>
+
+  <div class="section-wrap" id="sealed-section">
+    <div class="section-header">
+      <h2>Sealed</h2>
+      <span class="section-count" id="sealed-count"></span>
+      <div class="filter-group" id="sealed-filters">
+        <button class="filter-btn active" data-sort="gainers" data-target="sealed">% Gainers</button>
+        <button class="filter-btn" data-sort="value" data-target="sealed">Highest Value</button>
+      </div>
+    </div>
+    <div class="card-grid" id="sealed-grid"></div>
+  </div>
+</main>
+
+<div class="pnl-overlay" id="pnl-overlay">
+  <div class="pnl-modal">
+    <div class="pnl-header">
+      <div>
+        <div class="pnl-title">P&amp;L Breakdown</div>
+        <div class="pnl-totals">
+          <span class="pnl-total-val" id="pnl-total-val">—</span>
+          <span class="pnl-total-pct" id="pnl-total-pct"></span>
+        </div>
+      </div>
+      <button class="pnl-close" id="pnl-close">✕</button>
+    </div>
+    <div class="pnl-list" id="pnl-list"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <button class="modal-close-x" id="modal-close-x">✕</button>
+    <!-- Stage 3D de la carta -->
+    <div class="modal-stage" id="modal-stage">
+      <div class="modal-card-3d" id="modal-card-3d">
+        <img id="modal-img" src="" alt=""/>
+        <div class="modal-card-gloss" id="modal-card-gloss"></div>
+        <div class="modal-card-shine"></div>
+      </div>
+    </div>
+    <!-- Info estática debajo -->
+    <div class="modal-body">
+      <div class="modal-badges" id="modal-badges"></div>
+      <div class="modal-name" id="modal-name"></div>
+      <div class="modal-stats">
+        <div class="modal-stat"><span class="modal-stat-label">Cost</span><span class="modal-stat-value" id="modal-cost">—</span></div>
+        <div class="modal-stat"><span class="modal-stat-label">Market</span><span class="modal-stat-value" id="modal-market">—</span></div>
+        <div class="modal-stat"><span class="modal-stat-label">P&amp;L</span><span class="modal-stat-value" id="modal-pnl">—</span><span class="modal-stat-sub" id="modal-pct"></span></div>
+      </div>
+      <div class="modal-chart-section">
+        <span class="modal-spark-label">Price history</span>
+        <div class="chart-wrap" id="chart-wrap" style="display:none">
+          <canvas id="modal-spark"></canvas>
+          <div class="chart-tip" id="chart-tip"></div>
+        </div>
+        <div class="modal-spark-empty" id="modal-spark-empty"><span>No data yet</span></div>
+      </div>
+      <div class="modal-actions">
+        <a class="btn-cardmarket" id="modal-cm-link" href="#" target="_blank" rel="noopener">↗ Cardmarket</a>
+        <button class="btn-close" id="modal-close-btn">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  const fmt     = n => n.toLocaleString('de-DE',{minimumFractionDigits:0,maximumFractionDigits:0})+' €';
+  const fmtSign = n => (n>=0?'+':'')+fmt(n);
+  const fmtPct  = n => (n>=0?'+':'')+n.toFixed(1)+'%';
+  const badgeClass = s => ({Origins:'badge-origins',Unleashed:'badge-unleashed',Spiritforged:'badge-spiritforged','Proving Grounds':'badge-proving'}[s]||'');
+  const cmUrl = item => item.cardmarketUrl || 'https://www.cardmarket.com/en/Riftbound/Products/Search?searchString='+encodeURIComponent(item.name);
+
+  function drawSpark(id,history,h,interactive){
+    const canvas=document.getElementById(id); if(!canvas)return;
+    const ctx=canvas.getContext('2d'),dpr=window.devicePixelRatio||1;
+    const W=canvas.offsetWidth*dpr,H=(h||canvas.offsetHeight)*dpr;
+    canvas.width=W;canvas.height=H;
+    const prices=history.map(x=>x.price),dates=history.map(x=>x.date);
+    const mn=Math.min(...prices),mx=Math.max(...prices),rng=mx-mn||1;
+    const pad=6*dpr,xp=i=>pad+(i/(prices.length-1))*(W-pad*2),yp=v=>H-pad-((v-mn)/rng)*(H-pad*2);
+    const up=prices[prices.length-1]>=prices[0],col=up?'#3ddc84':'#ff5a5a';
+
+    function render(hlIdx){
+      ctx.clearRect(0,0,W,H);
+      const grad=ctx.createLinearGradient(0,0,0,H);
+      grad.addColorStop(0,up?'rgba(61,220,132,0.25)':'rgba(255,90,90,0.25)');grad.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.beginPath();prices.forEach((p,i)=>i===0?ctx.moveTo(xp(i),yp(p)):ctx.lineTo(xp(i),yp(p)));
+      ctx.lineTo(xp(prices.length-1),H);ctx.lineTo(xp(0),H);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+      ctx.beginPath();prices.forEach((p,i)=>i===0?ctx.moveTo(xp(i),yp(p)):ctx.lineTo(xp(i),yp(p)));
+      ctx.strokeStyle=col;ctx.lineWidth=2*dpr;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
+      ctx.beginPath();ctx.arc(xp(prices.length-1),yp(prices[prices.length-1]),3*dpr,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+
+      if(hlIdx!==undefined){
+        const hx=xp(hlIdx),hy=yp(prices[hlIdx]);
+        ctx.save();ctx.beginPath();ctx.moveTo(hx,0);ctx.lineTo(hx,H);
+        ctx.strokeStyle='rgba(255,255,255,0.18)';ctx.lineWidth=1*dpr;ctx.setLineDash([4*dpr,4*dpr]);ctx.stroke();ctx.restore();
+        ctx.beginPath();ctx.arc(hx,hy,6*dpr,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.18)';ctx.fill();
+        ctx.beginPath();ctx.arc(hx,hy,3.5*dpr,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+        ctx.beginPath();ctx.arc(hx,hy,2.2*dpr,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+      }
+    }
+    render();
+
+    if(interactive&&prices.length>1){
+      const tip=document.getElementById('chart-tip');
+      if(canvas._mv)canvas.removeEventListener('mousemove',canvas._mv);
+      if(canvas._ml)canvas.removeEventListener('mouseleave',canvas._ml);
+      canvas._mv=e=>{
+        const r=canvas.getBoundingClientRect(),rx=(e.clientX-r.left)*dpr;
+        let best=0,bd=Infinity;prices.forEach((_,i)=>{const d=Math.abs(xp(i)-rx);if(d<bd){bd=d;best=i;}});
+        render(best);
+        if(tip){
+          const pf=prices[best].toLocaleString('de-DE',{minimumFractionDigits:0,maximumFractionDigits:0})+' €';
+          const df=new Date(dates[best]+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+          tip.textContent=df+'  ·  '+pf;
+          tip.style.display='block';
+          const relX=e.clientX-r.left,cw=r.width;
+          if(relX>cw/2){tip.style.right=(cw-relX+10)+'px';tip.style.left='auto';}
+          else{tip.style.left=(relX+10)+'px';tip.style.right='auto';}
+        }
+      };
+      canvas._ml=()=>{render();if(tip)tip.style.display='none';};
+      canvas.addEventListener('mousemove',canvas._mv);
+      canvas.addEventListener('mouseleave',canvas._ml);
+    }
+  }
+
+  function openModal(item){
+    const isFree=!item.buyPrice||item.buyPrice===0,qty=item.qty||1;
+    const pnl=isFree?null:(item.currentPrice-item.buyPrice)*qty;
+    const pct=isFree?null:(item.currentPrice-item.buyPrice)/item.buyPrice*100;
+    document.getElementById('modal-img').src=item.image;
+    document.getElementById('modal-name').textContent=item.name;
+    document.getElementById('modal-cost').textContent=isFree?'Free':fmt(item.buyPrice*qty);
+    document.getElementById('modal-market').textContent=fmt(item.currentPrice*qty);
+    const pnlEl=document.getElementById('modal-pnl');
+    pnlEl.textContent=pnl!==null?fmtSign(pnl):'—';pnlEl.className='modal-stat-value'+(pnl===null?'':pnl>=0?' pos':' neg');
+    const pctEl=document.getElementById('modal-pct');
+    pctEl.textContent=pct!==null?fmtPct(pct)+' on cost':'';
+    pctEl.className='modal-stat-sub'+(pct===null?'':pct>=0?' pos':' neg');
+    document.getElementById('modal-badges').innerHTML=
+      (item.set?`<span class="badge ${badgeClass(item.set)}">${item.set}</span>`:'')+
+      (item.condition==='Sealed'?`<span class="badge badge-sealed-tag">Sealed</span>`:'');
+    document.getElementById('modal-cm-link').href=cmUrl(item);
+    const cw=document.getElementById('chart-wrap'),se=document.getElementById('modal-spark-empty');
+    if(item.priceHistory?.length>1){
+      cw.style.display='block';se.style.display='none';
+      requestAnimationFrame(()=>drawSpark('modal-spark',item.priceHistory,88,true));
+    } else { cw.style.display='none';se.style.display='flex'; }
+    document.getElementById('modal-overlay').classList.add('open');
+    document.body.style.overflow='hidden';
+    // Tilt 3D en la carta del modal
+    initModalTilt();
+  }
+  function closeModal(){
+    const ov=document.getElementById('modal-overlay');
+    ov.classList.remove('open');
+    document.body.style.overflow='';
+    if(ov._stopTilt){ov._stopTilt();ov._stopTilt=null;}
+  }
+  function initModalTilt(){
+    const stage=document.getElementById('modal-stage');
+    const card3d=document.getElementById('modal-card-3d');
+    const gloss=document.getElementById('modal-card-gloss');
+    if(!stage||!card3d)return;
+    let tx=0,ty=0,tgtX=0,tgtY=0,gx=50,gy=50,hov=false;
+    function onMove(e){
+      hov=true;
+      const r=card3d.getBoundingClientRect();
+      const mx=(e.clientX-r.left-r.width/2)/(r.width/2);
+      const my=(e.clientY-r.top-r.height/2)/(r.height/2);
+      tgtX=-my*14;tgtY=mx*14;
+      gx=((e.clientX-r.left)/r.width)*100;
+      gy=((e.clientY-r.top)/r.height)*100;
+      if(gloss)gloss.style.opacity='1';
+    }
+    function onLeave(){hov=false;tgtX=0;tgtY=0;if(gloss)gloss.style.opacity='0';}
+    stage.addEventListener('mousemove',onMove);
+    stage.addEventListener('mouseleave',onLeave);
+    let raf;
+    function tick(){
+      tx+=(tgtX-tx)*0.1;ty+=(tgtY-ty)*0.1;
+      if(Math.abs(tx)>0.01||Math.abs(ty)>0.01||hov){
+        card3d.style.transform=`perspective(900px) rotateX(${tx.toFixed(2)}deg) rotateY(${ty.toFixed(2)}deg)`;
+      }
+      if(gloss&&hov){
+        gloss.style.background=`radial-gradient(circle at ${gx.toFixed(0)}% ${gy.toFixed(0)}%,rgba(255,255,200,0.28) 0%,rgba(255,255,255,0.07) 40%,transparent 65%)`;
+      }
+      raf=requestAnimationFrame(tick);
+    }
+    raf=requestAnimationFrame(tick);
+    const ov=document.getElementById('modal-overlay');
+    ov._stopTilt=()=>{
+      stage.removeEventListener('mousemove',onMove);
+      stage.removeEventListener('mouseleave',onLeave);
+      cancelAnimationFrame(raf);
+      if(card3d)card3d.style.transform='';
+    };
+  }
+  document.getElementById('modal-close-x').addEventListener('click',closeModal);
+  document.getElementById('modal-close-btn').addEventListener('click',closeModal);
+  document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target.id==='modal-overlay')closeModal();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+  function sortItems(items, mode) {
+    if (mode === 'gainers') {
+      return [...items].sort((a,b) => {
+        const pctA = a.buyPrice>0 ? (a.currentPrice-a.buyPrice)/a.buyPrice : -Infinity;
+        const pctB = b.buyPrice>0 ? (b.currentPrice-b.buyPrice)/b.buyPrice : -Infinity;
+        return pctB - pctA;
+      });
+    }
+    return [...items].sort((a,b) => b.currentPrice - a.currentPrice);
+  }
+
+  function buildCard(item){
+    const isFree=!item.buyPrice||item.buyPrice===0,qty=item.qty||1;
+    const pnl=isFree?null:(item.currentPrice-item.buyPrice)*qty;
+    const pct=isFree?null:(item.currentPrice-item.buyPrice)/item.buyPrice*100;
+    const isPos=pnl!==null&&pnl>=0;
+    const pillCls=pnl===null?'neu':isPos?'pos':'neg';
+    const pillTxt=pct!==null?((pct>=0?'+':'')+pct.toFixed(1)+'%'):'—';
+    const varCls=pnl===null?'cv-neu':isPos?'cv-pos':'cv-neg';
+    const varArrow=isPos?'▲':pnl!==null?'▼':'';
+    const varTxt=pct!==null?((pct>=0?'+':'')+pct.toFixed(1)+'%'):'';
+    return `<div class="card" data-id="${item.id}">
+      <div class="card-cover">
+        <img src="${item.image}" alt="${item.name}" loading="lazy" onerror="this.style.opacity='0.08'"/>
+        <span class="pill ${pillCls}">${pillTxt}</span>
+        <div class="card-gloss"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-badge-row">
+          ${item.set?`<span class="badge ${badgeClass(item.set)}">${item.set}</span>`:''}
+          ${item.condition==='Sealed'?`<span class="badge badge-sealed-tag">Sealed</span>`:''}
+        </div>
+        <div class="card-name">${item.name}</div>
+        <div class="card-price-block">
+          <div class="card-price-row"><span class="card-price-label">Buy Price</span><span class="card-price-buy">${isFree?'Free':fmt(item.buyPrice*qty)}</span></div>
+          <div class="card-price-row"><span class="card-price-label">Current Price</span>
+            <span class="card-price-main">${fmt(item.currentPrice*qty)}${varTxt?`<span class="${varCls} card-var-inline"><span class="var-arrow">${varArrow}</span>${varTxt}</span>`:''}</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  let allCards = [];
+  let singlesSort = 'gainers', sealedSort = 'gainers';
+
+  function renderGrid(items, gridId, sort) {
+    document.getElementById(gridId).innerHTML = sortItems(items, sort).map(buildCard).join('');
+    document.querySelectorAll(`#${gridId} .card`).forEach(el => {
+      el.addEventListener('click', () => { const item = allCards.find(c=>c.id===el.dataset.id); if(item)openModal(item); });
+    });
+  }
+
+  // Watchlist carousel with manual scroll
+  function initWatchlist(cards){
+    const wl=(cards||[]).filter(c=>c.status==='Watchlist').sort((a,b)=>a.currentPrice-b.currentPrice);
+    const inner=document.getElementById('wl-inner');
+    const wrap=document.getElementById('wl-carousel');
+    if(!wl.length){inner.innerHTML='<div style="color:var(--text-muted);font-size:12px;padding:4px 0;">No watchlist items yet</div>';return;}
+
+    function varFromHistory7(h){
+      if(!h||h.length<2)return null;
+      const last=h[h.length-1],cutoff=new Date(last.date+'T12:00:00');
+      cutoff.setDate(cutoff.getDate()-7);
+      const cands=h.slice(0,-1).filter(x=>new Date(x.date+'T12:00:00')<=cutoff);
+      if(!cands.length)return null;
+      return(last.price-cands[cands.length-1].price)/cands[cands.length-1].price*100;
+    }
+
+    function buildSlide(item){
+      const p7=varFromHistory7(item.priceHistory);
+      const cls=p7===null?'neu':p7>=0?'pos':'neg';
+      const arrow=p7===null?'':p7>=0?'▲':'▼';
+      const pctTxt=p7===null?'—':(p7>=0?'+':'')+p7.toFixed(1)+'% 7d';
+      const price=item.currentPrice?item.currentPrice.toLocaleString('de-DE',{minimumFractionDigits:0})+' €':'—';
+      const url=item.cardmarketUrl||'https://www.cardmarket.com/en/Riftbound/Products/Search?searchString='+encodeURIComponent(item.name);
+      return `<a class="wl-img-slide" href="${url}" target="_blank" rel="noopener" draggable="false" title="${item.name}">
+        <img src="${item.image}" alt="${item.name}" draggable="false" onerror="this.style.opacity=0.15"/>
+        <div class="wl-slide-price">${price}</div>
+        <div class="wl-slide-pct ${cls}"><span>${arrow}</span>${pctTxt}</div>
+        <div class="wl-slide-name">${item.name}</div>
+      </a>`;
+    }
+
+    inner.innerHTML=[...wl,...wl,...wl].map(buildSlide).join('');
+
+    const SW=92, setW=wl.length*SW;
+    let pos=-setW, dragging=false, dragX=0, dragPos=0, prevT=null;
+
+    function wrap_(p){
+      while(p<-setW*2) p+=setW;
+      while(p>0) p-=setW;
+      return p;
+    }
+    function apply(p){ pos=wrap_(p); inner.style.transform=`translateX(${pos}px)`; }
+    apply(pos);
+
+    requestAnimationFrame(function tick(t){
+      if(!dragging){
+        if(prevT!==null) apply(pos-(40*(t-prevT)/1000));
+        prevT=t;
+      }
+      requestAnimationFrame(tick);
+    });
+
+    // Mouse - usar capture para interceptar antes que los links
+    wrap.addEventListener('mousedown',e=>{
+      dragging=true; dragX=e.clientX; dragPos=pos;
+      wrap.style.cursor='grabbing';
+      inner.style.pointerEvents='none'; // bloquea links durante drag
+      e.preventDefault();
+    },{capture:true});
+    window.addEventListener('mousemove',e=>{
+      if(dragging) apply(dragPos+(e.clientX-dragX));
+    });
+    window.addEventListener('mouseup',()=>{
+      if(dragging){
+        dragging=false; prevT=null; wrap.style.cursor='grab';
+        inner.style.pointerEvents=''; // restaura links
+      }
+    });
+    // Cancelar click si fue drag real
+    wrap.addEventListener('click',e=>{
+      if(Math.abs(pos-dragPos)>4) e.preventDefault();
+    },{capture:true});
+
+    // Touch
+    wrap.addEventListener('touchstart',e=>{
+      dragging=true; dragX=e.touches[0].clientX; dragPos=pos;
+    },{passive:true});
+    wrap.addEventListener('touchmove',e=>{
+      if(dragging) apply(dragPos+(e.touches[0].clientX-dragX));
+    },{passive:true});
+    wrap.addEventListener('touchend',()=>{ dragging=false; prevT=null; });
+  }
+
+  function render(){
+    if(!window.portfolioData?.cards)return;
+    allCards=window.portfolioData.cards;
+    const holding=allCards.filter(c=>c.status==='Holding');
+    const singles=holding.filter(c=>c.condition!=='Sealed');
+    const sealed=holding.filter(c=>c.condition==='Sealed');
+
+    const totalValue=holding.reduce((s,c)=>s+c.currentPrice*(c.qty||1),0);
+    const paid=holding.filter(c=>c.buyPrice>0);
+    const totalInvested=paid.reduce((s,c)=>s+c.buyPrice*(c.qty||1),0);
+    const paidMarket=paid.reduce((s,c)=>s+c.currentPrice*(c.qty||1),0);
+    const pnl=paidMarket-totalInvested;
+    const pct=totalInvested>0?pnl/totalInvested*100:0;
+
+    document.getElementById('s-invested').textContent=fmt(totalInvested);
+    document.getElementById('s-market').textContent=fmt(paidMarket);
+    const pnlEl=document.getElementById('s-pnl');
+    pnlEl.textContent=fmtSign(pnl);pnlEl.className='sm-value '+(pnl>=0?'pos':'neg');
+    document.getElementById('s-total').textContent=fmt(totalValue);
+    const pctEl=document.getElementById('s-pct');
+    pctEl.textContent=fmtPct(pct)+' on cost';pctEl.className='sm-sub '+(pnl>=0?'pos':'neg');
+
+    const upd=window.portfolioData.updatedAt;
+    if(upd)document.getElementById('updated-label').textContent='Updated '+new Date(upd+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+
+    renderGrid(singles,'singles-grid',singlesSort);
+    renderGrid(sealed,'sealed-grid',sealedSort);
+    document.getElementById('singles-count').textContent=singles.length+' items';
+    document.getElementById('sealed-count').textContent=sealed.length+' items';
+    if(!singles.length)document.getElementById('singles-section').style.display='none';
+    if(!sealed.length)document.getElementById('sealed-section').style.display='none';
+
+    initWatchlist(allCards);
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const target=btn.dataset.target,sort=btn.dataset.sort;
+        document.querySelectorAll(`.filter-btn[data-target="${target}"]`).forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        if(target==='singles'){singlesSort=sort;renderGrid(singles,'singles-grid',sort);}
+        else{sealedSort=sort;renderGrid(sealed,'sealed-grid',sort);}
+        initCardEffects();
+      });
+    });
+
+    // ── P&L BREAKDOWN MODAL ──
+    document.getElementById('pnl-metric').addEventListener('click', () => {
+      const paid = holding.filter(c => c.buyPrice > 0);
+      const rows = paid.map(c => {
+        const qty = c.qty || 1;
+        const pnlEur = (c.currentPrice - c.buyPrice) * qty;
+        const pnlPct = (c.currentPrice - c.buyPrice) / c.buyPrice * 100;
+        return { ...c, pnlEur, pnlPct };
+      }).sort((a, b) => b.pnlPct - a.pnlPct);
+
+      const totalPnl = rows.reduce((s, c) => s + c.pnlEur, 0);
+      const totalInv = paid.reduce((s, c) => s + c.buyPrice * (c.qty||1), 0);
+      const totalPct = totalInv > 0 ? totalPnl / totalInv * 100 : 0;
+
+      const pnlEl = document.getElementById('pnl-total-val');
+      const pctEl = document.getElementById('pnl-total-pct');
+      pnlEl.textContent = fmtSign(totalPnl);
+      pnlEl.style.color = totalPnl >= 0 ? 'var(--green)' : 'var(--red)';
+      pctEl.textContent = fmtPct(totalPct) + ' on cost';
+      pctEl.style.color = totalPnl >= 0 ? 'var(--green)' : 'var(--red)';
+
+      // Separar gainers y losers
+      const gainers = rows.filter(r => r.pnlEur >= 0);
+      const losers  = rows.filter(r => r.pnlEur < 0);
+
+      function rowHTML(r, i) {
+        const pos = r.pnlEur >= 0;
+        const sign = pos ? '+' : '';
+        return `<div class="pnl-row">
+          <span class="pnl-rank">${i + 1}</span>
+          <img class="pnl-img" src="${r.image}" alt="${r.name}" onerror="this.style.opacity=0.1"/>
+          <span class="pnl-name">${r.name}</span>
+          <span class="pnl-pct ${pos ? 'pos' : 'neg'}">${sign}${r.pnlPct.toFixed(1)}%</span>
+          <span class="pnl-eur">${sign}${fmt(Math.abs(r.pnlEur))}</span>
+        </div>`;
+      }
+
+      let html = gainers.map((r, i) => rowHTML(r, i)).join('');
+      if (gainers.length && losers.length) html += '<div class="pnl-divider"></div>';
+      html += losers.map((r, i) => rowHTML(r, i)).join('');
+
+      document.getElementById('pnl-list').innerHTML = html;
+      document.getElementById('pnl-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+
+    document.getElementById('pnl-close').addEventListener('click', () => {
+      document.getElementById('pnl-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    });
+    document.getElementById('pnl-overlay').addEventListener('click', e => {
+      if (e.target.id === 'pnl-overlay') {
+        document.getElementById('pnl-overlay').classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+  }
+
+  render();
+
+  // ── FLOATING + PARALLAX + 3D TILT + GLOSS (portfolio cards only) ──
+  function initCardEffects() {
+    const grids = ['singles-grid','sealed-grid'];
+    const portfolioCards = [];
+    grids.forEach(id => {
+      const g = document.getElementById(id);
+      if (g) portfolioCards.push(...g.querySelectorAll('.card'));
+    });
+    if (!portfolioCards.length) return;
+
+    portfolioCards.forEach((card) => {
+      card._tiltX = 0; card._tiltY = 0; card._tgtX = 0; card._tgtY = 0;
+      card._hovered = false; card._glossX = 50; card._glossY = 50;
+      card.style.position = 'relative';
+
+      card.addEventListener('mouseenter', () => { card._hovered = true; });
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        card._tgtX = -((e.clientY - r.top  - r.height/2) / (r.height/2)) * 10.8;
+        card._tgtY =  ((e.clientX - r.left - r.width /2) / (r.width /2)) * 10.8;
+        card._glossX = ((e.clientX - r.left) / r.width)  * 100;
+        card._glossY = ((e.clientY - r.top)  / r.height) * 100;
+      });
+      card.addEventListener('mouseleave', () => {
+        card._hovered = false; card._tgtX = 0; card._tgtY = 0;
+        const g = card.querySelector('.card-gloss');
+        if (g) g.style.opacity = '0';
+      });
+    });
+
+    // Parallax sólo en scroll
+    let lastScroll = window.scrollY;
+    const scrollShifts = new Map();
+    function updateScrollShifts() {
+      portfolioCards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        const vhC = window.innerHeight / 2;
+        const cardC = rect.top + rect.height / 2;
+        scrollShifts.set(card, ((cardC - vhC) / window.innerHeight) * 12);
+      });
+    }
+    window.addEventListener('scroll', updateScrollShifts, {passive:true});
+    updateScrollShifts();
+
+    function tick() {
+      portfolioCards.forEach(card => {
+        const scrollY = scrollShifts.get(card) || 0;
+        card._tiltX += (card._tgtX - card._tiltX) * 0.10;
+        card._tiltY += (card._tgtY - card._tiltY) * 0.10;
+
+        card.style.transform =
+          `translateY(${scrollY.toFixed(2)}px) ` +
+          `perspective(700px) ` +
+          `rotateX(${card._tiltX.toFixed(2)}deg) ` +
+          `rotateY(${card._tiltY.toFixed(2)}deg)`;
+
+        // Sombra fija de profundidad + glow dorado en hover
+        const glow = card._hovered ? ',0 0 24px 4px rgba(201,168,76,0.22)' : '';
+        card.style.boxShadow =
+          `0 10px 32px rgba(0,0,0,0.75),0 3px 8px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.04),inset 0 1px 0 rgba(255,255,255,0.05)${glow}`;
+
+        if (card._hovered) {
+          const g = card.querySelector('.card-gloss');
+          if (g) {
+            g.style.background = `radial-gradient(circle at ${card._glossX.toFixed(0)}% ${card._glossY.toFixed(0)}%,rgba(255,255,200,0.2) 0%,rgba(255,255,255,0.05) 40%,transparent 65%)`;
+            g.style.opacity = '1';
+          }
+        }
+      });
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  initCardEffects();
+
+  document.querySelectorAll('a.nav-link:not(.active)').forEach(link=>{
+    link.addEventListener('click',function(e){
+      e.preventDefault();const href=this.href;
+      document.querySelector('main').classList.add('leaving');
+      setTimeout(()=>{window.location.href=href;},220);
+    });
+  });
+})();
+</script>
+</body>
+</html>
