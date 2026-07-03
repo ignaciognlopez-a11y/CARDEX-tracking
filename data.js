@@ -6,12 +6,12 @@
 // ============================================================
 
 // Parámetros base para todos los links de Cardmarket
-// language=1 (EN), minCondition=3 (NM), sellerCountry excluye UK (8)
-const CM_FILTERS = '?language=1&minCondition=3&sellerCountry=3%2C4%2C5%2C6%2C7%2C9%2C10%2C11%2C12%2C13%2C14%2C15%2C16%2C17%2C18%2C19%2C20&sortBy=price_asc';
+// language=1 (EN), minCondition=2 (Near Mint o mejor — 3 sería Excellent, incorrecto), sellerCountry excluye UK
+const CM_FILTERS = '?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc';
 const CM = 'https://www.cardmarket.com';
 
 window.portfolioData = {
-  updatedAt: "2026-06-29",
+  updatedAt: "2026-07-03",
 
   cards: [
 
@@ -25,7 +25,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 0,
-      currentPrice: 1890,
+      currentPrice: 1995,
       image: "https://static.dotgg.gg/riftbound/cards/OGN-303s.webp",
       cardNumber: "OGN-303*",
       cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Origins/Ahri-Nine-Tailed-Fox-V3-Overnumbered" + CM_FILTERS,
@@ -33,7 +33,26 @@ window.portfolioData = {
         { date: "2026-06-22", price: 860 },
         { date: "2026-06-23", price: 1995 },
         { date: "2026-06-24", price: 1890 },
-        { date: "2026-06-26", price: 1995 }
+        { date: "2026-06-26", price: 1995 },
+        { date: "2026-07-03", price: 1995 }
+      ]
+    },
+
+    {
+      id: "OGN-303s-2",
+      name: "OGN Ahri, Nine-Tailed Fox (V.3 — Signed Showcase)",
+      set: "Origins",
+      condition: "Raw",
+      status: "Holding",
+      qty: 1,
+      buyPrice: 1800,
+      currentPrice: 1995,
+      image: "https://static.dotgg.gg/riftbound/cards/OGN-303s.webp",
+      cardNumber: "OGN-303*",
+      cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Origins/Ahri-Nine-Tailed-Fox-V3-Overnumbered" + CM_FILTERS,
+      priceHistory: [
+        { date: "2026-07-02", price: 1995 },
+        { date: "2026-07-03", price: 1995 }
       ]
     },
 
@@ -193,14 +212,15 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 40,
-      currentPrice: 74.9,
+      currentPrice: 70,
       image: "https://static.dotgg.gg/riftbound/cards/UNL-220.webp",
       cardNumber: "UNL-220",
       cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Unleashed/Pouty-Poro" + CM_FILTERS,
       priceHistory: [
         { date: "2026-06-22", price: 45 },
         { date: "2026-06-23", price: 45 },
-        { date: "2026-06-29", price: 79.5 }
+        { date: "2026-06-29", price: 79.5 },
+        { date: "2026-07-03", price: 70 }
       ]
     },
 
@@ -212,7 +232,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 45,
-      currentPrice: 75,
+      currentPrice: 72.95,
       image: "https://static.dotgg.gg/riftbound/cards/UNL-222.webp",
       cardNumber: "UNL-222",
       cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Unleashed/Plundering-Poro" + CM_FILTERS,
@@ -221,7 +241,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 72 },
         { date: "2026-06-24", price: 72 },
         { date: "2026-06-26", price: 78 },
-        { date: "2026-06-29", price: 73.99 }
+        { date: "2026-06-29", price: 73.99 },
+        { date: "2026-07-03", price: 72.95 }
       ]
     },
 
@@ -233,7 +254,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 27.99,
-      currentPrice: 65,
+      currentPrice: 62,
       image: "https://static.dotgg.gg/riftbound/cards/UNL-223.webp",
       cardNumber: "UNL-223",
       cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Unleashed/Veteran-Poro" + CM_FILTERS,
@@ -242,7 +263,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 70 },
         { date: "2026-06-24", price: 70 },
         { date: "2026-06-26", price: 73 },
-        { date: "2026-06-29", price: 57.21 }
+        { date: "2026-06-29", price: 57.21 },
+        { date: "2026-07-03", price: 62 }
       ]
     },
 
@@ -319,13 +341,14 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 50,
-      currentPrice: 24,
+      currentPrice: 26.21,
       image: "https://static.dotgg.gg/riftbound/cards/SFD-245.webp",
       cardNumber: "SFD-245",
       cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Spiritforged/Jax-Grandmaster-at-Arms-V2-Showcase" + CM_FILTERS,
       priceHistory: [
         { date: "2026-06-22", price: 28 },
-        { date: "2026-06-23", price: 28 }
+        { date: "2026-06-23", price: 28 },
+        { date: "2026-07-03", price: 26.21 }
       ]
     },
 
@@ -337,7 +360,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 58,
-      currentPrice: 50,
+      currentPrice: 45,
       image: "https://static.dotgg.gg/riftbound/cards/SFD-232.webp",
       cardNumber: "SFD-232",
       cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Spiritforged/Sett-Brawler-V1-Showcase" + CM_FILTERS,
@@ -346,7 +369,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 55 },
         { date: "2026-06-24", price: 52 },
         { date: "2026-06-26", price: 50 },
-        { date: "2026-06-29", price: 50 }
+        { date: "2026-06-29", price: 50 },
+        { date: "2026-07-03", price: 45 }
       ]
     },
 
@@ -360,7 +384,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 590,
-      currentPrice: 642,
+      currentPrice: 636.5,
       image: "https://cdn.sanity.io/images/dsfx7636/consumer_products_live/46c776a96cc14227a260d24489f10b4090cd2cd9-2560x2560.png",
       cardNumber: "UNL Case (6x)",
       cardmarketUrl: CM + "/en/Riftbound/Products/Booster-Boxes/Unleashed-Case-6x-Booster-Box?language=1&sortBy=price_asc&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4",
@@ -368,7 +392,8 @@ window.portfolioData = {
         { date: "2026-06-22", price: 595 },
         { date: "2026-06-23", price: 643.9 },
         { date: "2026-06-24", price: 643.9 },
-        { date: "2026-06-26", price: 642 }
+        { date: "2026-06-26", price: 642 },
+        { date: "2026-07-03", price: 636.5 }
       ]
     },
 
@@ -380,7 +405,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 128,
-      currentPrice: 157,
+      currentPrice: 156.85,
       image: "https://cdn.sanity.io/images/dsfx7636/consumer_products_live/e026ee1a44bc86095f9afc5949c5fdb519b29c66-2560x2560.png",
       cardNumber: "OGN Box",
       cardmarketUrl: CM + "/en/Riftbound/Products/Booster-Boxes/Origins-Booster-Box?language=1&sortBy=price_asc&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4",
@@ -389,7 +414,8 @@ window.portfolioData = {
         { date: "2026-06-23", price: 155.19 },
         { date: "2026-06-24", price: 161.89 },
         { date: "2026-06-26", price: 159.94 },
-        { date: "2026-06-29", price: 157 }
+        { date: "2026-06-29", price: 157 },
+        { date: "2026-07-03", price: 156.85 }
       ]
     },
 
@@ -401,7 +427,7 @@ window.portfolioData = {
       status: "Holding",
       qty: 1,
       buyPrice: 45,
-      currentPrice: 60.5,
+      currentPrice: 63.75,
       image: "https://cdn.sanity.io/images/dsfx7636/consumer_products_live/a2ca8f9bc247fc5435432e9a97c4efc5b79020c4-2560x2560.png",
       cardNumber: "PG Box",
       cardmarketUrl: CM + "/en/Riftbound/Products/Box-Sets/Proving-Grounds?language=1&sortBy=price_asc&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4",
@@ -409,7 +435,8 @@ window.portfolioData = {
         { date: "2026-06-22", price: 35 },
         { date: "2026-06-23", price: 59.89 },
         { date: "2026-06-24", price: 59.89 },
-        { date: "2026-06-26", price: 60.5 }
+        { date: "2026-06-26", price: 60.5 },
+        { date: "2026-07-03", price: 63.75 }
       ]
     },
 
@@ -574,22 +601,23 @@ window.portfolioData = {
     },
 
     {
-      id: "WL-ARCANE-BOX",
+      id: "ARCANE-BOX",
       name: "Arcane Box Set",
       set: "Origins",
       condition: "Sealed",
-      status: "Watchlist",
+      status: "Holding",
       qty: 1,
-      buyPrice: 0,
-      currentPrice: 265.49,
+      buyPrice: 190,
+      currentPrice: 305.48,
       image: "https://cdn.sanity.io/images/dsfx7636/consumer_products_live/2f0e070b2ea935e916cd8fa31253791a37d3a956-2560x2560.png",
-      cardNumber: "",
-      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Box-Sets/Arcane-Box-Set?sortBy=price_asc",
+      cardNumber: "Arcane Box Set",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Box-Sets/Arcane-Box-Set?language=1&sortBy=price_asc&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4",
       usSales: [],
       priceHistory: [{ date: "2026-06-22", price: 200 },
         { date: "2026-06-24", price: 179 },
         { date: "2026-06-26", price: 184 },
-        { date: "2026-06-29", price: 216.65 }
+        { date: "2026-06-29", price: 216.65 },
+        { date: "2026-07-03", price: 305.48 }
       ]
     },
 
@@ -1021,19 +1049,39 @@ window.portfolioData = {
 ,
 
     {
-      id: "WL-WORLDS-BOX",
+      id: "WORLDS-BOX",
       name: "Worlds Bundle 2025",
       set: "Origins",
       condition: "Sealed",
-      status: "Watchlist",
+      status: "Holding",
       qty: 1,
-      buyPrice: 0,
-      currentPrice: 314.59,
+      buyPrice: 190,
+      currentPrice: 473.49,
       image: "https://cdn.sanity.io/images/dsfx7636/consumer_products_live/e67cae02bd6312c1e9a4b3a0eb9e70dbd3dbcd0e-2560x2560.png",
       cardNumber: "Worlds Bundle",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Box-Sets/Worlds-Bundle-2025?language=1&sortBy=price_asc&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4",
       usSales: [],
-      priceHistory: [{ date: "2026-06-26", price: 221.06 }]
+      priceHistory: [{ date: "2026-06-26", price: 221.06 },
+        { date: "2026-07-03", price: 473.49 }
+      ]
+    },
+
+    {
+      id: "OGN-305-OVN",
+      name: "OGN Yasuo, Unforgiven (V.2 — Overnumbered)",
+      set: "Origins",
+      condition: "Raw",
+      status: "Holding",
+      qty: 1,
+      buyPrice: 38,
+      currentPrice: 38,
+      image: "https://static.dotgg.gg/riftbound/cards/OGN-305.webp",
+      cardNumber: "OGN-305*",
+      cardmarketUrl: CM + "/en/Riftbound/Products/Singles/Origins/Yasuo-Unforgiven-V2-Overnumbered" + CM_FILTERS,
+      priceHistory: [
+        { date: "2026-06-30", price: 38 },
+        { date: "2026-07-03", price: 38 }
+      ]
     }
 
   ]
