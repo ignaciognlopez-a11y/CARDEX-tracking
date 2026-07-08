@@ -3,6 +3,7 @@
 //  Fuente: Notion DB f298acf4-dc24-48e2-bc76-8d6c9bd193d6
 //  Actualizado: 2026-07-08
 //  Filtros Cardmarket: EN, NM (min. condicion 2), excluir UK
+//  Nota: imagenes Project K Promos pendientes (CDN sin cobertura + S3 Cardmarket bloquea hotlink)
 // ============================================================
 
 window.portfolioData = {
@@ -207,10 +208,10 @@ window.portfolioData = {
       set: "Origins",
       condition: "Raw",
       status: "Holding",
-      qty: 2,
+      qty: 1,
       buyPrice: 4,
       currentPrice: 7.5,
-      image: "https://static.dotgg.gg/riftbound/cards/OGN-119.webp",
+      image: "https://static.dotgg.gg/riftbound/cards/OGN-119a.webp",
       cardNumber: "OGN-119a",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins/Ahri-Inquisitive-V2-Overnumbered?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -628,7 +629,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: 4,
       currentPrice: 7.5,
-      image: "https://static.dotgg.gg/riftbound/cards/OGN-119.webp",
+      image: "https://static.dotgg.gg/riftbound/cards/OGN-119a.webp",
       cardNumber: "OGN-119a",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins/Ahri-Inquisitive-V2-Overnumbered?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -645,7 +646,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: 32,
       currentPrice: 30,
-      image: "https://product-images.s3.cardmarket.com/1655/OGNX/856100/856100.jpg",
+      image: "https://static.dotgg.gg/riftbound/cards/OGN-246.webp",
       cardNumber: "246",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Viktor-Leader-V1-Epic?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -662,7 +663,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: 42,
       currentPrice: 35,
-      image: "https://product-images.s3.cardmarket.com/1655/OGNX/856103/856103.jpg",
+      image: "https://static.dotgg.gg/riftbound/cards/OGN-151b.webp",
       cardNumber: "151b",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Lee-Sin-Centered?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -679,7 +680,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: 18,
       currentPrice: 18,
-      image: "https://product-images.s3.cardmarket.com/1655/OGNX/858988/858988.jpg",
+      image: "https://static.dotgg.gg/riftbound/cards/OGN-078.webp",
       cardNumber: "078",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Lee-Sin-Ascetic?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -696,7 +697,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 3500,
-      image: "https://product-images.s3.cardmarket.com/1655/PROK/866422/866422.jpg",
+      image: "",
       cardNumber: "FND196",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Project-K-Promos/Teemo-Scout?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -713,7 +714,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 799,
-      image: "https://product-images.s3.cardmarket.com/1655/PROK/871236/871236.jpg",
+      image: "",
       cardNumber: "FND249",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Project-K-Promos/Volibear-Relentless-Storm?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -730,7 +731,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 1400,
-      image: "https://product-images.s3.cardmarket.com/1655/PROK/871240/871240.jpg",
+      image: "",
       cardNumber: "FND259",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Project-K-Promos/Yasuo-Unforgiven?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -747,7 +748,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 1400,
-      image: "https://product-images.s3.cardmarket.com/1655/PROK/871241/871241.jpg",
+      image: "",
       cardNumber: "FND265",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Project-K-Promos/Viktor-Herald-of-the-Arcane?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -764,7 +765,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 1400,
-      image: "https://product-images.s3.cardmarket.com/1655/PROK/871239/871239.jpg",
+      image: "",
       cardNumber: "FND251",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Project-K-Promos/Jinx-Loose-Cannon?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -781,7 +782,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 39.9,
-      image: "https://product-images.s3.cardmarket.com/1655/OGNX/856008/856008.jpg",
+      image: "https://static.dotgg.gg/riftbound/cards/OGN-202.webp",
       cardNumber: "202",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Jinx-Rebel-V1-Epic?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -798,7 +799,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 28,
-      image: "https://product-images.s3.cardmarket.com/1655/OGNX/855680/855680.jpg",
+      image: "https://static.dotgg.gg/riftbound/cards/OGN-251.webp",
       cardNumber: "251",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Jinx-Loose-Cannon?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -815,7 +816,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 65,
-      image: "https://product-images.s3.cardmarket.com/1655/OGNX/850076/850076.jpg",
+      image: "https://static.dotgg.gg/riftbound/cards/OGN-066.webp",
       cardNumber: "066",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Ahri-Alluring?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
