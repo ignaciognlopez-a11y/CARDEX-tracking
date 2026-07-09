@@ -72,10 +72,20 @@
     .pnl-rank { font-size:10px; color:var(--text-muted); width:16px; text-align:right; flex-shrink:0; }
     .pnl-img { width:32px; height:32px; border-radius:4px; object-fit:cover; object-position:top; flex-shrink:0; }
     .pnl-name { font-size:12px; font-weight:600; color:var(--text); flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .pnl-date { font-size:11px; color:rgba(255,255,255,0.4); flex-shrink:0; min-width:48px; text-align:right; }
+    .pnl-current { font-size:12px; font-weight:600; color:rgba(255,255,255,0.65); flex-shrink:0; min-width:64px; text-align:right; }
     .pnl-pct { font-size:12px; font-weight:800; flex-shrink:0; min-width:56px; text-align:right; }
     .pnl-eur { font-size:12px; font-weight:600; color:var(--text); flex-shrink:0; min-width:70px; text-align:right; }
     .pnl-pct.pos { color:var(--green); } .pnl-pct.neg { color:var(--red); }
     .pnl-divider { height:1px; background:var(--border); margin:4px 20px; }
+    @media (max-width:640px){ .pnl-date { display:none; } }
+    /* SIMPLE BREAKDOWN (Total Value / Total Invested) */
+    .simple-row { display:flex; align-items:center; gap:10px; padding:8px 20px; transition:background 0.1s; }
+    .simple-row:hover { background:rgba(20,20,20,0.85); }
+    .simple-img { width:32px; height:32px; border-radius:4px; object-fit:cover; object-position:top; flex-shrink:0; }
+    .simple-name { font-size:12px; font-weight:600; color:var(--text); flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .simple-price { font-size:12px; font-weight:700; color:var(--text); flex-shrink:0; min-width:70px; text-align:right; }
+    .simple-price.free { color:rgba(255,255,255,0.35); font-weight:600; }
 
     /* WATCHLIST STRIP */
     .wl-strip { margin-bottom:28px; background:rgba(20,20,20,0.78); border:1px solid rgba(184,145,46,0.29); border-radius:var(--radius); padding:12px 16px; backdrop-filter:blur(20px); box-shadow:0 6px 24px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.04),inset 0 1px 0 rgba(255,255,255,0.06); }
@@ -206,18 +216,18 @@
       <span class="sm-value" id="s-invested">—</span>
       <span class="sm-sub">cost basis</span>
     </div>
-    <div class="summary-metric">
-      <span class="sm-label">Market Value</span>
+    <div class="summary-metric clickable" id="invested-metric" title="Ver desglose de precios de compra">
+      <span class="sm-label">Total Invested ↗</span>
       <span class="sm-value" id="s-market">—</span>
-      <span class="sm-sub">paid positions</span>
+      <span class="sm-sub">all positions</span>
     </div>
     <div class="summary-metric clickable" id="pnl-metric" title="Ver desglose P&L">
       <span class="sm-label">P&amp;L ↗</span>
       <span class="sm-value" id="s-pnl">—</span>
       <span class="sm-sub" id="s-pct">—</span>
     </div>
-    <div class="summary-metric">
-      <span class="sm-label">Total Value</span>
+    <div class="summary-metric clickable" id="total-metric" title="Ver desglose de precios actuales">
+      <span class="sm-label">Total Value ↗</span>
       <span class="sm-value" id="s-total">—</span>
       <span class="sm-sub">all positions</span>
     </div>
@@ -268,6 +278,36 @@
       <button class="pnl-close" id="pnl-close">✕</button>
     </div>
     <div class="pnl-list" id="pnl-list"></div>
+  </div>
+</div>
+
+<div class="pnl-overlay" id="total-overlay">
+  <div class="pnl-modal">
+    <div class="pnl-header">
+      <div>
+        <div class="pnl-title">Total Value Breakdown</div>
+        <div class="pnl-totals">
+          <span class="pnl-total-val" id="total-total-val">—</span>
+        </div>
+      </div>
+      <button class="pnl-close" id="total-close">✕</button>
+    </div>
+    <div class="pnl-list" id="total-list"></div>
+  </div>
+</div>
+
+<div class="pnl-overlay" id="invested-overlay">
+  <div class="pnl-modal">
+    <div class="pnl-header">
+      <div>
+        <div class="pnl-title">Total Invested Breakdown</div>
+        <div class="pnl-totals">
+          <span class="pnl-total-val" id="invested-total-val">—</span>
+        </div>
+      </div>
+      <button class="pnl-close" id="invested-close">✕</button>
+    </div>
+    <div class="pnl-list" id="invested-list"></div>
   </div>
 </div>
 
@@ -504,7 +544,7 @@
 
   // Watchlist carousel with manual scroll
   function initWatchlist(cards){
-    const wl=(cards||[]).filter(c=>c.status==='Watchlist').sort((a,b)=>a.currentPrice-b.currentPrice);
+    const wl=(cards||[]).filter(c=>c.status==='Watchlist' && c.image).sort((a,b)=>a.currentPrice-b.currentPrice);
     const inner=document.getElementById('wl-inner');
     const wrap=document.getElementById('wl-carousel');
     if(!wl.length){inner.innerHTML='<div style="color:var(--text-muted);font-size:12px;padding:4px 0;">No watchlist items yet</div>';return;}
@@ -601,7 +641,7 @@
     const pct=totalInvested>0?pnl/totalInvested*100:0;
 
     document.getElementById('s-invested').textContent=fmt(totalInvested);
-    document.getElementById('s-market').textContent=fmt(paidMarket);
+    document.getElementById('s-market').textContent=fmt(totalInvested);
     const pnlEl=document.getElementById('s-pnl');
     pnlEl.textContent=fmtSign(pnl);pnlEl.className='sm-value '+(pnl>=0?'pos':'neg');
     document.getElementById('s-total').textContent=fmt(totalValue);
@@ -660,10 +700,13 @@
       function rowHTML(r, i) {
         const pos = r.pnlEur >= 0;
         const sign = pos ? '+' : '';
+        const dateTxt = r.buyDate ? new Date(r.buyDate+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '—';
         return `<div class="pnl-row">
           <span class="pnl-rank">${i + 1}</span>
           <img class="pnl-img" src="${r.image}" alt="${r.name}" onerror="this.style.opacity=0.1"/>
           <span class="pnl-name">${r.name}</span>
+          <span class="pnl-date">${dateTxt}</span>
+          <span class="pnl-current">${fmt(r.currentPrice)}</span>
           <span class="pnl-pct ${pos ? 'pos' : 'neg'}">${sign}${r.pnlPct.toFixed(1)}%</span>
           <span class="pnl-eur">${sign}${fmt(Math.abs(r.pnlEur))}</span>
         </div>`;
@@ -685,6 +728,54 @@
     document.getElementById('pnl-overlay').addEventListener('click', e => {
       if (e.target.id === 'pnl-overlay') {
         document.getElementById('pnl-overlay').classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+
+    // ── TOTAL VALUE BREAKDOWN MODAL (solo precios, sin tendencias) ──
+    document.getElementById('total-metric').addEventListener('click', () => {
+      const rows = holding.map(c => ({ ...c, lineValue: c.currentPrice * (c.qty || 1) }))
+        .sort((a, b) => b.lineValue - a.lineValue);
+      document.getElementById('total-total-val').textContent = fmt(totalValue);
+      document.getElementById('total-list').innerHTML = rows.map(r => `<div class="simple-row">
+          <img class="simple-img" src="${r.image}" alt="${r.name}" onerror="this.style.opacity=0.1"/>
+          <span class="simple-name">${r.name}</span>
+          <span class="simple-price">${fmt(r.lineValue)}</span>
+        </div>`).join('');
+      document.getElementById('total-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+    document.getElementById('total-close').addEventListener('click', () => {
+      document.getElementById('total-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    });
+    document.getElementById('total-overlay').addEventListener('click', e => {
+      if (e.target.id === 'total-overlay') {
+        document.getElementById('total-overlay').classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+
+    // ── TOTAL INVESTED BREAKDOWN MODAL (precios de compra, incluye free) ──
+    document.getElementById('invested-metric').addEventListener('click', () => {
+      const rows = holding.map(c => ({ ...c, lineCost: c.buyPrice * (c.qty || 1) }))
+        .sort((a, b) => b.lineCost - a.lineCost);
+      document.getElementById('invested-total-val').textContent = fmt(totalInvested);
+      document.getElementById('invested-list').innerHTML = rows.map(r => `<div class="simple-row">
+          <img class="simple-img" src="${r.image}" alt="${r.name}" onerror="this.style.opacity=0.1"/>
+          <span class="simple-name">${r.name}</span>
+          <span class="simple-price ${r.buyPrice === 0 ? 'free' : ''}">${r.buyPrice === 0 ? 'Gratis' : fmt(r.lineCost)}</span>
+        </div>`).join('');
+      document.getElementById('invested-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+    document.getElementById('invested-close').addEventListener('click', () => {
+      document.getElementById('invested-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    });
+    document.getElementById('invested-overlay').addEventListener('click', e => {
+      if (e.target.id === 'invested-overlay') {
+        document.getElementById('invested-overlay').classList.remove('open');
         document.body.style.overflow = '';
       }
     });
