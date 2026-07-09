@@ -704,7 +704,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: 32,
       currentPrice: 25,
-      image: "https://static.dotgg.gg/riftbound/cards/OGN-246.webp",
+      image: "https://images.tcggo.com/tcggo/storage/35785/conversions/viktor-leader-ogn-246-origins-promos-large.webp",
       cardNumber: "246",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Viktor-Leader-V1-Epic?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       buyDate: "2026-07-08",
@@ -742,7 +742,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: 18,
       currentPrice: 18,
-      image: "https://static.dotgg.gg/riftbound/cards/OGN-078.webp",
+      image: "https://images.tcggo.com/tcggo/storage/35768/conversions/lee-sin-ascetic-ogn-078-origins-promos-large.webp",
       cardNumber: "078",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Lee-Sin-Ascetic?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       buyDate: "2026-07-08",
@@ -761,7 +761,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 3500,
-      image: "",
+      image: "https://images.tcggo.com/tcggo/storage/35666/conversions/teemo-scout-prok-fnd196-project-k-promos-large.webp",
       cardNumber: "FND196",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Project-K-Promos/Teemo-Scout?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -778,7 +778,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 799,
-      image: "",
+      image: "https://images.tcggo.com/tcggo/storage/35668/conversions/volibear-relentless-storm-prok-fnd249-project-k-promos-large.webp",
       cardNumber: "FND249",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Project-K-Promos/Volibear-Relentless-Storm?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -795,7 +795,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 1400,
-      image: "",
+      image: "https://images.tcggo.com/tcggo/storage/35669/conversions/yasuo-unforgiven-prok-fnd259-project-k-promos-large.webp",
       cardNumber: "FND259",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Project-K-Promos/Yasuo-Unforgiven?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -812,7 +812,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 1400,
-      image: "",
+      image: "https://images.tcggo.com/tcggo/storage/35667/conversions/viktor-herald-of-the-arcane-prok-fnd265-project-k-promos-large.webp",
       cardNumber: "FND265",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Project-K-Promos/Viktor-Herald-of-the-Arcane?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -829,7 +829,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 1400,
-      image: "",
+      image: "https://images.tcggo.com/tcggo/storage/35665/conversions/jinx-loose-cannon-prok-fnd251-project-k-promos-large.webp",
       cardNumber: "FND251",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Project-K-Promos/Jinx-Loose-Cannon?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -846,7 +846,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 39.9,
-      image: "https://static.dotgg.gg/riftbound/cards/OGN-202.webp",
+      image: "https://images.tcggo.com/tcggo/storage/35781/conversions/jinx-rebel-ogn-202-origins-promos-large.webp",
       cardNumber: "202",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Jinx-Rebel-V1-Epic?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -863,7 +863,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 28,
-      image: "https://static.dotgg.gg/riftbound/cards/OGN-251.webp",
+      image: "https://images.tcggo.com/tcggo/storage/35788/conversions/jinx-loose-cannon-ogn-251-origins-promos-large.webp",
       cardNumber: "251",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Jinx-Loose-Cannon?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
@@ -880,7 +880,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: 66,
       currentPrice: 65,
-      image: "",
+      image: "https://images.tcggo.com/tcggo/storage/35766/conversions/ahri-alluring-ogn-066-origins-promos-large.webp",
       cardNumber: "066",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Ahri-Alluring?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       buyDate: "2026-07-09",
@@ -899,7 +899,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: 66,
       currentPrice: 65,
-      image: "",
+      image: "https://images.tcggo.com/tcggo/storage/35766/conversions/ahri-alluring-ogn-066-origins-promos-large.webp",
       cardNumber: "066",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Ahri-Alluring?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       buyDate: "2026-07-09",
@@ -917,12 +917,63 @@ window.portfolioData = {
       qty: 1,
       buyPrice: 66,
       currentPrice: 65,
-      image: "",
+      image: "https://images.tcggo.com/tcggo/storage/35766/conversions/ahri-alluring-ogn-066-origins-promos-large.webp",
       cardNumber: "066",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Ahri-Alluring?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       buyDate: "2026-07-09",
       priceHistory: [
         { date: "2026-07-09", price: 65 }
+      ]
+    },
+
+    {
+      id: "SFDX-139",
+      name: "Edge of Night (V.2 - Rare)",
+      set: "Spiritforged Promos",
+      condition: "Raw",
+      status: "Watchlist",
+      qty: 1,
+      buyPrice: null,
+      currentPrice: 23.99,
+      image: "https://images.tcggo.com/tcggo/storage/35711/conversions/edge-of-night-sfdx-139-spiritforged-promos-large.webp",
+      cardNumber: "139",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Spiritforged-Promos/Edge-of-Night-V2-Rare?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      priceHistory: [
+        { date: "2026-07-09", price: 23.99 }
+      ]
+    },
+
+    {
+      id: "SFDX-051",
+      name: "Guardian Angel (V.2 - Rare)",
+      set: "Spiritforged Promos",
+      condition: "Raw",
+      status: "Watchlist",
+      qty: 1,
+      buyPrice: null,
+      currentPrice: 29,
+      image: "https://images.tcggo.com/tcggo/storage/35697/conversions/guardian-angel-sfdx-051-spiritforged-promos-large.webp",
+      cardNumber: "051",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Spiritforged-Promos/Guardian-Angel-V2-Rare?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      priceHistory: [
+        { date: "2026-07-09", price: 29 }
+      ]
+    },
+
+    {
+      id: "UNLX-120",
+      name: "Rengar, Trophy Hunter (V.2 - Epic)",
+      set: "Unleashed Promos",
+      condition: "Raw",
+      status: "Watchlist",
+      qty: 1,
+      buyPrice: null,
+      currentPrice: 83,
+      image: "",
+      cardNumber: "120",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Unleashed-Promos/Rengar-Trophy-Hunter-V2-Epic?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      priceHistory: [
+        { date: "2026-07-09", price: 83 }
       ]
     }
   ]
