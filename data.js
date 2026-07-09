@@ -9,6 +9,7 @@
 
 window.portfolioData = {
   updatedAt: "2026-07-09",
+  /* nota: 3 copias de Ahri, Alluring (OGNX-066) anadidas hoy, movidas de Watchlist a Holding a 66E/u */
 
   cards: [
     {
@@ -875,15 +876,53 @@ window.portfolioData = {
       name: "Ahri, Alluring",
       set: "Origins Promos",
       condition: "Raw",
-      status: "Watchlist",
+      status: "Holding",
       qty: 1,
-      buyPrice: null,
+      buyPrice: 66,
       currentPrice: 65,
-      image: "https://static.dotgg.gg/riftbound/cards/OGN-066.webp",
+      image: "",
       cardNumber: "066",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Ahri-Alluring?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      buyDate: "2026-07-09",
       priceHistory: [
-        { date: "2026-07-08", price: 65 }
+        { date: "2026-07-08", price: 65 },
+        { date: "2026-07-09", price: 65 }
+      ]
+    },
+
+    {
+      id: "OGNX-066-2",
+      name: "Ahri, Alluring",
+      set: "Origins Promos",
+      condition: "Raw",
+      status: "Holding",
+      qty: 1,
+      buyPrice: 66,
+      currentPrice: 65,
+      image: "",
+      cardNumber: "066",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Ahri-Alluring?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      buyDate: "2026-07-09",
+      priceHistory: [
+        { date: "2026-07-09", price: 65 }
+      ]
+    },
+
+    {
+      id: "OGNX-066-3",
+      name: "Ahri, Alluring",
+      set: "Origins Promos",
+      condition: "Raw",
+      status: "Holding",
+      qty: 1,
+      buyPrice: 66,
+      currentPrice: 65,
+      image: "",
+      cardNumber: "066",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Ahri-Alluring?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      buyDate: "2026-07-09",
+      priceHistory: [
+        { date: "2026-07-09", price: 65 }
       ]
     }
   ]
