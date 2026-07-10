@@ -936,6 +936,59 @@ window.portfolioData = {
     },
 
     {
+      id: "UNLX-058",
+      name: "Lillia, Protector of Dreams (V.2 - Epic)",
+      set: "Unleashed Promos",
+      condition: "Raw",
+      status: "Watchlist",
+      qty: 1,
+      buyPrice: null,
+      currentPrice: 45,
+      image: "https://static.dotgg.gg/riftbound/cards/UNL-058.webp",
+      cardNumber: "058",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Unleashed-Promos/Lillia-Protector-of-Dreams-V2-Epic?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      priceHistory: [
+        { date: "2026-07-10", price: 45 }
+      ]
+    },
+
+    {
+      id: "SFDX-059",
+      name: "Svellsongur",
+      set: "Spiritforged Promos",
+      condition: "Raw",
+      status: "Watchlist",
+      qty: 1,
+      buyPrice: null,
+      currentPrice: 116,
+      image: "https://static.dotgg.gg/riftbound/cards/SFD-059.webp",
+      cardNumber: "059",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Spiritforged-Promos/Svellsongur?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      priceHistory: [
+        { date: "2026-07-10", price: 116 }
+      ]
+    },
+
+    {
+      // Sin Current Price todavia: a fecha de hoy Cardmarket solo tiene listings en S-Chinese
+      // para este producto (0 en ingles). No se establece precio hasta que aparezca stock EN,
+      // segun el criterio no negociable de idioma. Sin imagen a proposito para que no se muestre
+      // en el carrusel de Watchlist con un precio erroneo o vacio.
+      id: "LUNAR-REVEL-BOX",
+      name: "Lunar Revel Bundle",
+      set: "Origins",
+      condition: "Sealed",
+      status: "Watchlist",
+      qty: 1,
+      buyPrice: null,
+      currentPrice: null,
+      image: "",
+      cardNumber: "Lunar Revel Bundle",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Box-Sets/Lunar-Revel-Bundle?language=1&sortBy=price_asc&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4",
+      priceHistory: []
+    },
+
+    {
       id: "SFD-227",
       name: "Ahri, Inquisitive (V.1 - Showcase) (Spiritforged)",
       set: "Spiritforged",

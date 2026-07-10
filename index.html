@@ -179,10 +179,14 @@
     .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); backdrop-filter:blur(12px); z-index:100; align-items:center; justify-content:center; }
     .modal-overlay.open { display:flex; animation:overlay-in 0.2s ease both; }
     @keyframes overlay-in { from{opacity:0;} to{opacity:1;} }
-    .modal { background:linear-gradient(160deg,#1a1a1a 0%,#0a0a0a 50%,#000000 100%); border:1px solid rgba(184,145,46,0.29); border-radius:18px; width:440px; max-width:95vw; max-height:92vh; overflow-y:auto; overflow-x:hidden; position:relative; box-shadow:0 36px 90px rgba(0,0,0,0.98),0 0 0 1px rgba(184,145,46,0.16),0 0 80px rgba(184,145,46,0.16); animation:modal-in 0.32s cubic-bezier(0.34,1.4,0.64,1) both; }
+    .modal { background:linear-gradient(160deg,#1a1a1a 0%,#0a0a0a 50%,#000000 100%); border:1px solid rgba(184,145,46,0.29); border-radius:18px; width:min(94vw,960px); max-width:960px; max-height:92vh; overflow-y:auto; overflow-x:hidden; position:relative; box-shadow:0 36px 90px rgba(0,0,0,0.98),0 0 0 1px rgba(184,145,46,0.16),0 0 80px rgba(184,145,46,0.16); animation:modal-in 0.32s cubic-bezier(0.34,1.4,0.64,1) both; }
     @keyframes modal-in { from{opacity:0;transform:scale(0.86) translateY(28px);} to{opacity:1;transform:scale(1) translateY(0);} }
     .modal-close-x { position:fixed; top:16px; right:16px; width:30px; height:30px; border-radius:50%; background:rgba(10,10,10,0.9); border:1px solid rgba(255,255,255,0.1); cursor:pointer; color:var(--text-muted); font-size:13px; display:flex; align-items:center; justify-content:center; z-index:10; transition:color 0.15s,border-color 0.15s; }
     .modal-close-x:hover { color:var(--text); border-color:rgba(255,255,255,0.25); }
+
+    /* Layout de dos columnas: info a la izquierda, grafica grande a la derecha */
+    .modal-grid { display:grid; grid-template-columns:300px 1fr; align-items:stretch; }
+    @media (max-width:760px) { .modal-grid { grid-template-columns:1fr; } }
 
     /* Stage: área de imagen de la carta con efecto 3D */
     .modal-stage { display:flex; justify-content:center; align-items:center; padding:32px 20px 20px; perspective:900px; background:radial-gradient(ellipse at 50% 60%, rgba(216,180,100,0.11) 0%, transparent 70%); cursor:crosshair; flex-shrink:0; }
@@ -193,9 +197,9 @@
     .modal-card-gloss { position:absolute; inset:0; opacity:0; pointer-events:none; border-radius:11px; transition:opacity 0.2s; }
     .modal-card-shine { position:absolute; inset:0; pointer-events:none; border-radius:11px; background:linear-gradient(135deg,rgba(255,255,255,0.1) 0%,transparent 55%,rgba(216,180,100,0.09) 100%); mix-blend-mode:screen; }
 
-    /* Info debajo de la carta */
-    .modal-body { padding:4px 22px 24px; }
-    .modal-badges { display:flex; gap:5px; margin-bottom:6px; }
+    /* Info debajo de la carta (columna izquierda) */
+    .modal-body { padding:4px 22px 24px; display:flex; flex-direction:column; }
+    .modal-badges { display:flex; gap:5px; margin-bottom:6px; flex-wrap:wrap; }
     .modal-name { font-size:17px; font-weight:800; letter-spacing:-0.4px; line-height:1.25; margin-bottom:14px; }
     .modal-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px; background:rgba(184,145,46,0.19); border:1px solid rgba(184,145,46,0.24); border-radius:10px; overflow:hidden; margin-bottom:16px; }
     .modal-stat { display:flex; flex-direction:column; gap:3px; padding:12px 14px; background:rgba(10,10,10,0.85); }
@@ -205,24 +209,40 @@
     .modal-stat-sub { font-size:10px; color:var(--text-muted); font-weight:600; }
     .modal-stat-sub.pos { color:var(--green); } .modal-stat-sub.neg { color:var(--red); }
 
-    /* Gráfica interactiva */
-    .modal-chart-section { margin-bottom:16px; }
-    .modal-spark-label { font-size:9px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); font-weight:700; display:block; margin-bottom:8px; }
-    .chart-wrap { position:relative; width:100%; height:88px; }
-    #modal-spark { width:100%; height:88px; display:block; cursor:crosshair; border-radius:6px; }
-    .chart-tip { display:none; position:absolute; top:6px; background:rgba(18,18,18,0.95); border:1px solid rgba(184,145,46,0.4); border-radius:6px; padding:4px 10px; font-size:11px; font-weight:700; color:var(--text); pointer-events:none; white-space:nowrap; z-index:10; box-shadow:0 4px 12px rgba(0,0,0,0.6); }
-    .modal-spark-empty { width:100%; height:88px; border:1px dashed rgba(184,145,46,0.24); border-radius:6px; display:flex; align-items:center; justify-content:center; margin-bottom:0; }
-    .modal-spark-empty span { font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; }
+    /* Columna derecha: grafica grande con filtros temporales */
+    .modal-chart-col { padding:24px 26px 24px; border-left:1px solid rgba(184,145,46,0.18); display:flex; flex-direction:column; min-width:0; }
+    @media (max-width:760px) { .modal-chart-col { border-left:none; border-top:1px solid rgba(184,145,46,0.18); padding:20px 22px 24px; } }
+    .modal-chart-header { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+    .modal-spark-label { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); font-weight:700; display:block; }
+    .range-filters { display:flex; gap:4px; flex-wrap:wrap; }
+    .range-btn { font-size:11px; font-weight:700; padding:5px 10px; border-radius:6px; border:1px solid rgba(184,145,46,0.22); background:rgba(10,10,10,0.6); color:var(--text-muted); cursor:pointer; transition:all 0.15s; }
+    .range-btn:hover { color:var(--text); border-color:rgba(184,145,46,0.55); }
+    .range-btn.active { background:var(--orange); border-color:var(--orange); color:#000; }
+    .chart-price-range { display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); font-weight:600; margin-bottom:4px; }
+    .chart-price-range .hi { color:var(--green); } .chart-price-range .lo { color:var(--red); }
+    .chart-wrap { position:relative; width:100%; height:300px; }
+    #modal-spark { width:100%; height:300px; display:block; cursor:crosshair; border-radius:6px; }
+    .chart-axis-dates { display:flex; justify-content:space-between; font-size:10px; color:rgba(255,255,255,0.35); font-weight:600; margin-top:6px; }
+    .chart-tip { display:none; position:absolute; top:6px; background:rgba(18,18,18,0.95); border:1px solid rgba(184,145,46,0.4); border-radius:6px; padding:5px 12px; font-size:12px; font-weight:700; color:var(--text); pointer-events:none; white-space:nowrap; z-index:10; box-shadow:0 4px 12px rgba(0,0,0,0.6); }
+    .modal-spark-empty { width:100%; height:300px; border:1px dashed rgba(184,145,46,0.24); border-radius:6px; display:flex; align-items:center; justify-content:center; margin-bottom:0; }
+    .modal-spark-empty span { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; }
+    .chart-fallback-note { font-size:11px; color:rgba(255,255,255,0.4); margin-top:8px; font-style:italic; }
+    .modal-chart-col .modal-actions { margin-top:20px; }
 
-    .modal-actions { display:flex; gap:10px; }
-    .btn-cardmarket { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg,#b8912e,#8a6d1a); color:#000; font-weight:800; font-size:13px; padding:11px 16px; border-radius:9px; text-decoration:none; transition:opacity 0.15s,box-shadow 0.15s; box-shadow:0 4px 14px rgba(216,180,100,0.45); }
+    .modal-actions { display:flex; gap:10px; flex-wrap:wrap; }
+    .btn-cardmarket, .btn-ebay { flex:1; min-width:140px; display:flex; align-items:center; justify-content:center; gap:8px; font-weight:800; font-size:13px; padding:11px 16px; border-radius:9px; text-decoration:none; transition:opacity 0.15s,box-shadow 0.15s; }
+    .btn-icon { width:18px; height:18px; object-fit:contain; border-radius:4px; background:#fff; padding:2px; flex-shrink:0; }
+    .btn-cardmarket { background:linear-gradient(135deg,#b8912e,#8a6d1a); color:#000; box-shadow:0 4px 14px rgba(216,180,100,0.45); }
     .btn-cardmarket:hover { opacity:0.9; box-shadow:0 6px 20px rgba(216,180,100,0.68); }
+    .btn-ebay { background:rgba(20,20,20,0.9); color:var(--text); border:1px solid rgba(90,150,255,0.4); box-shadow:0 4px 14px rgba(60,110,220,0.18); }
+    .btn-ebay:hover { opacity:0.9; border-color:rgba(90,150,255,0.7); box-shadow:0 6px 20px rgba(60,110,220,0.32); }
     .btn-close { background:rgba(10,10,10,0.85); border:1px solid rgba(184,145,46,0.24); color:var(--text-muted); font-size:13px; font-weight:600; padding:11px 18px; border-radius:9px; cursor:pointer; transition:border-color 0.15s,color 0.15s; }
     .btn-close:hover { border-color:rgba(255,255,255,0.2); color:var(--text); }
 
     @media (max-width:1100px) { .card-grid { grid-template-columns:repeat(4,1fr); column-gap:3.5vw; padding:0 3.5vw; } .summary-box { grid-template-columns:repeat(2,1fr); } }
     @media (max-width:860px)  { .card-grid { grid-template-columns:repeat(3,1fr); column-gap:3vw; padding:0 3vw; } }
     @media (max-width:540px)  { .card-grid { grid-template-columns:repeat(2,1fr); column-gap:2.5vw; padding:0 2.5vw; } .summary-box { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:760px) { .chart-wrap, #modal-spark, .modal-spark-empty { height:220px; } }
   </style>
 </head>
 <body>
@@ -348,34 +368,55 @@
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <button class="modal-close-x" id="modal-close-x">✕</button>
-    <!-- Stage 3D de la carta -->
-    <div class="modal-stage" id="modal-stage">
-      <div class="modal-card-3d" id="modal-card-3d">
-        <img id="modal-img" src="" alt=""/>
-        <div class="modal-card-gloss" id="modal-card-gloss"></div>
-        <div class="modal-card-shine"></div>
+    <div class="modal-grid">
+      <!-- Columna izquierda: carta 3D + info + stats + acciones -->
+      <div>
+        <div class="modal-stage" id="modal-stage">
+          <div class="modal-card-3d" id="modal-card-3d">
+            <img id="modal-img" src="" alt=""/>
+            <div class="modal-card-gloss" id="modal-card-gloss"></div>
+            <div class="modal-card-shine"></div>
+          </div>
+        </div>
+        <div class="modal-body">
+          <div class="modal-badges" id="modal-badges"></div>
+          <div class="modal-name" id="modal-name"></div>
+          <div class="modal-stats">
+            <div class="modal-stat"><span class="modal-stat-label">Cost</span><span class="modal-stat-value" id="modal-cost">—</span></div>
+            <div class="modal-stat"><span class="modal-stat-label">Market</span><span class="modal-stat-value" id="modal-market">—</span></div>
+            <div class="modal-stat"><span class="modal-stat-label">P&amp;L</span><span class="modal-stat-value" id="modal-pnl">—</span><span class="modal-stat-sub" id="modal-pct"></span></div>
+          </div>
+        </div>
       </div>
-    </div>
-    <!-- Info estática debajo -->
-    <div class="modal-body">
-      <div class="modal-badges" id="modal-badges"></div>
-      <div class="modal-name" id="modal-name"></div>
-      <div class="modal-stats">
-        <div class="modal-stat"><span class="modal-stat-label">Cost</span><span class="modal-stat-value" id="modal-cost">—</span></div>
-        <div class="modal-stat"><span class="modal-stat-label">Market</span><span class="modal-stat-value" id="modal-market">—</span></div>
-        <div class="modal-stat"><span class="modal-stat-label">P&amp;L</span><span class="modal-stat-value" id="modal-pnl">—</span><span class="modal-stat-sub" id="modal-pct"></span></div>
-      </div>
-      <div class="modal-chart-section">
-        <span class="modal-spark-label">Price history</span>
+      <!-- Columna derecha: grafica grande con filtros temporales -->
+      <div class="modal-chart-col">
+        <div class="modal-chart-header">
+          <span class="modal-spark-label">Price history</span>
+          <div class="range-filters" id="range-filters">
+            <button class="range-btn" data-range="1">1D</button>
+            <button class="range-btn" data-range="7">7D</button>
+            <button class="range-btn active" data-range="30">30D</button>
+            <button class="range-btn" data-range="90">3M</button>
+            <button class="range-btn" data-range="180">6M</button>
+            <button class="range-btn" data-range="365">1A</button>
+          </div>
+        </div>
+        <div class="chart-price-range" id="chart-price-range" style="display:none">
+          <span class="hi" id="chart-hi"></span>
+          <span class="lo" id="chart-lo"></span>
+        </div>
         <div class="chart-wrap" id="chart-wrap" style="display:none">
           <canvas id="modal-spark"></canvas>
           <div class="chart-tip" id="chart-tip"></div>
         </div>
+        <div class="chart-axis-dates" id="chart-axis-dates" style="display:none"></div>
         <div class="modal-spark-empty" id="modal-spark-empty"><span>No data yet</span></div>
-      </div>
-      <div class="modal-actions">
-        <a class="btn-cardmarket" id="modal-cm-link" href="#" target="_blank" rel="noopener">↗ Cardmarket</a>
-        <button class="btn-close" id="modal-close-btn">Close</button>
+        <div class="chart-fallback-note" id="chart-fallback-note" style="display:none"></div>
+        <div class="modal-actions">
+          <a class="btn-cardmarket" id="modal-cm-link" href="#" target="_blank" rel="noopener"><img class="btn-icon" src="https://www.google.com/s2/favicons?domain=cardmarket.com&sz=64" alt=""/> Cardmarket ↗</a>
+          <a class="btn-ebay" id="modal-ebay-link" href="#" target="_blank" rel="noopener"><img class="btn-icon" src="https://www.google.com/s2/favicons?domain=ebay.com&sz=64" alt=""/> eBay Sold (US) ↗</a>
+          <button class="btn-close" id="modal-close-btn">Close</button>
+        </div>
       </div>
     </div>
   </div>
@@ -390,6 +431,55 @@
   const badgeClass = s => ({Origins:'badge-origins',Unleashed:'badge-unleashed',Spiritforged:'badge-spiritforged','Proving Grounds':'badge-proving'}[s]||'');
   const cmUrl = item => item.cardmarketUrl || 'https://www.cardmarket.com/en/Riftbound/Products/Search?searchString='+encodeURIComponent(item.name);
 
+  // Construye un enlace de busqueda de "Sold Listings" en eBay (mercado US) para la version exacta de la carta.
+  // Es un enlace de busqueda en vivo a ventas reales completadas, no un dato pre-verificado.
+  function ebaySoldUrl(item){
+    let q = (item.name||'')
+      .replace(/^(OGN|OGNX|UNL|SFD|PROK)\s+/,'')
+      .replace(/[()—–,*×]/g,' ')
+      .replace(/\s+/g,' ')
+      .trim();
+    q = 'Riftbound ' + q;
+    return 'https://www.ebay.com/sch/i.html?_nkw='+encodeURIComponent(q)+'&_sacat=0&LH_Sold=1&LH_Complete=1&LH_PrefLoc=1&_ipg=60';
+  }
+
+  let modalFullHistory = [];
+  let modalRangeDays = 30;
+
+  function filterHistoryByRange(history, days){
+    if(!history || !history.length) return [];
+    const lastDate = new Date(history[history.length-1].date+'T12:00:00');
+    const cutoff = new Date(lastDate); cutoff.setDate(cutoff.getDate()-days);
+    return history.filter(p => new Date(p.date+'T12:00:00') >= cutoff);
+  }
+
+  function renderChartForRange(days){
+    const full = modalFullHistory;
+    const cw=document.getElementById('chart-wrap'), se=document.getElementById('modal-spark-empty');
+    const priceRangeEl=document.getElementById('chart-price-range'), axisEl=document.getElementById('chart-axis-dates'), noteEl=document.getElementById('chart-fallback-note');
+    if(!full || full.length<2){
+      cw.style.display='none'; se.style.display='flex';
+      priceRangeEl.style.display='none'; axisEl.style.display='none'; noteEl.style.display='none';
+      return;
+    }
+    let filtered = filterHistoryByRange(full, days);
+    let usedFallback=false;
+    if(filtered.length<2){ filtered=full; usedFallback=true; }
+    cw.style.display='block'; se.style.display='none';
+    priceRangeEl.style.display='flex'; axisEl.style.display='flex';
+    const prices=filtered.map(p=>p.price);
+    const hi=Math.max(...prices), lo=Math.min(...prices);
+    document.getElementById('chart-hi').textContent='High '+fmt(hi);
+    document.getElementById('chart-lo').textContent='Low '+fmt(lo);
+    const df=d=>new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    const n=filtered.length;
+    const labelDates=[filtered[0].date, filtered[Math.floor((n-1)/2)].date, filtered[n-1].date];
+    axisEl.innerHTML = labelDates.map(d=>`<span>${df(d)}</span>`).join('');
+    noteEl.style.display = usedFallback ? 'block' : 'none';
+    if(usedFallback) noteEl.textContent = 'Not enough data points in this range yet — showing full history instead.';
+    requestAnimationFrame(()=>drawSpark('modal-spark', filtered, 300, true));
+  }
+
   function drawSpark(id,history,h,interactive){
     const canvas=document.getElementById(id); if(!canvas)return;
     const ctx=canvas.getContext('2d'),dpr=window.devicePixelRatio||1;
@@ -397,22 +487,34 @@
     canvas.width=W;canvas.height=H;
     const prices=history.map(x=>x.price),dates=history.map(x=>x.date);
     const mn=Math.min(...prices),mx=Math.max(...prices),rng=mx-mn||1;
-    const pad=6*dpr,xp=i=>pad+(i/(prices.length-1))*(W-pad*2),yp=v=>H-pad-((v-mn)/rng)*(H-pad*2);
+    const padL=46*dpr,padR=10*dpr,padTop=14*dpr,padBot=10*dpr;
+    const xp=i=>padL+(i/(prices.length-1||1))*(W-padL-padR),yp=v=>H-padBot-((v-mn)/rng)*(H-padTop-padBot);
     const up=prices[prices.length-1]>=prices[0],col=up?'#3ddc84':'#ff5a5a';
 
     function render(hlIdx){
       ctx.clearRect(0,0,W,H);
+      // Gridlines horizontales con etiquetas de precio (min / medio / max)
+      ctx.font=(10*dpr)+'px DM Sans, sans-serif';
+      ctx.textBaseline='middle';ctx.textAlign='right';
+      [0,0.5,1].forEach(t=>{
+        const v=mn+t*rng, y=yp(v);
+        ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(W-padR,y);
+        ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1*dpr;ctx.setLineDash([3*dpr,3*dpr]);ctx.stroke();ctx.setLineDash([]);
+        ctx.fillStyle='rgba(255,255,255,0.32)';
+        ctx.fillText(v.toLocaleString('de-DE',{maximumFractionDigits:0}), padL-8*dpr, y);
+      });
+
       const grad=ctx.createLinearGradient(0,0,0,H);
       grad.addColorStop(0,up?'rgba(61,220,132,0.25)':'rgba(255,90,90,0.25)');grad.addColorStop(1,'rgba(0,0,0,0)');
       ctx.beginPath();prices.forEach((p,i)=>i===0?ctx.moveTo(xp(i),yp(p)):ctx.lineTo(xp(i),yp(p)));
       ctx.lineTo(xp(prices.length-1),H);ctx.lineTo(xp(0),H);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
       ctx.beginPath();prices.forEach((p,i)=>i===0?ctx.moveTo(xp(i),yp(p)):ctx.lineTo(xp(i),yp(p)));
-      ctx.strokeStyle=col;ctx.lineWidth=2*dpr;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
-      ctx.beginPath();ctx.arc(xp(prices.length-1),yp(prices[prices.length-1]),3*dpr,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+      ctx.strokeStyle=col;ctx.lineWidth=2.5*dpr;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
+      ctx.beginPath();ctx.arc(xp(prices.length-1),yp(prices[prices.length-1]),3.5*dpr,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
 
       if(hlIdx!==undefined){
         const hx=xp(hlIdx),hy=yp(prices[hlIdx]);
-        ctx.save();ctx.beginPath();ctx.moveTo(hx,0);ctx.lineTo(hx,H);
+        ctx.save();ctx.beginPath();ctx.moveTo(hx,padTop);ctx.lineTo(hx,H-padBot);
         ctx.strokeStyle='rgba(255,255,255,0.18)';ctx.lineWidth=1*dpr;ctx.setLineDash([4*dpr,4*dpr]);ctx.stroke();ctx.restore();
         ctx.beginPath();ctx.arc(hx,hy,6*dpr,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.18)';ctx.fill();
         ctx.beginPath();ctx.arc(hx,hy,3.5*dpr,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
@@ -463,11 +565,11 @@
       (item.set?`<span class="badge ${badgeClass(item.set)}">${item.set}</span>`:'')+
       (item.condition==='Sealed'?`<span class="badge badge-sealed-tag">Sealed</span>`:'');
     document.getElementById('modal-cm-link').href=cmUrl(item);
-    const cw=document.getElementById('chart-wrap'),se=document.getElementById('modal-spark-empty');
-    if(item.priceHistory?.length>1){
-      cw.style.display='block';se.style.display='none';
-      requestAnimationFrame(()=>drawSpark('modal-spark',item.priceHistory,88,true));
-    } else { cw.style.display='none';se.style.display='flex'; }
+    document.getElementById('modal-ebay-link').href=ebaySoldUrl(item);
+    modalFullHistory = item.priceHistory || [];
+    modalRangeDays = 30;
+    document.querySelectorAll('#range-filters .range-btn').forEach(b=>b.classList.toggle('active', b.dataset.range==='30'));
+    renderChartForRange(modalRangeDays);
     document.getElementById('modal-overlay').classList.add('open');
     document.body.style.overflow='hidden';
     // Tilt 3D en la carta del modal
@@ -522,6 +624,14 @@
   document.getElementById('modal-close-btn').addEventListener('click',closeModal);
   document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target.id==='modal-overlay')closeModal();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+  document.querySelectorAll('#range-filters .range-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('#range-filters .range-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      modalRangeDays=parseInt(btn.dataset.range,10);
+      renderChartForRange(modalRangeDays);
+    });
+  });
 
   function sortItems(items, mode) {
     if (mode === 'gainers') {
