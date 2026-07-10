@@ -102,6 +102,32 @@
     .wl-slide-pct.pos { color:var(--green); } .wl-slide-pct.neg { color:var(--red); } .wl-slide-pct.neu { color:var(--text-muted); }
     .wl-slide-name { font-size:9px; color:var(--text-muted); text-align:center; width:80px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
 
+    /* MONTHLY INVESTMENT ACCORDION */
+    .month-panel { background:rgba(20,20,20,0.78); border:1px solid rgba(184,145,46,0.29); border-radius:var(--radius); padding:10px; backdrop-filter:blur(20px); box-shadow:0 6px 24px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.04),inset 0 1px 0 rgba(255,255,255,0.06); }
+    .month-row { border-radius:8px; overflow:hidden; }
+    .month-row + .month-row { margin-top:4px; }
+    .month-row-head { display:flex; align-items:center; gap:10px; padding:11px 12px; cursor:pointer; border-radius:8px; background:rgba(255,255,255,0.02); transition:background 0.15s; }
+    .month-row-head:hover { background:rgba(184,145,46,0.09); }
+    .month-toggle-icon { font-size:10px; color:var(--gold); transition:transform 0.2s ease; width:10px; flex-shrink:0; display:inline-block; }
+    .month-row.open .month-toggle-icon { transform:rotate(90deg); }
+    .month-label { font-size:13px; font-weight:700; color:var(--text); flex:0 0 130px; }
+    .month-count { font-size:11px; color:var(--text-muted); flex:1; }
+    .month-total { font-size:14px; font-weight:800; color:var(--text); flex-shrink:0; }
+    .month-cap-flag { font-size:12px; flex-shrink:0; margin-left:2px; cursor:help; }
+    .month-detail { max-height:0; overflow:hidden; transition:max-height 0.28s ease; }
+    .month-row.open .month-detail { max-height:1400px; }
+    .month-card-row { display:flex; align-items:center; gap:10px; padding:7px 12px 7px 32px; }
+    .month-card-row:hover { background:rgba(255,255,255,0.03); }
+    .month-card-img { width:26px; height:26px; border-radius:4px; object-fit:cover; object-position:top; flex-shrink:0; }
+    .month-card-name { font-size:12px; font-weight:600; color:var(--text); flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .month-card-date { font-size:11px; color:rgba(255,255,255,0.4); flex-shrink:0; min-width:46px; text-align:right; }
+    .month-card-buy { font-size:12px; font-weight:600; color:rgba(255,255,255,0.65); flex-shrink:0; min-width:62px; text-align:right; }
+    .month-card-buy.free { color:rgba(255,255,255,0.35); }
+    .month-card-current { font-size:12px; font-weight:600; color:var(--text); flex-shrink:0; min-width:62px; text-align:right; }
+    .month-card-pct { font-size:12px; font-weight:800; flex-shrink:0; min-width:56px; text-align:right; color:var(--text-muted); }
+    .month-card-pct.pos { color:var(--green); } .month-card-pct.neg { color:var(--red); }
+    @media (max-width:640px){ .month-card-date{display:none;} .month-label{flex-basis:96px;} }
+
     /* FILTERS */
     .section-wrap { margin-bottom:32px; }
     .section-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
@@ -238,6 +264,14 @@
     <div class="wl-carousel-wrap" id="wl-carousel">
       <div class="wl-carousel-inner" id="wl-inner"></div>
     </div>
+  </div>
+
+  <div class="section-wrap" id="monthly-section">
+    <div class="section-header">
+      <h2>Monthly Investment</h2>
+      <span class="section-count" id="monthly-count"></span>
+    </div>
+    <div class="month-panel" id="month-accordion"></div>
   </div>
 
   <div class="section-wrap" id="singles-section">
@@ -626,6 +660,63 @@
     });
   }
 
+  function monthLabel(key){
+    const [y,m]=key.split('-').map(Number);
+    return new Date(y,m-1,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  }
+
+  function renderMonthly(holding){
+    const withDate=holding.filter(c=>c.buyDate);
+    const groups={};
+    withDate.forEach(c=>{
+      const key=c.buyDate.slice(0,7);
+      (groups[key]=groups[key]||[]).push(c);
+    });
+    const keys=Object.keys(groups).sort().reverse();
+    const wrap=document.getElementById('month-accordion');
+    document.getElementById('monthly-count').textContent=keys.length+(keys.length===1?' month':' months');
+
+    wrap.innerHTML=keys.map(key=>{
+      const items=groups[key].slice().sort((a,b)=>new Date(b.buyDate)-new Date(a.buyDate));
+      const paidItems=items.filter(c=>c.buyPrice>0);
+      const total=paidItems.reduce((s,c)=>s+c.buyPrice*(c.qty||1),0);
+      const cappedTotal=paidItems.filter(c=>!c.excludeFromCap).reduce((s,c)=>s+c.buyPrice*(c.qty||1),0);
+      const overCap=cappedTotal>500;
+
+      const rows=items.map(c=>{
+        const dateTxt=new Date(c.buyDate+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+        const isFree=!c.buyPrice||c.buyPrice===0;
+        const pct=isFree?null:(c.currentPrice-c.buyPrice)/c.buyPrice*100;
+        const pos=pct!==null&&pct>=0;
+        return `<div class="month-card-row">
+          <img class="month-card-img" src="${c.image||''}" alt="${c.name}" onerror="this.style.opacity=0.1"/>
+          <span class="month-card-name">${c.name}</span>
+          <span class="month-card-date">${dateTxt}</span>
+          <span class="month-card-buy ${isFree?'free':''}">${isFree?'Free':fmt(c.buyPrice)}</span>
+          <span class="month-card-current">${fmt(c.currentPrice)}</span>
+          <span class="month-card-pct ${pct===null?'':(pos?'pos':'neg')}">${pct===null?'—':(pos?'+':'')+pct.toFixed(1)+'%'}</span>
+        </div>`;
+      }).join('');
+
+      return `<div class="month-row" data-month="${key}">
+        <div class="month-row-head">
+          <span class="month-toggle-icon">▸</span>
+          <span class="month-label">${monthLabel(key)}</span>
+          <span class="month-count">${items.length} ${items.length===1?'buy':'buys'}</span>
+          <span class="month-total">${fmt(total)}</span>
+          ${overCap?'<span class="month-cap-flag" title="Exceeds the €500 monthly cap">⚠️</span>':''}
+        </div>
+        <div class="month-detail">${rows}</div>
+      </div>`;
+    }).join('');
+
+    wrap.querySelectorAll('.month-row-head').forEach(head=>{
+      head.addEventListener('click',()=>{
+        head.parentElement.classList.toggle('open');
+      });
+    });
+  }
+
   function render(){
     if(!window.portfolioData?.cards)return;
     allCards=window.portfolioData.cards;
@@ -659,6 +750,7 @@
     if(!sealed.length)document.getElementById('sealed-section').style.display='none';
 
     initWatchlist(allCards);
+    renderMonthly(holding);
 
     // Filter buttons
     document.querySelectorAll('.filter-btn').forEach(btn=>{
