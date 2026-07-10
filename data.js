@@ -1,15 +1,21 @@
 // ============================================================
 //  RIFTBOUND PORTFOLIO — data.js
 //  Fuente: Notion DB f298acf4-dc24-48e2-bc76-8d6c9bd193d6
-//  Actualizado: 2026-07-09
+//  Actualizado: 2026-07-10
 //  Filtros Cardmarket: EN, NM (min. condicion 2), excluir UK
 //  Nota: imagenes Project K Promos pendientes (CDN sin cobertura + S3 Cardmarket bloquea hotlink)
 //  buyDate anadido en esta sesion, extraido de Notion (Buy Date) para el desglose P&L
 // ============================================================
 
 window.portfolioData = {
-  updatedAt: "2026-07-09",
-  /* nota: 3 copias de Ahri, Alluring (OGNX-066) anadidas hoy, movidas de Watchlist a Holding a 66E/u */
+  updatedAt: "2026-07-10",
+  /* nota 2026-07-10: Jinx, Loose Cannon (OGNX-251) movida de Watchlist a Holding (compra a 32E).
+     Anadidas 3 compras nuevas: Leona Radiant Dawn (OGNX-261, 13E), Lux Lady of Luminosity (OGNX-021, 15E),
+     Viktor Herald of the Arcane Origins Promos (OGNX-265, 16E) - distinta de la version Project K Promos (PROK-FND265) ya existente en Watchlist.
+     Anadidas 7 cartas a Watchlist: Ahri Inquisitive V1 Showcase (SFD-227), Volibear Relentless Storm Origins (OGNX-249),
+     Yasuo Unforgiven Origins (OGNX-259), Teemo Swift Scout Origins (OGNX-263), Lee Sin Blind Monk Origins (OGNX-257),
+     Sett The Boss Origins (OGNX-269), Miss Fortune Bounty Hunter Origins (OGNX-267) - todas distintas de sus
+     homologas Project K Promos ya presentes en el tracker. */
 
   cards: [
     {
@@ -859,15 +865,190 @@ window.portfolioData = {
       name: "Jinx, Loose Cannon (Origins Promos)",
       set: "Origins Promos",
       condition: "Raw",
+      status: "Holding",
+      qty: 1,
+      buyPrice: 32,
+      currentPrice: 38,
+      image: "https://images.tcggo.com/tcggo/storage/35788/conversions/jinx-loose-cannon-ogn-251-origins-promos-large.webp",
+      cardNumber: "251",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Jinx-Loose-Cannon?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      buyDate: "2026-07-10",
+      priceHistory: [
+        { date: "2026-07-08", price: 28 },
+        { date: "2026-07-10", price: 38 }
+      ]
+    },
+
+    {
+      id: "OGNX-261",
+      name: "Leona, Radiant Dawn (Origins Promos)",
+      set: "Origins Promos",
+      condition: "Raw",
+      status: "Holding",
+      qty: 1,
+      buyPrice: 13,
+      currentPrice: 10,
+      image: "https://images.tcggo.com/tcggo/storage/35793/conversions/leona-radiant-dawn-ogn-261-origins-promos-large.webp",
+      cardNumber: "261",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Leona-Radiant-Dawn?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      buyDate: "2026-07-10",
+      priceHistory: [
+        { date: "2026-07-10", price: 10 }
+      ]
+    },
+
+    {
+      id: "OGNX-021",
+      name: "Lux, Lady of Luminosity (Origins Promos)",
+      set: "Origins Promos",
+      condition: "Raw",
+      status: "Holding",
+      qty: 1,
+      buyPrice: 15,
+      currentPrice: 12.8,
+      image: "https://images.tcggo.com/tcggo/storage/35757/conversions/lux-lady-of-luminosity-ogn-021-origins-promos-large.webp",
+      cardNumber: "021",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Lux-Lady-of-Luminosity?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      buyDate: "2026-07-10",
+      priceHistory: [
+        { date: "2026-07-10", price: 12.8 }
+      ]
+    },
+
+    {
+      id: "OGNX-265",
+      name: "Viktor, Herald of the Arcane (Origins Promos)",
+      set: "Origins Promos",
+      condition: "Raw",
+      status: "Holding",
+      qty: 1,
+      buyPrice: 16,
+      currentPrice: 9,
+      image: "https://images.tcggo.com/tcggo/storage/35795/conversions/viktor-herald-of-the-arcane-ogn-265-origins-promos-large.webp",
+      cardNumber: "265",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Viktor-Herald-of-the-Arcane?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      buyDate: "2026-07-10",
+      priceHistory: [
+        { date: "2026-07-10", price: 9 }
+      ]
+    },
+
+    {
+      id: "SFD-227",
+      name: "Ahri, Inquisitive (V.1 - Showcase) (Spiritforged)",
+      set: "Spiritforged",
+      condition: "Raw",
+      status: "Watchlist",
+      qty: 1,
+      buyPrice: null,
+      currentPrice: 484,
+      image: "https://images.tcggo.com/tcggo/storage/33869/conversions/ahri-inquisitive-sfd-227221-spiritforged-large.webp",
+      cardNumber: "227",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Spiritforged/Ahri-Inquisitive-V1-Showcase?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      priceHistory: [
+        { date: "2026-07-10", price: 484 }
+      ]
+    },
+
+    {
+      id: "OGNX-249",
+      name: "Volibear, Relentless Storm (Origins Promos)",
+      set: "Origins Promos",
+      condition: "Raw",
+      status: "Watchlist",
+      qty: 1,
+      buyPrice: null,
+      currentPrice: 9,
+      image: "https://images.tcggo.com/tcggo/storage/35787/conversions/volibear-relentless-storm-ogn-249-origins-promos-large.webp",
+      cardNumber: "249",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Volibear-Relentless-Storm?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      priceHistory: [
+        { date: "2026-07-10", price: 9 }
+      ]
+    },
+
+    {
+      id: "OGNX-259",
+      name: "Yasuo, Unforgiven (Origins Promos)",
+      set: "Origins Promos",
+      condition: "Raw",
+      status: "Watchlist",
+      qty: 1,
+      buyPrice: null,
+      currentPrice: 12,
+      image: "https://images.tcggo.com/tcggo/storage/35792/conversions/yasuo-unforgiven-ogn-259-origins-promos-large.webp",
+      cardNumber: "259",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Yasuo-Unforgiven?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      priceHistory: [
+        { date: "2026-07-10", price: 12 }
+      ]
+    },
+
+    {
+      id: "OGNX-263",
+      name: "Teemo, Swift Scout (V.1 - Rare) (Origins Promos)",
+      set: "Origins Promos",
+      condition: "Raw",
       status: "Watchlist",
       qty: 1,
       buyPrice: null,
       currentPrice: 28,
-      image: "https://images.tcggo.com/tcggo/storage/35788/conversions/jinx-loose-cannon-ogn-251-origins-promos-large.webp",
-      cardNumber: "251",
-      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Jinx-Loose-Cannon?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      image: "https://images.tcggo.com/tcggo/storage/35794/conversions/teemo-swift-scout-ogn-263-origins-promos-large.webp",
+      cardNumber: "263",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Teemo-Swift-Scout-V1-Rare?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
-        { date: "2026-07-08", price: 28 }
+        { date: "2026-07-10", price: 28 }
+      ]
+    },
+
+    {
+      id: "OGNX-257",
+      name: "Lee Sin, Blind Monk (Origins Promos)",
+      set: "Origins Promos",
+      condition: "Raw",
+      status: "Watchlist",
+      qty: 1,
+      buyPrice: null,
+      currentPrice: 9,
+      image: "https://images.tcggo.com/tcggo/storage/35791/conversions/lee-sin-blind-monk-ogn-257-origins-promos-large.webp",
+      cardNumber: "257",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Lee-Sin-Blind-Monk?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      priceHistory: [
+        { date: "2026-07-10", price: 9 }
+      ]
+    },
+
+    {
+      id: "OGNX-269",
+      name: "Sett, The Boss (Origins Promos)",
+      set: "Origins Promos",
+      condition: "Raw",
+      status: "Watchlist",
+      qty: 1,
+      buyPrice: null,
+      currentPrice: 8,
+      image: "https://images.tcggo.com/tcggo/storage/35797/conversions/sett-the-boss-ogn-269-origins-promos-large.webp",
+      cardNumber: "269",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Sett-The-Boss?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      priceHistory: [
+        { date: "2026-07-10", price: 8 }
+      ]
+    },
+
+    {
+      id: "OGNX-267",
+      name: "Miss Fortune, Bounty Hunter (Origins Promos)",
+      set: "Origins Promos",
+      condition: "Raw",
+      status: "Watchlist",
+      qty: 1,
+      buyPrice: null,
+      currentPrice: 14,
+      image: "https://images.tcggo.com/tcggo/storage/35796/conversions/miss-fortune-bounty-hunter-ogn-267-origins-promos-large.webp",
+      cardNumber: "267",
+      cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Miss-Fortune-Bounty-Hunter?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+      priceHistory: [
+        { date: "2026-07-10", price: 14 }
       ]
     },
 
