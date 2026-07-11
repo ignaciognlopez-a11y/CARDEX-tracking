@@ -59,10 +59,10 @@
     /* ── GRID ── */
     .card-grid {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      column-gap: 4vw;
-      row-gap: 14px;
-      padding: 0 4vw;
+      grid-template-columns: repeat(8, 1fr);
+      column-gap: 2vw;
+      row-gap: 10px;
+      padding: 0 2vw;
     }
 
     /* ── WATCHLIST CARD ── */
@@ -85,8 +85,8 @@
     .card-cover img { width: 100%; height: 100%; object-fit: contain; display: block; }
     .card-gloss { position: absolute; inset: 0; opacity: 0; pointer-events: none; z-index: 5; transition: opacity 0.3s; }
 
-    .card-body { padding: 10px 11px 12px; display: flex; flex-direction: column; gap: 5px; }
-    .card-name { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; line-height: 1.3; color: var(--text); }
+    .card-body { padding: 7px 8px 8px; display: flex; flex-direction: column; gap: 3px; }
+    .card-name { font-family: 'DM Sans', sans-serif; font-size: 11.5px; font-weight: 700; line-height: 1.25; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.5em; }
     .card-badge-row { display: flex; gap: 3px; flex-wrap: wrap; }
 
     .badge { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 3px 7px; border-radius: 4px; }
@@ -96,12 +96,15 @@
     .badge-proving      { background: rgba(212,166,53,0.9); color: #000; }
     .badge-sealed-tag   { background: rgba(80,200,255,0.9); color: #000; }
 
-    .price-pill { font-family: 'DM Sans', sans-serif; font-size: 18px; font-weight: 800; color: #d9b04a; letter-spacing: -0.3px; line-height: 1.15; display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .card-price-block { display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
-    .card-price-row { display: flex; align-items: baseline; gap: 6px; }
-    .card-price-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600; min-width: 76px; flex-shrink: 0; }
-    .card-price-buy { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; color: var(--text); }
-    .card-var-inline { font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 2px; }
+    .price-pill { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 800; color: #d9b04a; letter-spacing: -0.2px; line-height: 1.15; display: inline-flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .card-price-block { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
+    .card-price-row { display: flex; align-items: baseline; gap: 5px; }
+    .card-price-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; min-width: 0; flex-shrink: 0; }
+    .card-price-buy { font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; color: var(--text); }
+    .card-var-inline { font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 2px; }
+
+    .var-compact { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+    .var-compact-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 500; }
 
     .var-table { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; }
     .var-row { display: flex; align-items: center; justify-content: space-between; }
@@ -216,9 +219,12 @@
     .drag-mode .list-row:active { cursor: grabbing; }
     .drag-hint { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; margin-left: 8px; opacity: 0; transition: opacity 0.2s; }
     .drag-hint.visible { opacity: 1; }
-    @media (max-width: 1100px) { .card-grid { grid-template-columns: repeat(4,1fr); column-gap: 3.5vw; padding: 0 3.5vw; } }
-    @media (max-width: 860px)  { .card-grid { grid-template-columns: repeat(3,1fr); column-gap: 3vw; padding: 0 3vw; } }
-    @media (max-width: 540px)  { .card-grid { grid-template-columns: repeat(2,1fr); column-gap: 2.5vw; padding: 0 2.5vw; } }
+    @media (max-width: 1300px) { .card-grid { grid-template-columns: repeat(6,1fr); column-gap: 2.5vw; padding: 0 2.5vw; } }
+    @media (max-width: 1000px) { .card-grid { grid-template-columns: repeat(4,1fr); column-gap: 3vw; padding: 0 3vw; } }
+    @media (max-width: 700px)  { .card-grid { grid-template-columns: repeat(3,1fr); column-gap: 2.5vw; padding: 0 2.5vw; } }
+    @media (max-width: 460px)  { .card-grid { grid-template-columns: repeat(2,1fr); column-gap: 2.5vw; padding: 0 2.5vw; } }
+
+    .section-header.section-header-spaced { margin-top: 34px; }
   </style>
 </head>
 <body>
@@ -513,19 +519,12 @@
         <div class="card-price-block">
           ${hasBuy ? `
           <div class="card-price-row">
-            <span class="card-price-label">Buy Price</span>
+            <span class="card-price-label">Buy</span>
             <span class="card-price-buy">${fmt(item.buyPrice)}</span>
           </div>` : ''}
-          <div class="card-price-row">
-            <span class="card-price-label">Current Price</span>
-            <span class="price-pill">${fmt(item.currentPrice)}${varTxt ? `<span class="${varCls} card-var-inline"><span class="var-arrow">${varArrow}</span>${varTxt}</span>` : ''}</span>
-          </div>
+          <span class="price-pill">${fmt(item.currentPrice)}${varTxt ? `<span class="${varCls} card-var-inline"><span class="var-arrow">${varArrow}</span>${varTxt}</span>` : ''}</span>
         </div>
-        <div class="var-table">
-          <div class="var-row"><span class="var-label">Last check</span>${varHtml(vLast)}</div>
-          <div class="var-row"><span class="var-label">7 days</span>${varHtml(v7)}</div>
-          <div class="var-row"><span class="var-label">30 days</span>${varHtml(v30)}</div>
-        </div>
+        <div class="var-compact">${varHtml(v7)}<span class="var-compact-label">7d</span></div>
       </div>
     </div>`;
   }
@@ -566,16 +565,20 @@
       return;
     }
 
-    let currentSort = 'value';
-    let currentView = 'grid';
+    const groups = [
+      { id: 'singles', label: 'Singles', items: wl.filter(function(c){ return c.condition !== 'Sealed'; }) },
+      { id: 'sealed',  label: 'Sealed',  items: wl.filter(function(c){ return c.condition === 'Sealed'; }) }
+    ].filter(function(g){ return g.items.length > 0; });
 
-    var STORAGE_KEY = 'wl-custom-order';
-    function loadCustomOrder() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null'); } catch(e){ return null; } }
-    function saveCustomOrder(ids) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(ids)); } catch(e){} }
+    const state = {};
+    groups.forEach(function(g){ state[g.id] = { sort: 'value', view: 'grid' }; });
 
-    function sortWL(items, mode) {
+    function loadCustomOrder(gid) { try { return JSON.parse(localStorage.getItem('wl-custom-order-'+gid)||'null'); } catch(e){ return null; } }
+    function saveCustomOrder(gid, ids) { try { localStorage.setItem('wl-custom-order-'+gid, JSON.stringify(ids)); } catch(e){} }
+
+    function sortWL(items, mode, gid) {
       if (mode === 'custom') {
-        var saved = loadCustomOrder();
+        var saved = loadCustomOrder(gid);
         if (!saved) return items.slice().sort(function(a,b){ return a.currentPrice-b.currentPrice; });
         var idx = {}; saved.forEach(function(id,i){ idx[id]=i; });
         return items.slice().sort(function(a,b){ return (idx[a.id]!=null?idx[a.id]:999)-(idx[b.id]!=null?idx[b.id]:999); });
@@ -590,103 +593,107 @@
       return items.slice().sort(function(a,b){ return a.currentPrice-b.currentPrice; });
     }
 
-    function addDragGrid(grid) {
+    function addDragGrid(grid, gid) {
       var dragEl = null;
       grid.querySelectorAll('.wl-card').forEach(function(card) {
         card.setAttribute('draggable','true');
         card.addEventListener('dragstart',function(e){ dragEl=card; card.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
-        card.addEventListener('dragend',function(){ card.classList.remove('dragging'); grid.querySelectorAll('.wl-card').forEach(function(c){c.classList.remove('drag-over');}); saveCustomOrder(Array.from(grid.querySelectorAll('.wl-card')).map(function(c){return c.dataset.id;})); });
+        card.addEventListener('dragend',function(){ card.classList.remove('dragging'); grid.querySelectorAll('.wl-card').forEach(function(c){c.classList.remove('drag-over');}); saveCustomOrder(gid, Array.from(grid.querySelectorAll('.wl-card')).map(function(c){return c.dataset.id;})); });
         card.addEventListener('dragover',function(e){ e.preventDefault(); if(!dragEl||dragEl===card)return; card.classList.add('drag-over'); var r=card.getBoundingClientRect(); e.clientX<r.left+r.width/2?grid.insertBefore(dragEl,card):grid.insertBefore(dragEl,card.nextSibling); });
         card.addEventListener('dragleave',function(){ card.classList.remove('drag-over'); });
         card.addEventListener('drop',function(e){ e.preventDefault(); card.classList.remove('drag-over'); });
       });
     }
 
-    function addDragList(container) {
+    function addDragList(container, gid) {
       var dragEl = null;
       container.querySelectorAll('.list-row').forEach(function(row) {
         row.setAttribute('draggable','true');
         row.addEventListener('dragstart',function(e){ dragEl=row; row.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
-        row.addEventListener('dragend',function(){ row.classList.remove('dragging'); container.querySelectorAll('.list-row').forEach(function(r){r.classList.remove('drag-over');}); saveCustomOrder(Array.from(container.querySelectorAll('.list-row')).map(function(r){return r.dataset.id;})); container.querySelectorAll('.list-rank').forEach(function(el,i){el.textContent=i+1;}); });
+        row.addEventListener('dragend',function(){ row.classList.remove('dragging'); container.querySelectorAll('.list-row').forEach(function(r){r.classList.remove('drag-over');}); saveCustomOrder(gid, Array.from(container.querySelectorAll('.list-row')).map(function(r){return r.dataset.id;})); container.querySelectorAll('.list-rank').forEach(function(el,i){el.textContent=i+1;}); });
         row.addEventListener('dragover',function(e){ e.preventDefault(); if(!dragEl||dragEl===row)return; row.classList.add('drag-over'); var r=row.getBoundingClientRect(); e.clientY<r.top+r.height/2?container.insertBefore(dragEl,row):container.insertBefore(dragEl,row.nextSibling); });
         row.addEventListener('dragleave',function(){ row.classList.remove('drag-over'); });
         row.addEventListener('drop',function(e){ e.preventDefault(); row.classList.remove('drag-over'); });
       });
     }
 
-    function renderWLGrid(items, sort, view) {
-      var sorted = sortWL(items, sort);
+    function renderGroup(g) {
+      var gid = g.id, sort = state[gid].sort, view = state[gid].view;
+      var sorted = sortWL(g.items, sort, gid);
       var isDrag = sort === 'custom';
-      var hint = document.getElementById('drag-hint');
+      var hint = document.getElementById('drag-hint-'+gid);
       if (hint) hint.classList.toggle('visible', isDrag);
 
       if (view === 'list') {
-        var container = document.getElementById('wl-list');
+        var container = document.getElementById('wl-list-'+gid);
         container.style.display = 'flex';
-        document.getElementById('wl-grid').style.display = 'none';
+        document.getElementById('wl-grid-'+gid).style.display = 'none';
         container.innerHTML = sorted.map(function(item,i){ return buildListRow(item,i+1); }).join('');
         container.classList.toggle('drag-mode', isDrag);
         container.querySelectorAll('.list-row').forEach(function(el) {
           el.addEventListener('click', function(){ if(el.classList.contains('dragging'))return; var item=cards.find(function(c){return c.id===el.dataset.id;}); if(item)openModal(item); });
         });
-        if (isDrag) addDragList(container);
+        if (isDrag) addDragList(container, gid);
       } else {
-        var grid = document.getElementById('wl-grid');
+        var grid = document.getElementById('wl-grid-'+gid);
         grid.style.display = 'grid';
-        document.getElementById('wl-list').style.display = 'none';
+        document.getElementById('wl-list-'+gid).style.display = 'none';
         grid.innerHTML = sorted.map(buildCard).join('');
         grid.classList.toggle('drag-mode', isDrag);
         grid.querySelectorAll('.wl-card').forEach(function(el) {
           el.addEventListener('click', function(){ if(el.classList.contains('dragging'))return; var item=cards.find(function(c){return c.id===el.dataset.id;}); if(item)openModal(item); });
         });
-        if (isDrag) addDragGrid(grid);
-        initWLCardEffects(grid);
+        if (isDrag) addDragGrid(grid, gid);
       }
+      initWLCardEffects();
     }
 
-    main.innerHTML =
-      '<div class="section-header">'
-      + '<h2>Watchlist</h2>'
-      + '<span class="section-count">' + wl.length + ' items</span>'
-      + '<span class="drag-hint" id="drag-hint">✦ arrastra para reordenar</span>'
-      + '<div class="filter-group">'
-      + '<button class="filter-btn" data-sort="gainers">% Gainers</button>'
-      + '<button class="filter-btn active" data-sort="value">Price ↑</button>'
-      + '<button class="filter-btn" data-sort="custom">Custom ⠿</button>'
-      + '<span style="width:1px;background:var(--border);height:20px;margin:0 4px"></span>'
-      + '<button class="view-btn active" data-view="grid" title="Vista tarjetas">⊞</button>'
-      + '<button class="view-btn" data-view="list" title="Vista lista">≡</button>'
-      + '</div>'
-      + '</div>'
-      + '<div class="card-grid" id="wl-grid"></div>'
-      + '<div class="list-view" id="wl-list" style="display:none"></div>';
+    main.innerHTML = groups.map(function(g, i) {
+      return '<div class="section-header' + (i>0 ? ' section-header-spaced' : '') + '">'
+        + '<h2>' + g.label + '</h2>'
+        + '<span class="section-count">' + g.items.length + ' items</span>'
+        + '<span class="drag-hint" id="drag-hint-' + g.id + '">✦ arrastra para reordenar</span>'
+        + '<div class="filter-group">'
+        + '<button class="filter-btn" data-group="' + g.id + '" data-sort="gainers">% Gainers</button>'
+        + '<button class="filter-btn active" data-group="' + g.id + '" data-sort="value">Price ↑</button>'
+        + '<button class="filter-btn" data-group="' + g.id + '" data-sort="custom">Custom ⠿</button>'
+        + '<span style="width:1px;background:var(--border);height:20px;margin:0 4px"></span>'
+        + '<button class="view-btn active" data-group="' + g.id + '" data-view="grid" title="Vista tarjetas">⊞</button>'
+        + '<button class="view-btn" data-group="' + g.id + '" data-view="list" title="Vista lista">≡</button>'
+        + '</div>'
+        + '</div>'
+        + '<div class="card-grid" id="wl-grid-' + g.id + '"></div>'
+        + '<div class="list-view" id="wl-list-' + g.id + '" style="display:none"></div>';
+    }).join('');
 
-    renderWLGrid(wl, currentSort, currentView);
+    groups.forEach(renderGroup);
 
     document.querySelectorAll('.filter-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+        var gid = btn.dataset.group;
+        document.querySelectorAll('.filter-btn[data-group="'+gid+'"]').forEach(function(b){ b.classList.remove('active'); });
         btn.classList.add('active');
-        currentSort = btn.dataset.sort;
-        renderWLGrid(wl, currentSort, currentView);
+        state[gid].sort = btn.dataset.sort;
+        renderGroup(groups.find(function(g){ return g.id===gid; }));
       });
     });
 
     document.querySelectorAll('.view-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        document.querySelectorAll('.view-btn').forEach(function(b){ b.classList.remove('active'); });
+        var gid = btn.dataset.group;
+        document.querySelectorAll('.view-btn[data-group="'+gid+'"]').forEach(function(b){ b.classList.remove('active'); });
         btn.classList.add('active');
-        currentView = btn.dataset.view;
-        renderWLGrid(wl, currentSort, currentView);
+        state[gid].view = btn.dataset.view;
+        renderGroup(groups.find(function(g){ return g.id===gid; }));
       });
     });
   }
 
   // ── FLOATING + PARALLAX + 3D TILT + GLOSS (watchlist cards, igual que portfolio) ──
   let wlCardEffectsRaf = null;
-  function initWLCardEffects(grid) {
+  function initWLCardEffects() {
     if (wlCardEffectsRaf) { cancelAnimationFrame(wlCardEffectsRaf); wlCardEffectsRaf = null; }
-    const wlCards = Array.from(grid.querySelectorAll('.wl-card'));
+    const wlCards = Array.from(document.querySelectorAll('.wl-card'));
     if (!wlCards.length) return;
 
     wlCards.forEach(card => {

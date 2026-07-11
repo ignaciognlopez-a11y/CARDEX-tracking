@@ -1020,8 +1020,8 @@ window.portfolioData = {
     {
       // Sin Current Price todavia: a fecha de hoy Cardmarket solo tiene listings en S-Chinese
       // para este producto (0 en ingles). No se establece precio hasta que aparezca stock EN,
-      // segun el criterio no negociable de idioma. Sin imagen a proposito para que no se muestre
-      // en el carrusel de Watchlist con un precio erroneo o vacio.
+      // segun el criterio no negociable de idioma. Imagen anadida el 2026-07-11 (TCGGO);
+      // ya se muestra en carrusel/watchlist con precio "-" gracias al fix null-safe de fmt().
       id: "LUNAR-REVEL-BOX",
       name: "Lunar Revel Bundle",
       set: "Origins",
@@ -1030,7 +1030,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: null,
-      image: "",
+      image: "https://images.tcggo.com/tcggo/storage/35729/conversions/lunar-revel-bundle-large.webp",
       cardNumber: "Lunar Revel Bundle",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Box-Sets/Lunar-Revel-Bundle?language=1&sortBy=price_asc&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4",
       priceHistory: []
@@ -1256,7 +1256,7 @@ window.portfolioData = {
       qty: 1,
       buyPrice: null,
       currentPrice: 83,
-      image: "",
+      image: "https://images.tcggo.com/tcggo/storage/33118/conversions/rengar-trophy-hunter-large.webp",
       cardNumber: "120",
       cardmarketUrl: "https://www.cardmarket.com/en/Riftbound/Products/Singles/Unleashed-Promos/Rengar-Trophy-Hunter-V2-Epic?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
       priceHistory: [
