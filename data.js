@@ -5,23 +5,25 @@
 //  Filtros Cardmarket: EN, NM (min. condicion 2), excluir UK
 //  Nota: imagenes Project K Promos pendientes (CDN sin cobertura + S3 Cardmarket bloquea hotlink)
 //  buyDate anadido en esta sesion, extraido de Notion (Buy Date) para el desglose P&L
+//  notionPageId anadido en esta sesion (12 julio 2026): permite actualizar precios en Notion
+//  directamente por ID sin tener que buscar cada carta por nombre, ahorrando llamadas al MCP.
 // ============================================================
 
 window.portfolioData = {
   updatedAt: "2026-07-12",
-  /* nota 2026-07-12 (segundo check del dia): repeticion completa del price check tras detectar que ya
-     se habia hecho uno esa misma manana. 43 de 65 posiciones cambiaron de precio en unas horas (alta
-     volatilidad, especialmente en Project K Promos y sellado: Worlds Bundle 587->889E, Ahri V.3 Signed
-     Showcase 2500->3500E, Yasuo/Viktor Herald Project K Promos subieron fuerte). Mystic Poro: excluido
-     el listado propio de Nacho/Narsonius (144.99E) segun regla; tomado el siguiente vendedor (Soltys6,
-     150E). Cartas OVN evaluadas con el minimo, no el maximo (regla vigente). Lunar Revel Bundle
-     (Watchlist) obtuvo precio por primera vez: 138.65E (producto+envio minimo, LucaBSwist). Anomalia
-     detectada: los 5 productos de Project K Promos no muestran la opcion de filtro "English" disponible
-     (solo aparece "S-Chinese"), a diferencia del resto de cartas -- verificar manualmente si los
-     listados tomados son realmente en ingles. Sin captchas de Cloudflare en toda la sesion (49 URLs
-     unicas consultadas). Añadidas 3 compras nuevas: Lee Sin Ascetic x2 (21E c/u) y Viktor Leader V1 Epic (31E) -
-     total 73E, con lo que julio 2026 supera el tope de 500E/mes (845E previos + 73E = 918E, excluyendo
-     la compra retroactiva de Ahri). Nueva regla de memoria anadida sobre idioma en Project K Promos. */
+  /* nota 2026-07-12 (quinta actualizacion del dia): anadidas 4 compras nuevas a Holding: Annie, Dark
+     Child (12E), Garen, Might of Demacia (3E), Darius, Hand of Noxus #253 (12E) -- todas OGNX Origins
+     Promos, Rare -- y Volibear, Relentless Storm (12E), que ya existia en Watchlist y se convirtio a
+     Holding en la misma pagina de Notion en vez de crear una duplicada. Anadidas 2 cartas nuevas a
+     Watchlist: Master Yi, Wuju Bladesman (19E) y Ahri, Nine-Tailed Fox #255 (230E, presumiblemente promo
+     rara pese a figurar como Rare). Se detecto que 4 de las cartas que Nacho pidio anadir a Watchlist
+     (Miss Fortune Bounty Hunter, Sett The Boss, Teemo Swift Scout V1 Rare, Lee Sin Blind Monk) ya estaban
+     registradas -- no se crearon duplicados, solo se refresco su precio (Miss Fortune 25->24, Teemo
+     25->27, resto sin cambio). Se corrigio ademas el notionPageId de Miss Fortune Bounty Hunter: al
+     borrar las 7 duplicadas de la sesion anterior, Nacho borro por error la pagina que se había marcado
+     como "a conservar" en vez de la duplicada para esta carta en concreto -- sin impacto real porque
+     ambas paginas ya tenian el nombre homogeneizado, pero el ID guardado en data.js apuntaba a la pagina
+     que dejo de existir; ahora apunta a la superviviente real. */
 
   cards: [
   {
@@ -78,7 +80,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 3500
       }
-    ]
+    ],
+    "notionPageId": "382d9b45-174c-817f-b8fb-f334c9c649ae"
   },
   {
     "id": "OGN-303s-2",
@@ -123,7 +126,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 3500
       }
-    ]
+    ],
+    "notionPageId": "391d9b45-174c-812d-b826-d1366cbf8f2f"
   },
   {
     "id": "OGN-308",
@@ -179,7 +183,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 58
       }
-    ]
+    ],
+    "notionPageId": "385d9b45-174c-81e0-84b0-d51b2af5dddc"
   },
   {
     "id": "OGN-246b",
@@ -239,7 +244,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 98
       }
-    ]
+    ],
+    "notionPageId": "380d9b45-174c-813f-a772-fce1f8af45e6"
   },
   {
     "id": "OGN-302",
@@ -295,7 +301,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 29
       }
-    ]
+    ],
+    "notionPageId": "37ed9b45-174c-81a5-a6be-d8aab220c0b3"
   },
   {
     "id": "OGN-151b",
@@ -351,7 +358,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 89
       }
-    ]
+    ],
+    "notionPageId": "36bd9b45-174c-8196-8f6b-e00b22b7da2b"
   },
   {
     "id": "OGN-151b-2",
@@ -391,7 +399,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 89
       }
-    ]
+    ],
+    "notionPageId": "397d9b45-174c-8131-b746-c8fdb0ad29fb"
   },
   {
     "id": "OGN-151b-4",
@@ -431,7 +440,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 89
       }
-    ]
+    ],
+    "notionPageId": "395d9b45-174c-816d-a969-e584c0a97717"
   },
   {
     "id": "OGN-151b-3",
@@ -467,51 +477,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 89
       }
-    ]
-  },
-  {
-    "id": "OGN-119a",
-    "name": "Ahri, Inquisitive (V.1 - Epic)",
-    "set": "Origins",
-    "condition": "Raw",
-    "status": "Holding",
-    "qty": 1,
-    "buyPrice": 4,
-    "currentPrice": 3.6,
-    "image": "https://static.dotgg.gg/riftbound/cards/OGN-119.webp",
-    "cardNumber": "119",
-    "cardmarketUrl": "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins/Ahri-Inquisitive-V1-Epic?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
-    "buyDate": "2026-07-05",
-    "priceHistory": [
-      {
-        "date": "2026-07-06",
-        "price": 7
-      },
-      {
-        "date": "2026-07-07",
-        "price": 7
-      },
-      {
-        "date": "2026-07-08",
-        "price": 7.5
-      },
-      {
-        "date": "2026-07-09",
-        "price": 7.25
-      },
-      {
-        "date": "2026-07-10",
-        "price": 3.6
-      },
-      {
-        "date": "2026-07-11",
-        "price": 4
-      },
-      {
-        "date": "2026-07-12",
-        "price": 3.6
-      }
-    ]
+    ],
+    "notionPageId": "395d9b45-174c-8020-8d8d-e8a280b3cf9a"
   },
   {
     "id": "UNL-235",
@@ -563,7 +530,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 69.99
       }
-    ]
+    ],
+    "notionPageId": "364d9b45-174c-818e-8e89-deafcfc8a126"
   },
   {
     "id": "UNL-224-a",
@@ -623,7 +591,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 150
       }
-    ]
+    ],
+    "notionPageId": "35fd9b45-174c-81c6-90f7-da6f4d99245d"
   },
   {
     "id": "UNL-224-b",
@@ -683,7 +652,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 150
       }
-    ]
+    ],
+    "notionPageId": "36bd9b45-174c-81a8-b35f-e03c0c39f172"
   },
   {
     "id": "UNL-220",
@@ -739,7 +709,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 100.53
       }
-    ]
+    ],
+    "notionPageId": "35fd9b45-174c-81da-9b63-d52ed86d3c4b"
   },
   {
     "id": "UNL-222",
@@ -803,7 +774,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 149.99
       }
-    ]
+    ],
+    "notionPageId": "364d9b45-174c-81ce-93ee-ee3adc9804db"
   },
   {
     "id": "UNL-223",
@@ -863,7 +835,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 169
       }
-    ]
+    ],
+    "notionPageId": "35fd9b45-174c-81fc-bada-ffacf6b948c2"
   },
   {
     "id": "UNL-225",
@@ -923,7 +896,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 140
       }
-    ]
+    ],
+    "notionPageId": "35fd9b45-174c-819d-8bce-fe435051e191"
   },
   {
     "id": "UNL-221-a",
@@ -983,7 +957,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 121.26
       }
-    ]
+    ],
+    "notionPageId": "36bd9b45-174c-8123-bb68-f4415c11ce8e"
   },
   {
     "id": "UNL-221-b",
@@ -1043,7 +1018,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 121.26
       }
-    ]
+    ],
+    "notionPageId": "36bd9b45-174c-8101-af1a-c786df52dc2e"
   },
   {
     "id": "SFD-245",
@@ -1095,7 +1071,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 25.95
       }
-    ]
+    ],
+    "notionPageId": "385d9b45-174c-81a5-8810-c3180ec3a2be"
   },
   {
     "id": "SFD-232",
@@ -1159,7 +1136,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 55
       }
-    ]
+    ],
+    "notionPageId": "364d9b45-174c-81a2-8fca-d226a5a5439b"
   },
   {
     "id": "UNL-CASE",
@@ -1219,7 +1197,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 605.9
       }
-    ]
+    ],
+    "notionPageId": "385d9b45-174c-8150-b604-e53b34ba6331"
   },
   {
     "id": "OGN-BOX",
@@ -1283,7 +1262,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 163.4
       }
-    ]
+    ],
+    "notionPageId": "36dd9b45-174c-818d-9270-d19bf7e725c7"
   },
   {
     "id": "PG-BOX",
@@ -1343,7 +1323,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 57.85
       }
-    ]
+    ],
+    "notionPageId": "36dd9b45-174c-81e8-ad53-ccf98cf86c4e"
   },
   {
     "id": "ARCANE-BOX",
@@ -1403,7 +1384,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 388.64
       }
-    ]
+    ],
+    "notionPageId": "387d9b45-174c-815d-ac33-c06eeb2c4238"
   },
   {
     "id": "WORLDS-BOX",
@@ -1451,7 +1433,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 889.59
       }
-    ]
+    ],
+    "notionPageId": "38fd9b45-174c-8102-bf1a-d0b23a3f42f3"
   },
   {
     "id": "OGN-305-OVN",
@@ -1495,43 +1478,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 45
       }
-    ]
-  },
-  {
-    "id": "OGN-119a-2",
-    "name": "Ahri, Inquisitive (V.1 - Epic)",
-    "set": "Origins",
-    "condition": "Raw",
-    "status": "Holding",
-    "qty": 1,
-    "buyPrice": 4,
-    "currentPrice": 3.6,
-    "image": "https://static.dotgg.gg/riftbound/cards/OGN-119.webp",
-    "cardNumber": "119",
-    "cardmarketUrl": "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins/Ahri-Inquisitive-V1-Epic?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
-    "buyDate": "2026-07-05",
-    "priceHistory": [
-      {
-        "date": "2026-07-08",
-        "price": 7.5
-      },
-      {
-        "date": "2026-07-09",
-        "price": 7.25
-      },
-      {
-        "date": "2026-07-10",
-        "price": 3.6
-      },
-      {
-        "date": "2026-07-11",
-        "price": 4
-      },
-      {
-        "date": "2026-07-12",
-        "price": 3.6
-      }
-    ]
+    ],
+    "notionPageId": "38fd9b45-174c-8117-b95a-f2431033370b"
   },
   {
     "id": "OGNX-246",
@@ -1563,7 +1511,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 25
       }
-    ]
+    ],
+    "notionPageId": "39ad9b45-174c-81e4-8d6e-efbc9630781c"
   },
   {
     "id": "OGN-151b-5",
@@ -1595,7 +1544,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 89
       }
-    ]
+    ],
+    "notionPageId": "394d9b45-174c-81d3-baeb-c610238ea280"
   },
   {
     "id": "OGNX-078",
@@ -1627,7 +1577,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 20
       }
-    ]
+    ],
+    "notionPageId": "39ad9b45-174c-8109-9667-f7a7203b8ea9"
   },
   {
     "id": "PROK-FND196",
@@ -1650,7 +1601,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 3000
       }
-    ]
+    ],
+    "notionPageId": "397d9b45-174c-8116-8d05-dd6c37a53841"
   },
   {
     "id": "PROK-FND249",
@@ -1673,7 +1625,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 749
       }
-    ]
+    ],
+    "notionPageId": "397d9b45-174c-81d8-b6a7-d3f173108273"
   },
   {
     "id": "PROK-FND259",
@@ -1696,7 +1649,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 2899.99
       }
-    ]
+    ],
+    "notionPageId": "397d9b45-174c-814e-89fd-cf82bac6b596"
   },
   {
     "id": "PROK-FND265",
@@ -1719,7 +1673,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 3699.99
       }
-    ]
+    ],
+    "notionPageId": "397d9b45-174c-8178-9888-e5bec3d37b04"
   },
   {
     "id": "PROK-FND251",
@@ -1742,7 +1697,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 1800
       }
-    ]
+    ],
+    "notionPageId": "397d9b45-174c-81cd-8500-dde98a35b039"
   },
   {
     "id": "OGNX-202",
@@ -1770,7 +1726,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 43
       }
-    ]
+    ],
+    "notionPageId": "39ad9b45-174c-81c7-a916-d7ccdf1ba140"
   },
   {
     "id": "OGNX-251",
@@ -1802,7 +1759,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 85
       }
-    ]
+    ],
+    "notionPageId": "39ad9b45-174c-81bd-852a-d3458fcd5b8b"
   },
   {
     "id": "OGNX-261",
@@ -1830,7 +1788,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 10
       }
-    ]
+    ],
+    "notionPageId": "39ad9b45-174c-8150-bccd-c27e6f2acad0"
   },
   {
     "id": "OGNX-021",
@@ -1858,7 +1817,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 12.8
       }
-    ]
+    ],
+    "notionPageId": "398d9b45-174c-8119-98f0-d4ce79554614"
   },
   {
     "id": "OGNX-265",
@@ -1886,7 +1846,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 9
       }
-    ]
+    ],
+    "notionPageId": "398d9b45-174c-81f5-808e-d4698dea04f6"
   },
   {
     "id": "UNLX-058",
@@ -1909,7 +1870,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 60
       }
-    ]
+    ],
+    "notionPageId": "399d9b45-174c-81e3-9931-f4133dcb0563"
   },
   {
     "id": "SFDX-059",
@@ -1932,7 +1894,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 116
       }
-    ]
+    ],
+    "notionPageId": "399d9b45-174c-81ce-a04c-c76bd9d2d948"
   },
   {
     "id": "LUNAR-REVEL-BOX",
@@ -1951,39 +1914,17 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 138.65
       }
-    ]
-  },
-  {
-    "id": "SFD-227",
-    "name": "Ahri, Inquisitive (V.1 - Showcase) (Spiritforged)",
-    "set": "Spiritforged",
-    "condition": "Raw",
-    "status": "Watchlist",
-    "qty": 1,
-    "buyPrice": null,
-    "currentPrice": 420,
-    "image": "https://images.tcggo.com/tcggo/storage/33869/conversions/ahri-inquisitive-sfd-227221-spiritforged-large.webp",
-    "cardNumber": "227",
-    "cardmarketUrl": "https://www.cardmarket.com/en/Riftbound/Products/Singles/Spiritforged/Ahri-Inquisitive-V1-Showcase?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
-    "priceHistory": [
-      {
-        "date": "2026-07-10",
-        "price": 484
-      },
-      {
-        "date": "2026-07-12",
-        "price": 420
-      }
-    ]
+    ],
+    "notionPageId": "399d9b45-174c-81ac-bbc5-c6646c64dcf0"
   },
   {
     "id": "OGNX-249",
     "name": "Volibear, Relentless Storm (Origins Promos)",
     "set": "Origins Promos",
     "condition": "Raw",
-    "status": "Watchlist",
+    "status": "Holding",
     "qty": 1,
-    "buyPrice": null,
+    "buyPrice": 12,
     "currentPrice": 9.5,
     "image": "https://images.tcggo.com/tcggo/storage/35787/conversions/volibear-relentless-storm-ogn-249-origins-promos-large.webp",
     "cardNumber": "249",
@@ -1997,7 +1938,9 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 9.5
       }
-    ]
+    ],
+    "notionPageId": "398d9b45-174c-81c8-b925-f36cd7513488",
+    "buyDate": "2026-07-12"
   },
   {
     "id": "OGNX-259",
@@ -2020,7 +1963,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 13.95
       }
-    ]
+    ],
+    "notionPageId": "398d9b45-174c-8154-b9f1-e3c3610ed914"
   },
   {
     "id": "OGNX-263",
@@ -2030,7 +1974,7 @@ window.portfolioData = {
     "status": "Watchlist",
     "qty": 1,
     "buyPrice": null,
-    "currentPrice": 25,
+    "currentPrice": 27,
     "image": "https://images.tcggo.com/tcggo/storage/35794/conversions/teemo-swift-scout-ogn-263-origins-promos-large.webp",
     "cardNumber": "263",
     "cardmarketUrl": "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Teemo-Swift-Scout-V1-Rare?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
@@ -2041,9 +1985,10 @@ window.portfolioData = {
       },
       {
         "date": "2026-07-12",
-        "price": 25
+        "price": 27
       }
-    ]
+    ],
+    "notionPageId": "398d9b45-174c-8198-8623-f31a4e920eae"
   },
   {
     "id": "OGNX-257",
@@ -2066,7 +2011,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 9
       }
-    ]
+    ],
+    "notionPageId": "398d9b45-174c-8100-9a71-e2e7d21d3c56"
   },
   {
     "id": "OGNX-269",
@@ -2089,7 +2035,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 8
       }
-    ]
+    ],
+    "notionPageId": "398d9b45-174c-81ec-9037-f758b70d5f26"
   },
   {
     "id": "OGNX-267",
@@ -2099,7 +2046,7 @@ window.portfolioData = {
     "status": "Watchlist",
     "qty": 1,
     "buyPrice": null,
-    "currentPrice": 25,
+    "currentPrice": 24,
     "image": "https://images.tcggo.com/tcggo/storage/35796/conversions/miss-fortune-bounty-hunter-ogn-267-origins-promos-large.webp",
     "cardNumber": "267",
     "cardmarketUrl": "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Miss-Fortune-Bounty-Hunter?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
@@ -2110,9 +2057,10 @@ window.portfolioData = {
       },
       {
         "date": "2026-07-12",
-        "price": 25
+        "price": 24
       }
-    ]
+    ],
+    "notionPageId": "398d9b45-174c-8128-b9ea-d43927bfd0fe"
   },
   {
     "id": "OGNX-066",
@@ -2144,7 +2092,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 74.5
       }
-    ]
+    ],
+    "notionPageId": "398d9b45-174c-81ee-946f-cd967c3b56ae"
   },
   {
     "id": "OGNX-066-2",
@@ -2172,7 +2121,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 74.5
       }
-    ]
+    ],
+    "notionPageId": "398d9b45-174c-8148-8cd8-eee04e98498a"
   },
   {
     "id": "OGNX-066-3",
@@ -2200,7 +2150,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 74.5
       }
-    ]
+    ],
+    "notionPageId": "397d9b45-174c-817f-833a-e9e70cfe4361"
   },
   {
     "id": "SFDX-139",
@@ -2223,7 +2174,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 55
       }
-    ]
+    ],
+    "notionPageId": "398d9b45-174c-8176-ab8f-d940f9c64f12"
   },
   {
     "id": "SFDX-051",
@@ -2246,7 +2198,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 99
       }
-    ]
+    ],
+    "notionPageId": "398d9b45-174c-81c7-a933-dff471573a61"
   },
   {
     "id": "UNLX-120",
@@ -2269,7 +2222,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 119.99
       }
-    ]
+    ],
+    "notionPageId": "398d9b45-174c-8159-93f6-cdbeb3f2d1a2"
   },
   {
     "id": "OGNX-078-2",
@@ -2289,7 +2243,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 20
       }
-    ]
+    ],
+    "notionPageId": "397d9b45-174c-8103-a4ad-d93abc46ef4b"
   },
   {
     "id": "OGNX-251-2",
@@ -2309,7 +2264,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 85
       }
-    ]
+    ],
+    "notionPageId": "397d9b45-174c-8138-b517-d8ae2a276992"
   },
   {
     "id": "OGNX-261-2",
@@ -2329,7 +2285,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 10
       }
-    ]
+    ],
+    "notionPageId": "398d9b45-174c-818d-afcb-ffaf7e8c6b7a"
   },
   {
     "id": "OGNX-202-2",
@@ -2349,7 +2306,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 43
       }
-    ]
+    ],
+    "notionPageId": "39ad9b45-174c-81e4-8d19-e1d514994b84"
   },
   {
     "id": "OGNX-246-2",
@@ -2369,7 +2327,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 25
       }
-    ]
+    ],
+    "notionPageId": "397d9b45-174c-812e-9082-d01990a128c8"
   },
   {
     "id": "OGNX-021-2",
@@ -2389,7 +2348,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 12.8
       }
-    ]
+    ],
+    "notionPageId": "39ad9b45-174c-81af-a3c6-dadf1f24048b"
   },
   {
     "id": "OGN-301",
@@ -2409,7 +2369,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 80
       }
-    ]
+    ],
+    "notionPageId": "39ad9b45-174c-81dc-9992-c1556ee476c3"
   },
   {
     "id": "OGN-309",
@@ -2429,7 +2390,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 95
       }
-    ]
+    ],
+    "notionPageId": "39ad9b45-174c-812c-9c52-c45db6b1a85e"
   },
   {
     "id": "OGNX-078-3",
@@ -2449,7 +2411,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 20
       }
-    ]
+    ],
+    "notionPageId": "39bd9b45-174c-8118-a252-c711240550e7"
   },
   {
     "id": "OGNX-078-4",
@@ -2469,7 +2432,8 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 20
       }
-    ]
+    ],
+    "notionPageId": "39bd9b45-174c-81df-9d0f-f03f71d6e63b"
   },
   {
     "id": "OGNX-246-3",
@@ -2489,7 +2453,111 @@ window.portfolioData = {
         "date": "2026-07-12",
         "price": 25
       }
-    ]
+    ],
+    "notionPageId": "39bd9b45-174c-816b-88d5-dba9037f00a1"
+  },
+  {
+    "id": "OGN-017",
+    "name": "Annie, Dark Child",
+    "set": "Origins Promos",
+    "condition": "Raw",
+    "status": "Holding",
+    "qty": 1,
+    "buyPrice": 12,
+    "currentPrice": 11,
+    "image": "https://static.dotgg.gg/riftbound/cards/OGN-017.webp",
+    "cardNumber": "017",
+    "cardmarketUrl": "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Annie-Dark-Child?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+    "buyDate": "2026-07-12",
+    "priceHistory": [
+      {
+        "date": "2026-07-12",
+        "price": 11
+      }
+    ],
+    "notionPageId": "39bd9b45-174c-8103-93bb-e3a552e68336"
+  },
+  {
+    "id": "OGN-023",
+    "name": "Garen, Might of Demacia",
+    "set": "Origins Promos",
+    "condition": "Raw",
+    "status": "Holding",
+    "qty": 1,
+    "buyPrice": 3,
+    "currentPrice": 3,
+    "image": "https://static.dotgg.gg/riftbound/cards/OGN-023.webp",
+    "cardNumber": "023",
+    "cardmarketUrl": "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Garen-Might-of-Demacia?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+    "buyDate": "2026-07-12",
+    "priceHistory": [
+      {
+        "date": "2026-07-12",
+        "price": 3
+      }
+    ],
+    "notionPageId": "39bd9b45-174c-81ed-8c9a-e11e11c45380"
+  },
+  {
+    "id": "OGN-253",
+    "name": "Darius, Hand of Noxus",
+    "set": "Origins Promos",
+    "condition": "Raw",
+    "status": "Holding",
+    "qty": 1,
+    "buyPrice": 12,
+    "currentPrice": 8.99,
+    "image": "https://static.dotgg.gg/riftbound/cards/OGN-253.webp",
+    "cardNumber": "253",
+    "cardmarketUrl": "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Darius-Hand-of-Noxus?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+    "buyDate": "2026-07-12",
+    "priceHistory": [
+      {
+        "date": "2026-07-12",
+        "price": 8.99
+      }
+    ],
+    "notionPageId": "39bd9b45-174c-813d-b3f8-c8b0bb69b6a5"
+  },
+  {
+    "id": "OGN-019",
+    "name": "Master Yi, Wuju Bladesman",
+    "set": "Origins Promos",
+    "condition": "Raw",
+    "status": "Watchlist",
+    "qty": 1,
+    "buyPrice": null,
+    "currentPrice": 19,
+    "image": "https://static.dotgg.gg/riftbound/cards/OGN-019.webp",
+    "cardNumber": "019",
+    "cardmarketUrl": "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Master-Yi-Wuju-Bladesman?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+    "priceHistory": [
+      {
+        "date": "2026-07-12",
+        "price": 19
+      }
+    ],
+    "notionPageId": "39bd9b45-174c-8156-9f8e-f7fe655ce57d"
+  },
+  {
+    "id": "OGN-255",
+    "name": "Ahri, Nine-Tailed Fox",
+    "set": "Origins Promos",
+    "condition": "Raw",
+    "status": "Watchlist",
+    "qty": 1,
+    "buyPrice": null,
+    "currentPrice": 230,
+    "image": "https://static.dotgg.gg/riftbound/cards/OGN-255.webp",
+    "cardNumber": "255",
+    "cardmarketUrl": "https://www.cardmarket.com/en/Riftbound/Products/Singles/Origins-Promos/Ahri-Nine-Tailed-Fox?language=1&minCondition=2&sellerCountry=1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4&sortBy=price_asc",
+    "priceHistory": [
+      {
+        "date": "2026-07-12",
+        "price": 230
+      }
+    ],
+    "notionPageId": "39bd9b45-174c-81a4-afa0-e898cb165452"
   }
 ]
 };
