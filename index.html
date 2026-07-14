@@ -127,6 +127,7 @@
     .simple-name { font-size:12px; font-weight:600; color:var(--text); flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .simple-price { font-size:12px; font-weight:700; color:var(--text); flex-shrink:0; min-width:70px; text-align:right; }
     .simple-price.free { color:rgba(255,255,255,0.35); font-weight:600; }
+    .simple-price.pos { color:var(--green); } .simple-price.neg { color:var(--red); }
 
     /* WATCHLIST STRIP */
     .wl-strip { margin-bottom:28px; background:rgba(20,20,20,0.78); border:1px solid rgba(184,145,46,0.29); border-radius:var(--radius); padding:12px 16px; backdrop-filter:blur(20px); box-shadow:0 6px 24px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.04),inset 0 1px 0 rgba(255,255,255,0.06); }
@@ -328,10 +329,10 @@
           <span class="sm-value" id="s-sold">—</span>
           <span class="sm-sub" id="s-sold-count">no sales yet</span>
         </div>
-        <div class="summary-metric clickable" id="flow-metric" title="Total Invested plus Total Sold — everything you've put into the portfolio plus everything you've already cashed out from sales. Click to see the full breakdown.">
-          <span class="sm-label">Invested + Cashed Out ↗</span>
+        <div class="summary-metric clickable" id="flow-metric" title="Total Sold minus Total Invested — how much of your invested capital you've recovered through sales. Negative means you're still recovering it, zero means you've broken even, positive means pure profit beyond cost recovery. Click to see the full breakdown.">
+          <span class="sm-label">Net Capital Recovery ↗</span>
           <span class="sm-value" id="s-flow">—</span>
-          <span class="sm-sub">capital in + capital out</span>
+          <span class="sm-sub" id="s-flow-sub">—</span>
         </div>
       </div>
     </div>
@@ -482,7 +483,7 @@
   <div class="pnl-modal">
     <div class="pnl-header">
       <div>
-        <div class="pnl-title">Invested + Cashed Out <span class="pnl-info" title="Total Invested plus Total Sold — everything you've put into the portfolio plus everything you've already cashed out from sales.">ⓘ</span></div>
+        <div class="pnl-title">Net Capital Recovery <span class="pnl-info" title="Total Sold minus Total Invested — how much of your invested capital you've recovered through sales. Zero means you've broken even.">ⓘ</span></div>
         <div class="pnl-totals">
           <span class="pnl-total-val" id="flow-total-val">—</span>
         </div>
@@ -1054,7 +1055,7 @@
     const pnl=paidMarket-totalInvested;
     const pct=totalInvested>0?pnl/totalInvested*100:0;
     const totalSold=sold.reduce((s,c)=>s+(c.sellPrice||0)*(c.qty||1),0);
-    const totalFlow=totalInvested+totalSold;
+    const totalFlow=totalSold-totalInvested;
 
     document.getElementById('s-invested').textContent=fmt(totalInvested);
     document.getElementById('s-paid').textContent=fmt(paidMarket);
@@ -1065,7 +1066,16 @@
     pctEl.textContent=fmtPct(pct)+' on cost';pctEl.className='sm-sub '+(pnl>=0?'pos':'neg');
     document.getElementById('s-sold').textContent=fmt(totalSold);
     document.getElementById('s-sold-count').textContent=sold.length?(sold.length+(sold.length===1?' sale':' sales')):'no sales yet';
-    document.getElementById('s-flow').textContent=fmt(totalFlow);
+    const flowEl=document.getElementById('s-flow');
+    flowEl.textContent=fmtSign(totalFlow);flowEl.className='sm-value '+(totalFlow>=0?'pos':'neg');
+    const flowSubEl=document.getElementById('s-flow-sub');
+    if(totalInvested>0){
+      const recoveredPct=Math.min(totalSold/totalInvested*100,999);
+      flowSubEl.textContent=totalFlow>=0?'fully recovered + profit':recoveredPct.toFixed(0)+'% of investment recovered';
+    } else {
+      flowSubEl.textContent='sold − invested';
+    }
+    flowSubEl.className='sm-sub '+(totalFlow>=0?'pos':'neg');
 
     const upd=window.portfolioData.updatedAt;
     if(upd)document.getElementById('updated-label').textContent='Updated '+new Date(upd+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
@@ -1277,16 +1287,18 @@
       }
     });
 
-    // ── INVESTED + CASHED OUT BREAKDOWN MODAL (Total Invested + Total Sold combined) ──
+    // ── NET CAPITAL RECOVERY BREAKDOWN MODAL (Cashed Out − Invested) ──
     document.getElementById('flow-metric').addEventListener('click', () => {
-      document.getElementById('flow-total-val').textContent = fmt(totalFlow);
-      const investedRows = paid.map(c => ({ ...c, lineValue: c.buyPrice * (c.qty || 1), tag:'Invested' }));
-      const cashedRows = sold.map(c => ({ ...c, lineValue: (c.sellPrice||0) * (c.qty || 1), tag:'Cashed out' }));
+      const totalValEl = document.getElementById('flow-total-val');
+      totalValEl.textContent = fmtSign(totalFlow);
+      totalValEl.style.color = totalFlow >= 0 ? 'var(--green)' : 'var(--red)';
+      const investedRows = paid.map(c => ({ ...c, lineValue: c.buyPrice * (c.qty || 1), tag:'Invested', sign:'-', cls:'neg' }));
+      const cashedRows = sold.map(c => ({ ...c, lineValue: (c.sellPrice||0) * (c.qty || 1), tag:'Cashed out', sign:'+', cls:'pos' }));
       const rows = [...investedRows, ...cashedRows].sort((a,b)=>b.lineValue-a.lineValue);
       document.getElementById('flow-list').innerHTML = rows.map(r => `<div class="simple-row">
           <img class="simple-img" src="${r.image}" alt="${r.name}" onerror="this.style.opacity=0.1"/>
           <span class="simple-name">${r.name} <span style="color:var(--text-muted);font-weight:500;">(${r.tag})</span></span>
-          <span class="simple-price">${fmt(r.lineValue)}</span>
+          <span class="simple-price ${r.cls}">${r.sign}${fmt(r.lineValue)}</span>
         </div>`).join('');
       document.getElementById('flow-overlay').classList.add('open');
       document.body.style.overflow = 'hidden';
