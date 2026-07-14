@@ -43,9 +43,11 @@
 
     /* TOP ROW LAYOUT — summary / watchlist side by side, equal height, split full width */
     .top-row { display:flex; align-items:stretch; gap:14px; margin-bottom:24px; flex-wrap:wrap; }
-    .summary-panel { flex:1 1 0; min-width:320px; display:flex; }
+    .summary-panel { flex:1 1 0; min-width:320px; display:flex; flex-direction:column; gap:8px; }
     .wl-panel { flex:1 1 0; min-width:280px; display:flex; }
     .summary-panel .summary-box { width:100%; }
+    .hobby-total-line { font-size:10.5px; color:rgba(255,255,255,0.45); text-align:center; padding:2px 4px; }
+    .hobby-total-line b { color:var(--text-muted); font-weight:700; }
     .wl-panel .wl-strip { margin-bottom:0; width:100%; }
 
     /* SUMMARY (compact) */
@@ -335,6 +337,7 @@
           <span class="sm-sub" id="s-flow-sub">—</span>
         </div>
       </div>
+      <div class="hobby-total-line">Total hobby spend (cards + supplies): <b id="s-hobby-total">—</b></div>
     </div>
 
     <div class="wl-panel">
@@ -576,15 +579,14 @@
   const SUPABASE_URL = "https://fsmuhcvmifvyvjjpmtdx.supabase.co";
   const SUPABASE_KEY = "sb_publishable_WJTVFkd8c12jW6VJOwXcQQ_0XBkU_Bn";
 
-  window.__portfolioDataPromise = fetch(
-    SUPABASE_URL + "/rest/v1/riftbound_inversiones?select=*",
-    { headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY } }
-  )
-  .then(function(r){
-    if(!r.ok) throw new Error("Supabase fetch failed: " + r.status);
-    return r.json();
-  })
-  .then(function(rows){
+  window.__portfolioDataPromise = Promise.all([
+    fetch(SUPABASE_URL + "/rest/v1/riftbound_inversiones?select=*", { headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY } }).then(function(r){ if(!r.ok) throw new Error("Supabase fetch failed: " + r.status); return r.json(); }),
+    fetch(SUPABASE_URL + "/rest/v1/riftbound_gastos?select=price", { headers: { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY } }).then(function(r){ return r.ok ? r.json() : []; }).catch(function(){ return []; })
+  ])
+  .then(function(results){
+    const rows = results[0];
+    const gastos = results[1];
+    const suppliesTotal = gastos.reduce(function(s,g){ return s + Number(g.price||0); }, 0);
     const cards = rows.map(function(row){
       return {
         id: row.card_number || row.id,
@@ -610,11 +612,11 @@
       const u = row.updated_at ? row.updated_at.slice(0,10) : null;
       return (u && (!max || u > max)) ? u : max;
     }, null);
-    window.portfolioData = { updatedAt: updatedAt || new Date().toISOString().slice(0,10), cards: cards };
+    window.portfolioData = { updatedAt: updatedAt || new Date().toISOString().slice(0,10), cards: cards, suppliesTotal: suppliesTotal };
   })
   .catch(function(err){
     console.error("Error cargando datos de Supabase:", err);
-    window.portfolioData = { updatedAt: null, cards: [] };
+    window.portfolioData = { updatedAt: null, cards: [], suppliesTotal: 0 };
   });
 </script>
 <script>
@@ -1076,6 +1078,11 @@
       flowSubEl.textContent='sold − invested';
     }
     flowSubEl.className='sm-sub '+(totalFlow>=0?'pos':'neg');
+
+    const suppliesTotal = window.portfolioData.suppliesTotal || 0;
+    const hobbyTotalEl = document.getElementById('s-hobby-total');
+    hobbyTotalEl.textContent = fmt(totalInvested + suppliesTotal);
+    hobbyTotalEl.parentElement.title = `Cards: ${fmt(totalInvested)} + Supplies: ${fmt(suppliesTotal)}`;
 
     const upd=window.portfolioData.updatedAt;
     if(upd)document.getElementById('updated-label').textContent='Updated '+new Date(upd+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
