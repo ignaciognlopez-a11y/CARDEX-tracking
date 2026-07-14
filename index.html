@@ -41,18 +41,58 @@
 
     main { padding:22px 28px; padding-top:calc(22px + 55px); }
 
-    /* SUMMARY */
-    .summary-box { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:20px; }
-    .summary-metric { background:rgba(20,20,20,0.85); border:1px solid rgba(184,145,46,0.32); border-radius:var(--radius); padding:16px 20px; display:flex; flex-direction:column; gap:4px; backdrop-filter:blur(20px); box-shadow:0 6px 28px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.04),inset 0 1px 0 rgba(255,255,255,0.07); }
-    .sm-label { font-size:11px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(255,255,255,0.75); font-weight:700; }
-    .sm-value { font-family:'DM Sans',sans-serif; font-size:26px; font-weight:800; letter-spacing:-0.8px; line-height:1.1; color:var(--text); }
+    /* TOP ROW LAYOUT — summary / watchlist side by side, equal height, split full width */
+    .top-row { display:flex; align-items:stretch; gap:14px; margin-bottom:24px; flex-wrap:wrap; }
+    .summary-panel { flex:1 1 0; min-width:320px; display:flex; }
+    .wl-panel { flex:1 1 0; min-width:280px; display:flex; }
+    .summary-panel .summary-box { width:100%; }
+    .wl-panel .wl-strip { margin-bottom:0; width:100%; }
+
+    /* SUMMARY (compact) */
+    .summary-box { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; background:rgba(20,20,20,0.85); border:1px solid rgba(184,145,46,0.32); border-radius:var(--radius); padding:12px; backdrop-filter:blur(20px); box-shadow:0 6px 28px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.04),inset 0 1px 0 rgba(255,255,255,0.07); }
+    .summary-metric { background:rgba(255,255,255,0.02); border:1px solid rgba(184,145,46,0.18); border-radius:9px; padding:10px 11px; display:flex; flex-direction:column; gap:3px; }
+    .summary-metric.span-2 { grid-column:1 / -1; }
+    .sm-label { font-size:9.5px; text-transform:uppercase; letter-spacing:0.08em; color:rgba(255,255,255,0.75); font-weight:700; }
+    .sm-value { font-family:'DM Sans',sans-serif; font-size:19px; font-weight:800; letter-spacing:-0.6px; line-height:1.15; color:var(--text); }
     .sm-value.pos { color:var(--green); } .sm-value.neg { color:var(--red); }
-    .sm-sub { font-size:11px; color:rgba(255,255,255,0.4); font-weight:500; }
+    .sm-sub { font-size:10px; color:rgba(255,255,255,0.4); font-weight:500; }
     .sm-sub.pos { color:var(--green); } .sm-sub.neg { color:var(--red); } .sm-sub.pos, .sm-sub.neg { font-weight:600; }
 
     /* P&L metric clickable */
     .summary-metric.clickable { cursor:pointer; transition:border-color 0.2s, background 0.2s, box-shadow 0.2s; }
-    .summary-metric.clickable:hover { border-color:rgba(184,145,46,0.56); background:rgba(20,20,20,0.85); box-shadow:0 4px 24px rgba(0,0,0,0.5),0 0 20px rgba(184,145,46,0.16),inset 0 1px 0 rgba(255,255,255,0.07); }
+    .summary-metric.clickable:hover { border-color:rgba(184,145,46,0.56); background:rgba(20,20,20,0.06); box-shadow:0 4px 16px rgba(0,0,0,0.5),0 0 16px rgba(184,145,46,0.16),inset 0 1px 0 rgba(255,255,255,0.07); }
+
+    /* VIEW TOGGLE (Grid / List) */
+    .view-toggle { display:flex; gap:6px; margin-bottom:14px; }
+    .view-toggle-btn { font-size:12px; font-weight:700; padding:6px 14px; border-radius:7px; border:1px solid rgba(184,145,46,0.28); background:rgba(10,10,10,0.55); color:var(--text-muted); cursor:pointer; transition:all 0.15s; display:flex; align-items:center; gap:6px; }
+    .view-toggle-btn:hover { color:var(--text); border-color:rgba(184,145,46,0.6); }
+    .view-toggle-btn.active { background:var(--orange); border-color:var(--orange); color:#000; }
+
+    /* HOLDING TABLE VIEW — split into two side-by-side blocks (continuation layout) */
+    .holding-table-columns { display:flex; gap:14px; align-items:flex-start; }
+    .holding-table-wrap { flex:1 1 0; min-width:0; overflow-x:auto; border:1px solid rgba(184,145,46,0.29); border-radius:var(--radius); background:rgba(14,14,14,0.85); backdrop-filter:blur(20px); box-shadow:0 6px 24px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.04); }
+    .holding-table { width:100%; border-collapse:collapse; font-size:11.5px; min-width:560px; }
+    .holding-table thead th { text-align:left; font-size:9.5px; text-transform:uppercase; letter-spacing:0.06em; color:rgba(255,255,255,0.6); font-weight:700; padding:8px 8px; border-bottom:1px solid rgba(184,145,46,0.29); white-space:nowrap; cursor:pointer; user-select:none; position:sticky; top:0; background:rgba(18,18,18,0.97); backdrop-filter:blur(10px); }
+    .holding-table thead th:hover { color:var(--text); }
+    .holding-table thead th.sorted { color:var(--gold); }
+    .holding-table thead th .sort-arrow { font-size:8px; margin-left:2px; opacity:0.7; }
+    .holding-table tbody tr { cursor:pointer; transition:background 0.12s; border-bottom:1px solid rgba(255,255,255,0.04); }
+    .holding-table tbody tr:hover { background:rgba(184,145,46,0.08); }
+    .holding-table tbody tr:last-child { border-bottom:none; }
+    .holding-table td { padding:6px 8px; color:var(--text); white-space:nowrap; }
+    .holding-table td.ht-name { font-weight:700; min-width:120px; display:flex; align-items:center; gap:6px; white-space:normal; }
+    .holding-table td.ht-name img { width:22px; height:22px; border-radius:4px; object-fit:cover; object-position:top; flex-shrink:0; }
+    .holding-table td.ht-num { text-align:right; font-variant-numeric:tabular-nums; }
+    .holding-table td.ht-link { text-align:center; }
+    .holding-table td.ht-link a { color:var(--gold); text-decoration:none; font-size:13px; }
+    .holding-table td.ht-link a:hover { color:#e8c766; }
+    .holding-table td.ht-pnl { text-align:right; font-weight:700; }
+    .holding-table td.ht-pnl.pos { color:var(--green); }
+    .holding-table td.ht-pnl.neg { color:var(--red); }
+    .holding-table td.ht-pnl.neu { color:var(--text-muted); font-weight:500; }
+    @media (max-width:900px) { .holding-table-columns { flex-direction:column; } }
+
+    @media (max-width:1300px) { .card-grid { grid-template-columns:repeat(6,1fr); } }
 
     /* P&L BREAKDOWN MODAL */
     .pnl-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.82); backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; }
@@ -140,7 +180,7 @@
     .filter-btn.active { background:var(--orange); border-color:var(--orange); color:#fff; }
 
     /* GRID */
-    .card-grid { display:grid; grid-template-columns:repeat(5,1fr); column-gap:4vw; row-gap:14px; padding:0 4vw; }
+    .card-grid { display:grid; grid-template-columns:repeat(7,1fr); column-gap:1.4vw; row-gap:16px; padding:0 1.2vw; }
 
     /* CARD */
     .card { background:linear-gradient(145deg,#262626 0%,#1a1a1a 50%,#0f0f0f 100%); border:1px solid rgba(184,145,46,0.35); border-radius:var(--radius); overflow:hidden; cursor:pointer; display:flex; flex-direction:column; transition:border-color 0.25s,box-shadow 0.3s; will-change:transform; position:relative;
@@ -157,21 +197,22 @@
     .pill.neu { background:rgba(28,28,28,0.65); color:var(--text-muted); border:1px solid var(--border); }
     .card-cover { width:100%; aspect-ratio:5/7; overflow:hidden; background:#050505; position:relative; flex-shrink:0; }
     .card-cover img { width:100%; height:100%; object-fit:contain; display:block; }
-    .card-body { padding:10px 11px 12px; display:flex; flex-direction:column; gap:5px; }
-    .card-name { font-size:14px; font-weight:700; line-height:1.3; color:var(--text); }
+    .card-body { padding:8px 9px 10px; display:flex; flex-direction:column; gap:4px; }
+    .card-name { font-size:12px; font-weight:700; line-height:1.25; color:var(--text); }
     .card-badge-row { display:flex; gap:3px; flex-wrap:wrap; }
-    .badge { font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; padding:3px 7px; border-radius:4px; }
+    .badge { font-size:7px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; padding:2px 6px; border-radius:4px; }
     .badge-origins      { background:rgba(80,120,255,0.9); color:#fff; }
     .badge-unleashed    { background:rgba(220,70,70,0.9); color:#fff; }
     .badge-spiritforged { background:rgba(50,180,100,0.9); color:#fff; }
     .badge-proving      { background:rgba(212,166,53,0.9); color:#000; }
+    .badge-default      { background:rgba(150,150,150,0.55); color:#fff; }
     .badge-sealed-tag   { background:rgba(80,200,255,0.9); color:#000; }
-    .card-price-block { display:flex; flex-direction:column; gap:4px; margin-top:5px; }
-    .card-price-row { display:flex; align-items:baseline; gap:6px; }
-    .card-price-label { font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); font-weight:600; min-width:76px; flex-shrink:0; }
-    .card-price-buy { font-size:13px; font-weight:600; color:var(--text); }
-    .card-price-main { font-size:18px; font-weight:800; color:#d9b04a; letter-spacing:-0.3px; line-height:1.15; display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap; }
-    .card-var-inline { font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:2px; }
+    .card-price-block { display:flex; flex-direction:column; gap:3px; margin-top:4px; }
+    .card-price-row { display:flex; align-items:baseline; gap:4px; flex-wrap:wrap; }
+    .card-price-label { font-size:9px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); font-weight:600; min-width:56px; flex-shrink:0; }
+    .card-price-buy { font-size:11px; font-weight:600; color:var(--text); }
+    .card-price-main { font-size:14px; font-weight:800; color:#d9b04a; letter-spacing:-0.2px; line-height:1.15; display:inline-flex; align-items:center; gap:4px; flex-wrap:wrap; }
+    .card-var-inline { font-size:10.5px; font-weight:700; display:inline-flex; align-items:center; gap:2px; }
     .var-arrow { font-size:9px; }
     .cv-pos { color:var(--green); } .cv-neg { color:var(--red); } .cv-neu { color:var(--text-muted); }
 
@@ -239,8 +280,8 @@
     .btn-close { background:rgba(10,10,10,0.85); border:1px solid rgba(184,145,46,0.24); color:var(--text-muted); font-size:13px; font-weight:600; padding:11px 18px; border-radius:9px; cursor:pointer; transition:border-color 0.15s,color 0.15s; }
     .btn-close:hover { border-color:rgba(255,255,255,0.2); color:var(--text); }
 
-    @media (max-width:1100px) { .card-grid { grid-template-columns:repeat(4,1fr); column-gap:3.5vw; padding:0 3.5vw; } .summary-box { grid-template-columns:repeat(2,1fr); } }
-    @media (max-width:860px)  { .card-grid { grid-template-columns:repeat(3,1fr); column-gap:3vw; padding:0 3vw; } }
+    @media (max-width:1100px) { .card-grid { grid-template-columns:repeat(5,1fr); column-gap:2.5vw; padding:0 2vw; } .top-row { flex-direction:column; } .summary-panel, .wl-panel { width:100%; max-width:100%; } }
+    @media (max-width:860px)  { .card-grid { grid-template-columns:repeat(4,1fr); column-gap:3vw; padding:0 3vw; } }
     @media (max-width:540px)  { .card-grid { grid-template-columns:repeat(2,1fr); column-gap:2.5vw; padding:0 2.5vw; } .summary-box { grid-template-columns:repeat(2,1fr); } }
     @media (max-width:760px) { .chart-wrap, #modal-spark, .modal-spark-empty { height:220px; } }
   </style>
@@ -251,47 +292,97 @@
   <nav>
     <a class="nav-link active" href="index.html">Portfolio</a>
     <a class="nav-link" href="watchlist.html">Watchlist</a>
+    <a class="nav-link" href="monthly.html">Monthly</a>
   </nav>
   <span class="updated" id="updated-label"></span>
 </header>
 
 <main>
-  <div class="summary-box">
-    <div class="summary-metric">
-      <span class="sm-label">Invested</span>
-      <span class="sm-value" id="s-invested">—</span>
-      <span class="sm-sub">cost basis</span>
+  <div class="top-row">
+    <div class="summary-panel">
+      <div class="summary-box">
+        <div class="summary-metric clickable" id="invested-metric" title="Total amount paid for positions in Holding and Sold status. Click to see the full breakdown.">
+          <span class="sm-label">Total Invested ↗</span>
+          <span class="sm-value" id="s-invested">—</span>
+          <span class="sm-sub">cost basis</span>
+        </div>
+        <div class="summary-metric clickable" id="pnl-metric" title="Change in value of your paid positions compared to what you paid for them. Click to see the full breakdown.">
+          <span class="sm-label">P&amp;L ↗</span>
+          <span class="sm-value" id="s-pnl">—</span>
+          <span class="sm-sub" id="s-pct">—</span>
+        </div>
+        <div class="summary-metric clickable" id="paid-metric" title="Current market value of only the positions you paid for, excluding free items. Click to see the full breakdown.">
+          <span class="sm-label">Paid Positions Value ↗</span>
+          <span class="sm-value" id="s-paid">—</span>
+          <span class="sm-sub">paid items only</span>
+        </div>
+        <div class="summary-metric clickable" id="total-metric" title="Current market value of all Holding items, including free ones. Click to see the full breakdown.">
+          <span class="sm-label">Total Market Value ↗</span>
+          <span class="sm-value" id="s-total">—</span>
+          <span class="sm-sub">all positions</span>
+        </div>
+        <div class="summary-metric clickable span-2" id="sold-metric" title="Total amount already received from completed sales. Click to see the full breakdown.">
+          <span class="sm-label">Total Sold ↗</span>
+          <span class="sm-value" id="s-sold">—</span>
+          <span class="sm-sub" id="s-sold-count">no sales yet</span>
+        </div>
+      </div>
     </div>
-    <div class="summary-metric clickable" id="invested-metric" title="Ver desglose de precios de compra">
-      <span class="sm-label">Total Invested ↗</span>
-      <span class="sm-value" id="s-market">—</span>
-      <span class="sm-sub">all positions</span>
-    </div>
-    <div class="summary-metric clickable" id="pnl-metric" title="Ver desglose P&L">
-      <span class="sm-label">P&amp;L ↗</span>
-      <span class="sm-value" id="s-pnl">—</span>
-      <span class="sm-sub" id="s-pct">—</span>
-    </div>
-    <div class="summary-metric clickable" id="total-metric" title="Ver desglose de precios actuales">
-      <span class="sm-label">Total Value ↗</span>
-      <span class="sm-value" id="s-total">—</span>
-      <span class="sm-sub">all positions</span>
+
+    <div class="wl-panel">
+      <div class="wl-strip">
+        <div class="wl-strip-label">Watchlist</div>
+        <div class="wl-carousel-wrap" id="wl-carousel">
+          <div class="wl-carousel-inner" id="wl-inner"></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="wl-strip">
-    <div class="wl-strip-label">Watchlist</div>
-    <div class="wl-carousel-wrap" id="wl-carousel">
-      <div class="wl-carousel-inner" id="wl-inner"></div>
-    </div>
+  <div class="view-toggle">
+    <button class="view-toggle-btn active" data-view="grid" id="view-btn-grid">▦ Grid view</button>
+    <button class="view-toggle-btn" data-view="list" id="view-btn-list">☰ List view</button>
   </div>
 
-  <div class="section-wrap" id="monthly-section">
-    <div class="section-header">
-      <h2>Monthly Investment</h2>
-      <span class="section-count" id="monthly-count"></span>
+  <div class="section-wrap" id="holding-table-section" style="display:none;">
+    <div class="holding-table-columns">
+      <div class="holding-table-wrap">
+        <table class="holding-table">
+          <thead>
+            <tr class="holding-table-head">
+              <th data-sort="cardNumber">Card #</th>
+              <th data-sort="name">Card Name</th>
+              <th data-sort="set">Set</th>
+              <th data-sort="buyPrice" style="text-align:right">Buy</th>
+              <th data-sort="currentPrice" style="text-align:right">Current</th>
+              <th data-sort="condition">Cond.</th>
+              <th data-sort="buyDate">Date</th>
+              <th data-sort="pnl" style="text-align:right">P&amp;L</th>
+              <th style="text-align:center">Link</th>
+            </tr>
+          </thead>
+          <tbody id="holding-table-body-a"></tbody>
+        </table>
+      </div>
+      <div class="holding-table-wrap">
+        <table class="holding-table">
+          <thead>
+            <tr class="holding-table-head">
+              <th data-sort="cardNumber">Card #</th>
+              <th data-sort="name">Card Name</th>
+              <th data-sort="set">Set</th>
+              <th data-sort="buyPrice" style="text-align:right">Buy</th>
+              <th data-sort="currentPrice" style="text-align:right">Current</th>
+              <th data-sort="condition">Cond.</th>
+              <th data-sort="buyDate">Date</th>
+              <th data-sort="pnl" style="text-align:right">P&amp;L</th>
+              <th style="text-align:center">Link</th>
+            </tr>
+          </thead>
+          <tbody id="holding-table-body-b"></tbody>
+        </table>
+      </div>
     </div>
-    <div class="month-panel" id="month-accordion"></div>
   </div>
 
   <div class="section-wrap" id="singles-section">
@@ -339,7 +430,7 @@
   <div class="pnl-modal">
     <div class="pnl-header">
       <div>
-        <div class="pnl-title">Total Value Breakdown</div>
+        <div class="pnl-title">Total Market Value Breakdown</div>
         <div class="pnl-totals">
           <span class="pnl-total-val" id="total-total-val">—</span>
         </div>
@@ -347,6 +438,36 @@
       <button class="pnl-close" id="total-close">✕</button>
     </div>
     <div class="pnl-list" id="total-list"></div>
+  </div>
+</div>
+
+<div class="pnl-overlay" id="sold-overlay">
+  <div class="pnl-modal">
+    <div class="pnl-header">
+      <div>
+        <div class="pnl-title">Sold Positions Breakdown</div>
+        <div class="pnl-totals">
+          <span class="pnl-total-val" id="sold-total-val">—</span>
+        </div>
+      </div>
+      <button class="pnl-close" id="sold-close">✕</button>
+    </div>
+    <div class="pnl-list" id="sold-list"></div>
+  </div>
+</div>
+
+<div class="pnl-overlay" id="paid-overlay">
+  <div class="pnl-modal">
+    <div class="pnl-header">
+      <div>
+        <div class="pnl-title">Paid Positions Value Breakdown</div>
+        <div class="pnl-totals">
+          <span class="pnl-total-val" id="paid-total-val">—</span>
+        </div>
+      </div>
+      <button class="pnl-close" id="paid-close">✕</button>
+    </div>
+    <div class="pnl-list" id="paid-list"></div>
   </div>
 </div>
 
@@ -457,6 +578,8 @@
         buyDate: row.buy_date,
         priceHistory: row.price_history || [],
         rarity: row.rarity,
+        sellPrice: row.sell_price === null ? null : Number(row.sell_price),
+        sellDate: row.sell_date,
         excludeFromCap: row.exclude_from_cap === true
       };
     });
@@ -476,7 +599,7 @@
   const fmt     = n => (n===null||n===undefined) ? '—' : n.toLocaleString('de-DE',{minimumFractionDigits:0,maximumFractionDigits:0})+' €';
   const fmtSign = n => (n>=0?'+':'')+fmt(n);
   const fmtPct  = n => (n>=0?'+':'')+n.toFixed(1)+'%';
-  const badgeClass = s => ({Origins:'badge-origins',Unleashed:'badge-unleashed',Spiritforged:'badge-spiritforged','Proving Grounds':'badge-proving'}[s]||'');
+  const badgeClass = s => ({Origins:'badge-origins',Unleashed:'badge-unleashed',Spiritforged:'badge-spiritforged','Proving Grounds':'badge-proving'}[s]||'badge-default');
   const cmUrl = item => item.cardmarketUrl || 'https://www.cardmarket.com/en/Riftbound/Products/Search?searchString='+encodeURIComponent(item.name);
 
   // Construye un enlace de busqueda de "Sold Listings" en eBay (mercado US) para la version exacta de la carta.
@@ -629,6 +752,19 @@
     document.body.style.overflow='';
     if(ov._stopTilt){ov._stopTilt();ov._stopTilt=null;}
   }
+
+  document.addEventListener('keydown', function(e){
+    if (e.key !== 'Escape') return;
+    const modalOv = document.getElementById('modal-overlay');
+    if (modalOv && modalOv.classList.contains('open')) { closeModal(); return; }
+    ['pnl-overlay','total-overlay','invested-overlay','paid-overlay','sold-overlay'].forEach(function(id){
+      const el = document.getElementById(id);
+      if (el && el.classList.contains('open')) {
+        el.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+  });
   function initModalTilt(){
     const stage=document.getElementById('modal-stage');
     const card3d=document.getElementById('modal-card-3d');
@@ -726,6 +862,69 @@
 
   let allCards = [];
   let singlesSort = 'gainers', sealedSort = 'gainers';
+  let holdingSortField = 'pnl', holdingSortDir = 'desc';
+  let currentHolding = [];
+
+  function compareHolding(a, b, field, dir) {
+    let va, vb;
+    switch (field) {
+      case 'cardNumber':   va = a.cardNumber || ''; vb = b.cardNumber || ''; break;
+      case 'name':         va = a.name || '';       vb = b.name || '';       break;
+      case 'set':          va = a.set || '';        vb = b.set || '';        break;
+      case 'buyPrice':     va = a.buyPrice || 0;     vb = b.buyPrice || 0;     break;
+      case 'currentPrice': va = a.currentPrice || 0; vb = b.currentPrice || 0; break;
+      case 'condition':    va = a.condition || '';  vb = b.condition || '';  break;
+      case 'buyDate':      va = a.buyDate || '';    vb = b.buyDate || '';    break;
+      case 'pnl':
+        va = a.buyPrice > 0 ? (a.currentPrice - a.buyPrice) / a.buyPrice : -Infinity;
+        vb = b.buyPrice > 0 ? (b.currentPrice - b.buyPrice) / b.buyPrice : -Infinity;
+        break;
+      default: va = 0; vb = 0;
+    }
+    if (typeof va === 'string') { const c = va.localeCompare(vb); return dir === 'asc' ? c : -c; }
+    return dir === 'asc' ? va - vb : vb - va;
+  }
+
+  function buildHoldingRow(item) {
+    const isFree = !item.buyPrice || item.buyPrice === 0, qty = item.qty || 1;
+    const pnlEur = isFree ? null : (item.currentPrice - item.buyPrice) * qty;
+    const pnlPct = isFree ? null : (item.currentPrice - item.buyPrice) / item.buyPrice * 100;
+    const pos = pnlEur !== null && pnlEur >= 0;
+    const pnlCls = pnlEur === null ? 'neu' : (pos ? 'pos' : 'neg');
+    const pnlTxt = pnlEur === null ? '—' : `${fmtPct(pnlPct)} (${fmtSign(pnlEur)})`;
+    const dateTxt = item.buyDate ? new Date(item.buyDate + 'T12:00:00').toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '—';
+    return `<tr data-id="${item.id}">
+      <td>${item.cardNumber || '—'}</td>
+      <td class="ht-name"><img src="${item.image}" alt="" onerror="this.style.opacity=0"/>${item.name}</td>
+      <td>${item.set ? `<span class="badge ${badgeClass(item.set)}">${item.set}</span>` : '—'}</td>
+      <td class="ht-num">${isFree ? 'Free' : fmt(item.buyPrice * qty)}</td>
+      <td class="ht-num">${fmt(item.currentPrice * qty)}</td>
+      <td>${item.condition || '—'}</td>
+      <td>${dateTxt}</td>
+      <td class="ht-pnl ${pnlCls}">${pnlTxt}</td>
+      <td class="ht-link"><a href="${cmUrl(item)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="View on Cardmarket">↗</a></td>
+    </tr>`;
+  }
+
+  function renderHoldingTable(items) {
+    const sorted = [...items].sort((a, b) => compareHolding(a, b, holdingSortField, holdingSortDir));
+    const half = Math.ceil(sorted.length / 2);
+    const rowsA = sorted.slice(0, half);
+    const rowsB = sorted.slice(half);
+    document.getElementById('holding-table-body-a').innerHTML = rowsA.map(buildHoldingRow).join('');
+    document.getElementById('holding-table-body-b').innerHTML = rowsB.map(buildHoldingRow).join('');
+    document.querySelectorAll('#holding-table-body-a tr, #holding-table-body-b tr').forEach(tr => {
+      tr.addEventListener('click', () => { const item = allCards.find(c => c.id === tr.dataset.id); if (item) openModal(item); });
+    });
+    document.querySelectorAll('.holding-table-head th[data-sort]').forEach(th => {
+      th.classList.toggle('sorted', th.dataset.sort === holdingSortField);
+      const existingArrow = th.querySelector('.sort-arrow');
+      if (existingArrow) existingArrow.remove();
+      if (th.dataset.sort === holdingSortField) {
+        th.insertAdjacentHTML('beforeend', `<span class="sort-arrow">${holdingSortDir === 'asc' ? '▲' : '▼'}</span>`);
+      }
+    });
+  }
 
   function renderGrid(items, gridId, sort) {
     document.getElementById(gridId).innerHTML = sortItems(items, sort).map(buildCard).join('');
@@ -818,63 +1017,6 @@
     });
   }
 
-  function monthLabel(key){
-    const [y,m]=key.split('-').map(Number);
-    return new Date(y,m-1,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
-  }
-
-  function renderMonthly(holding){
-    const withDate=holding.filter(c=>c.buyDate);
-    const groups={};
-    withDate.forEach(c=>{
-      const key=c.buyDate.slice(0,7);
-      (groups[key]=groups[key]||[]).push(c);
-    });
-    const keys=Object.keys(groups).sort().reverse();
-    const wrap=document.getElementById('month-accordion');
-    document.getElementById('monthly-count').textContent=keys.length+(keys.length===1?' month':' months');
-
-    wrap.innerHTML=keys.map(key=>{
-      const items=groups[key].slice().sort((a,b)=>new Date(b.buyDate)-new Date(a.buyDate));
-      const paidItems=items.filter(c=>c.buyPrice>0);
-      const total=paidItems.reduce((s,c)=>s+c.buyPrice*(c.qty||1),0);
-      const cappedTotal=paidItems.filter(c=>!c.excludeFromCap).reduce((s,c)=>s+c.buyPrice*(c.qty||1),0);
-      const overCap=cappedTotal>500;
-
-      const rows=items.map(c=>{
-        const dateTxt=new Date(c.buyDate+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-        const isFree=!c.buyPrice||c.buyPrice===0;
-        const pct=isFree?null:(c.currentPrice-c.buyPrice)/c.buyPrice*100;
-        const pos=pct!==null&&pct>=0;
-        return `<div class="month-card-row">
-          <img class="month-card-img" src="${c.image||''}" alt="${c.name}" onerror="this.style.opacity=0.1"/>
-          <span class="month-card-name">${c.name}</span>
-          <span class="month-card-date">${dateTxt}</span>
-          <span class="month-card-buy ${isFree?'free':''}">${isFree?'Free':fmt(c.buyPrice)}</span>
-          <span class="month-card-current">${fmt(c.currentPrice)}</span>
-          <span class="month-card-pct ${pct===null?'':(pos?'pos':'neg')}">${pct===null?'—':(pos?'+':'')+pct.toFixed(1)+'%'}</span>
-        </div>`;
-      }).join('');
-
-      return `<div class="month-row" data-month="${key}">
-        <div class="month-row-head">
-          <span class="month-toggle-icon">▸</span>
-          <span class="month-label">${monthLabel(key)}</span>
-          <span class="month-count">${items.length} ${items.length===1?'buy':'buys'}</span>
-          <span class="month-total">${fmt(total)}</span>
-          ${overCap?'<span class="month-cap-flag" title="Exceeds the €500 monthly cap">⚠️</span>':''}
-        </div>
-        <div class="month-detail">${rows}</div>
-      </div>`;
-    }).join('');
-
-    wrap.querySelectorAll('.month-row-head').forEach(head=>{
-      head.addEventListener('click',()=>{
-        head.parentElement.classList.toggle('open');
-      });
-    });
-  }
-
   function render(){
     if(!window.portfolioData?.cards)return;
     allCards=window.portfolioData.cards;
@@ -888,14 +1030,18 @@
     const paidMarket=paid.reduce((s,c)=>s+c.currentPrice*(c.qty||1),0);
     const pnl=paidMarket-totalInvested;
     const pct=totalInvested>0?pnl/totalInvested*100:0;
+    const sold=allCards.filter(c=>c.status==='Sold');
+    const totalSold=sold.reduce((s,c)=>s+(c.sellPrice||0)*(c.qty||1),0);
 
     document.getElementById('s-invested').textContent=fmt(totalInvested);
-    document.getElementById('s-market').textContent=fmt(totalInvested);
+    document.getElementById('s-paid').textContent=fmt(paidMarket);
     const pnlEl=document.getElementById('s-pnl');
     pnlEl.textContent=fmtSign(pnl);pnlEl.className='sm-value '+(pnl>=0?'pos':'neg');
     document.getElementById('s-total').textContent=fmt(totalValue);
     const pctEl=document.getElementById('s-pct');
     pctEl.textContent=fmtPct(pct)+' on cost';pctEl.className='sm-sub '+(pnl>=0?'pos':'neg');
+    document.getElementById('s-sold').textContent=fmt(totalSold);
+    document.getElementById('s-sold-count').textContent=sold.length?(sold.length+(sold.length===1?' sale':' sales')):'no sales yet';
 
     const upd=window.portfolioData.updatedAt;
     if(upd)document.getElementById('updated-label').textContent='Updated '+new Date(upd+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
@@ -908,7 +1054,33 @@
     if(!sealed.length)document.getElementById('sealed-section').style.display='none';
 
     initWatchlist(allCards);
-    renderMonthly(holding);
+
+    // ── HOLDING TABLE (list view) + Grid/List toggle ──
+    currentHolding = holding;
+    renderHoldingTable(currentHolding);
+
+    document.getElementById('view-btn-grid').addEventListener('click', () => {
+      document.getElementById('view-btn-grid').classList.add('active');
+      document.getElementById('view-btn-list').classList.remove('active');
+      document.getElementById('holding-table-section').style.display = 'none';
+      if (singles.length) document.getElementById('singles-section').style.display = '';
+      if (sealed.length) document.getElementById('sealed-section').style.display = '';
+    });
+    document.getElementById('view-btn-list').addEventListener('click', () => {
+      document.getElementById('view-btn-list').classList.add('active');
+      document.getElementById('view-btn-grid').classList.remove('active');
+      document.getElementById('singles-section').style.display = 'none';
+      document.getElementById('sealed-section').style.display = 'none';
+      document.getElementById('holding-table-section').style.display = '';
+    });
+    document.querySelectorAll('.holding-table-head th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const field = th.dataset.sort;
+        if (holdingSortField === field) { holdingSortDir = holdingSortDir === 'asc' ? 'desc' : 'asc'; }
+        else { holdingSortField = field; holdingSortDir = ['name','set','condition','cardNumber'].includes(field) ? 'asc' : 'desc'; }
+        renderHoldingTable(currentHolding);
+      });
+    });
 
     // Filter buttons
     document.querySelectorAll('.filter-btn').forEach(btn=>{
@@ -1002,6 +1174,57 @@
     document.getElementById('total-overlay').addEventListener('click', e => {
       if (e.target.id === 'total-overlay') {
         document.getElementById('total-overlay').classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+
+    // ── PAID POSITIONS VALUE BREAKDOWN MODAL (solo current price de items pagados) ──
+    document.getElementById('paid-metric').addEventListener('click', () => {
+      const rows = paid.map(c => ({ ...c, lineValue: c.currentPrice * (c.qty || 1) }))
+        .sort((a, b) => b.lineValue - a.lineValue);
+      document.getElementById('paid-total-val').textContent = fmt(paidMarket);
+      document.getElementById('paid-list').innerHTML = rows.map(r => `<div class="simple-row">
+          <img class="simple-img" src="${r.image}" alt="${r.name}" onerror="this.style.opacity=0.1"/>
+          <span class="simple-name">${r.name}</span>
+          <span class="simple-price">${fmt(r.lineValue)}</span>
+        </div>`).join('');
+      document.getElementById('paid-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+    document.getElementById('paid-close').addEventListener('click', () => {
+      document.getElementById('paid-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    });
+    document.getElementById('paid-overlay').addEventListener('click', e => {
+      if (e.target.id === 'paid-overlay') {
+        document.getElementById('paid-overlay').classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+
+    // ── SOLD BREAKDOWN MODAL ──
+    document.getElementById('sold-metric').addEventListener('click', () => {
+      document.getElementById('sold-total-val').textContent = fmt(totalSold);
+      if (!sold.length) {
+        document.getElementById('sold-list').innerHTML = '<div style="color:var(--text-muted);font-size:12px;padding:16px 20px;">No sales recorded yet.</div>';
+      } else {
+        const rows = sold.map(c => ({ ...c, lineValue: (c.sellPrice||0) * (c.qty || 1) })).sort((a,b)=>b.lineValue-a.lineValue);
+        document.getElementById('sold-list').innerHTML = rows.map(r => `<div class="simple-row">
+            <img class="simple-img" src="${r.image}" alt="${r.name}" onerror="this.style.opacity=0.1"/>
+            <span class="simple-name">${r.name}</span>
+            <span class="simple-price">${fmt(r.lineValue)}</span>
+          </div>`).join('');
+      }
+      document.getElementById('sold-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+    document.getElementById('sold-close').addEventListener('click', () => {
+      document.getElementById('sold-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    });
+    document.getElementById('sold-overlay').addEventListener('click', e => {
+      if (e.target.id === 'sold-overlay') {
+        document.getElementById('sold-overlay').classList.remove('open');
         document.body.style.overflow = '';
       }
     });
