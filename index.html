@@ -57,7 +57,7 @@
 
     /* WATCHLIST STRIP */
     .wl-strip { margin-bottom:0; background:rgba(20,20,20,0.78); border:1px solid rgba(184,145,46,0.29); border-radius:var(--radius); padding:12px 16px; backdrop-filter:blur(20px); box-shadow:0 6px 24px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.04),inset 0 1px 0 rgba(255,255,255,0.06); }
-    .wl-strip-label { font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:rgba(255,255,255,0.7); font-weight:700; margin-bottom:10px; display:flex; justify-content:space-between; }
+    .wl-strip-label { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; }
     .wl-carousel-wrap { overflow-x:auto; overflow-y:hidden; height:158px; cursor:grab; -webkit-overflow-scrolling:touch; scrollbar-width:none; -ms-overflow-style:none; display:flex; align-items:center; }
     .wl-carousel-wrap::-webkit-scrollbar { display:none; }
     .wl-carousel-wrap:active { cursor:grabbing; }
@@ -75,8 +75,14 @@
     @media (max-width:900px) { .panel-grid { grid-template-columns:1fr; } }
     .panel { background:rgba(20,20,20,0.78); border:1px solid rgba(184,145,46,0.29); border-radius:var(--radius); padding:14px 16px; backdrop-filter:blur(20px); box-shadow:0 6px 24px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.04),inset 0 1px 0 rgba(255,255,255,0.06); }
     .panel-title { font-size:13px; font-weight:800; letter-spacing:-0.2px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; }
-    .panel-title .p-main { font-size:15px; font-weight:800; letter-spacing:0.02em; text-transform:uppercase; color:var(--gold); }
-    .panel-title .p-sub { font-size:10.5px; color:var(--text-muted); font-weight:600; }
+    .p-main { font-size:15px; font-weight:800; letter-spacing:0.02em; text-transform:uppercase; color:var(--gold); }
+    .p-sub { font-size:10.5px; color:var(--text-muted); font-weight:600; }
+    .p-by { display:flex; align-items:center; gap:4px; }
+    .p-by-label { font-size:10px; color:var(--text-muted); font-weight:600; margin-right:2px; }
+    .p-by-btn { font-size:11px; font-weight:700; padding:3px 9px; border-radius:6px; border:1px solid rgba(184,145,46,0.24); background:rgba(255,255,255,0.03); color:var(--text-muted); cursor:pointer; transition:all 0.15s; }
+    .p-by-btn:hover { color:var(--text); border-color:rgba(184,145,46,0.55); }
+    .p-by-btn.active { background:var(--orange); border-color:var(--orange); color:#000; }
+    .scrollable-panel-list { max-height:280px; overflow-y:auto; }
 
     .perf-row { display:flex; align-items:center; gap:9px; padding:6px 2px; cursor:pointer; border-radius:7px; transition:background 0.12s; }
     .perf-row:hover { background:rgba(184,145,46,0.08); }
@@ -220,7 +226,7 @@
   <div class="carousel-row">
     <div class="carousel-col">
       <div class="wl-strip">
-        <div class="wl-strip-label"><span>Holding</span><span id="holding-count-label"></span></div>
+        <div class="wl-strip-label"><span class="p-main">Holding</span><span class="p-sub" id="holding-count-label"></span></div>
         <div class="wl-carousel-wrap" id="holding-carousel">
           <div class="wl-carousel-inner" id="holding-inner"></div>
         </div>
@@ -228,7 +234,7 @@
     </div>
     <div class="carousel-col">
       <div class="wl-strip">
-        <div class="wl-strip-label"><span>Watchlist</span><span id="wl-count-label"></span></div>
+        <div class="wl-strip-label"><span class="p-main">Watchlist</span><span class="p-sub" id="wl-count-label"></span></div>
         <div class="wl-carousel-wrap" id="wl-carousel">
           <div class="wl-carousel-inner" id="wl-inner"></div>
         </div>
@@ -238,8 +244,15 @@
 
   <div class="panel-grid">
     <div class="panel">
-      <div class="panel-title" title="Your paid Holding positions with the best return on cost."><span class="p-main">Top Performers</span><span class="p-sub">% on cost</span></div>
-      <div id="top-performers"></div>
+      <div class="panel-title" title="Your paid Holding positions with the best return, ranked by percentage or by total euros.">
+        <span class="p-main">Top Performers</span>
+        <div class="p-by">
+          <span class="p-by-label">by:</span>
+          <button class="p-by-btn active" data-panel="top-performers" data-mode="pct">%</button>
+          <button class="p-by-btn" data-panel="top-performers" data-mode="eur">€</button>
+        </div>
+      </div>
+      <div id="top-performers" class="scrollable-panel-list"></div>
     </div>
     <div class="panel">
       <div class="panel-title" title="Watchlist items that have dropped the most over the last 7 days — potential entry points."><span class="p-main">Top Decreases</span><span class="p-sub">Watchlist · 7d</span></div>
@@ -528,15 +541,43 @@
     });
   }
 
-  function renderPerfRow(c, pct, valueMode){
-    const pos = pct >= 0;
-    const label = valueMode ? fmt(pct) : (pos?'+':'')+pct.toFixed(1)+'%';
+  function renderPerfRow(c, value, mode){
+    mode = mode || 'pct';
+    const pos = value >= 0;
+    const label = mode === 'eur' ? fmtSign(value) : (pos?'+':'')+value.toFixed(1)+'%';
     return `<div class="perf-row" data-id="${c.id}">
       <img class="perf-img" src="${c.image}" alt="" onerror="this.style.opacity=0.1"/>
       <span class="perf-name">${c.name}</span>
-      <span class="perf-pct ${valueMode?'':(pos?'pos':'neg')}">${label}</span>
+      <span class="perf-pct ${pos?'pos':'neg'}">${label}</span>
     </div>`;
   }
+
+  let topPerfMode = 'pct';
+  let currentPaid = [];
+  function renderTopPerformers(){
+    const withVal = currentPaid.map(c => {
+      const qty = c.qty || 1;
+      return { c, pct: (c.currentPrice-c.buyPrice)/c.buyPrice*100, eur: (c.currentPrice-c.buyPrice)*qty };
+    });
+    const sorted = topPerfMode === 'eur'
+      ? [...withVal].sort((a,b)=>b.eur-a.eur)
+      : [...withVal].sort((a,b)=>b.pct-a.pct);
+    const top = sorted.slice(0,20);
+    document.getElementById('top-performers').innerHTML = top.length
+      ? top.map(x=>renderPerfRow(x.c, topPerfMode==='eur'?x.eur:x.pct, topPerfMode)).join('')
+      : '<div class="empty-mini">Not enough data yet.</div>';
+    document.querySelectorAll('#top-performers .perf-row').forEach(el=>{
+      el.addEventListener('click', ()=>{ const item = allCards.find(c=>c.id===el.dataset.id); if(item) openModal(item); });
+    });
+  }
+  document.querySelectorAll('.p-by-btn[data-panel="top-performers"]').forEach(btn=>{
+    btn.onclick = () => {
+      document.querySelectorAll('.p-by-btn[data-panel="top-performers"]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      topPerfMode = btn.dataset.mode;
+      renderTopPerformers();
+    };
+  });
 
   function render(){
     if(!window.portfolioData?.cards)return;
@@ -582,10 +623,9 @@
     document.getElementById('holding-count-label').textContent = holding.length + (holding.length===1?' item':' items');
     document.getElementById('wl-count-label').textContent = watchlist.length + (watchlist.length===1?' item':' items');
 
-    // ── TOP PERFORMERS (Holding) ──
-    const withPct = paid.map(c => ({ c, pct: (c.currentPrice-c.buyPrice)/c.buyPrice*100 }));
-    const top = [...withPct].sort((a,b)=>b.pct-a.pct).slice(0,5);
-    document.getElementById('top-performers').innerHTML = top.length ? top.map(x=>renderPerfRow(x.c,x.pct)).join('') : '<div class="empty-mini">Not enough data yet.</div>';
+    // ── TOP PERFORMERS (Holding) — by % or by € ──
+    currentPaid = paid;
+    renderTopPerformers();
 
     // ── TOP DECREASES (Watchlist, 7d) ──
     const wlWithPct = watchlist.map(c => ({ c, pct: varFromHistory7(c.priceHistory) })).filter(x => x.pct !== null && x.pct < 0);
@@ -611,7 +651,7 @@
         <span class="set-qty">${d.qty} uds</span>
       </div>`).join('') : '<div class="empty-mini">No cards in Holding yet.</div>';
 
-    document.querySelectorAll('.perf-row').forEach(el=>{
+    document.querySelectorAll('#watchlist-decreases .perf-row').forEach(el=>{
       el.addEventListener('click', ()=>{ const item = allCards.find(c=>c.id===el.dataset.id); if(item) openModal(item); });
     });
 

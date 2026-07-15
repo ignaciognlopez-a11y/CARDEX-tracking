@@ -107,6 +107,8 @@
   // ---------- Estilos inyectados (menú, modales de añadir/mover) ----------
   const css = `
   .cx-burger{width:34px;height:34px;border-radius:8px;background:rgba(20,20,20,0.7);border:1px solid rgba(184,145,46,0.32);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;flex-shrink:0;}
+  .cx-header-add{margin-left:10px;padding:7px 14px;border-radius:8px;background:#b8912e;color:#000;font-weight:700;font-size:12.5px;border:none;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background 0.15s;}
+  .cx-header-add:hover{background:#d9b04a;}
   .cx-burger span{display:block;width:16px;height:2px;background:var(--gold,#b8912e);border-radius:2px;}
   .cx-side-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:300;}
   .cx-side-overlay.open{display:block;animation:cx-fade 0.15s ease both;}
@@ -196,6 +198,13 @@
         logo.style.cursor = 'pointer';
         logo.addEventListener('click', function () { window.location.href = 'index.html'; });
       }
+
+      const headerAddBtn = document.createElement('button');
+      headerAddBtn.className = 'cx-header-add';
+      headerAddBtn.id = 'cx-header-add';
+      headerAddBtn.textContent = '+ Add card';
+      headerAddBtn.addEventListener('click', function () { requirePassword(function () { openAddModal(); }); });
+      header.appendChild(headerAddBtn);
     }
     document.getElementById('cx-open-add').addEventListener('click', function () {
       closeMenu();
@@ -205,7 +214,10 @@
   function openMenu() { document.getElementById('cx-side-overlay').classList.add('open'); }
   function closeMenu() { document.getElementById('cx-side-overlay').classList.remove('open'); }
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { const ov = document.getElementById('cx-side-overlay'); if (ov) ov.classList.remove('open'); }
+    if (e.key === 'Escape') {
+      const ov = document.getElementById('cx-side-overlay'); if (ov) ov.classList.remove('open');
+      const fov = document.getElementById('cx-form-overlay'); if (fov) fov.classList.remove('open');
+    }
   });
 
   // ---------- Formulario Añadir / Editar / Mover ----------
