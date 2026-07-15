@@ -98,10 +98,10 @@
     .set-val { font-size:11px; color:var(--text-muted); flex-shrink:0; width:78px; text-align:right; font-variant-numeric:tabular-nums; }
     .set-qty { font-size:10px; color:rgba(255,255,255,0.4); flex-shrink:0; width:44px; text-align:right; }
 
-    .stat-strip { display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
-    .stat-chip { flex:1; min-width:130px; background:rgba(20,20,20,0.78); border:1px solid rgba(184,145,46,0.24); border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:2px; }
-    .stat-chip .sc-label { font-size:9.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); font-weight:700; }
-    .stat-chip .sc-value { font-size:17px; font-weight:800; }
+
+    .carousel-row { display:flex; gap:14px; margin-bottom:20px; flex-wrap:wrap; align-items:stretch; }
+    .carousel-col { flex:1 1 0; min-width:280px; display:flex; }
+    .carousel-col .wl-strip { width:100%; }
 
     .empty-mini { font-size:11.5px; color:var(--text-muted); padding:10px 2px; }
 
@@ -208,6 +208,25 @@
     </div>
 
     <div class="wl-panel">
+      <div class="panel" style="width:100%;">
+        <div class="panel-title" title="Market value and item count of your Holding, grouped by set.">
+          <span class="p-main">Set Distribution</span><span class="p-sub">market value</span>
+        </div>
+        <div id="set-distribution"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="carousel-row">
+    <div class="carousel-col">
+      <div class="wl-strip">
+        <div class="wl-strip-label"><span>Holding</span><span id="holding-count-label"></span></div>
+        <div class="wl-carousel-wrap" id="holding-carousel">
+          <div class="wl-carousel-inner" id="holding-inner"></div>
+        </div>
+      </div>
+    </div>
+    <div class="carousel-col">
       <div class="wl-strip">
         <div class="wl-strip-label"><span>Watchlist</span><span id="wl-count-label"></span></div>
         <div class="wl-carousel-wrap" id="wl-carousel">
@@ -217,34 +236,17 @@
     </div>
   </div>
 
-  <div class="stat-strip">
-    <div class="stat-chip" title="Number of individual positions currently in Holding (each purchase counts as one unit)."><span class="sc-label">Units in Holding</span><span class="sc-value" id="stat-units">—</span></div>
-    <div class="stat-chip" title="How many Holding items are single cards vs. sealed product."><span class="sc-label">Singles / Sealed</span><span class="sc-value" id="stat-split">—</span></div>
-    <div class="stat-chip" title="Number of distinct sets represented among your Holding items."><span class="sc-label">Sets Represented</span><span class="sc-value" id="stat-sets">—</span></div>
-    <div class="stat-chip" title="Number of items currently on your Watchlist."><span class="sc-label">Watchlist Items</span><span class="sc-value" id="stat-watchlist">—</span></div>
-  </div>
-
   <div class="panel-grid">
     <div class="panel">
       <div class="panel-title" title="Your paid Holding positions with the best return on cost."><span class="p-main">Top Performers</span><span class="p-sub">% on cost</span></div>
       <div id="top-performers"></div>
     </div>
     <div class="panel">
-      <div class="panel-title" title="Your paid Holding positions with the worst return on cost."><span class="p-main">Worst Performers</span><span class="p-sub">% on cost</span></div>
-      <div id="worst-performers"></div>
+      <div class="panel-title" title="Watchlist items that have dropped the most over the last 7 days — potential entry points."><span class="p-main">Top Decreases</span><span class="p-sub">Watchlist · 7d</span></div>
+      <div id="watchlist-decreases"></div>
     </div>
   </div>
 
-  <div class="panel-grid">
-    <div class="panel">
-      <div class="panel-title" title="Market value and item count of your Holding, grouped by set."><span class="p-main">Set Distribution</span><span class="p-sub">market value</span></div>
-      <div id="set-distribution"></div>
-    </div>
-    <div class="panel">
-      <div class="panel-title" title="Your Holding items with the highest current market price."><span class="p-main">Most Expensive Items</span><span class="p-sub">Current Price</span></div>
-      <div id="most-expensive"></div>
-    </div>
-  </div>
 </main>
 
 <div class="modal-overlay" id="modal-overlay">
@@ -475,19 +477,20 @@
     });
   });
 
-  function initWatchlist(cards){
-    const wl=(cards||[]).filter(c=>c.status==='Watchlist' && c.image).sort((a,b)=>a.currentPrice-b.currentPrice);
-    const inner=document.getElementById('wl-inner');
-    const wrap=document.getElementById('wl-carousel');
-    if(!wl.length){inner.innerHTML='<div style="color:var(--text-muted);font-size:12px;padding:4px 0;">No watchlist items yet</div>';return;}
-    function varFromHistory7(h){
-      if(!h||h.length<2)return null;
-      const last=h[h.length-1],cutoff=new Date(last.date+'T12:00:00');
-      cutoff.setDate(cutoff.getDate()-7);
-      const cands=h.slice(0,-1).filter(x=>new Date(x.date+'T12:00:00')<=cutoff);
-      if(!cands.length)return null;
-      return(last.price-cands[cands.length-1].price)/cands[cands.length-1].price*100;
-    }
+  function varFromHistory7(h){
+    if(!h||h.length<2)return null;
+    const last=h[h.length-1],cutoff=new Date(last.date+'T12:00:00');
+    cutoff.setDate(cutoff.getDate()-7);
+    const cands=h.slice(0,-1).filter(x=>new Date(x.date+'T12:00:00')<=cutoff);
+    if(!cands.length)return null;
+    return(last.price-cands[cands.length-1].price)/cands[cands.length-1].price*100;
+  }
+
+  function initCarousel(items, wrapId, innerId, emptyMsg){
+    const list=(items||[]).filter(c=>c.image);
+    const inner=document.getElementById(innerId);
+    const wrap=document.getElementById(wrapId);
+    if(!list.length){inner.innerHTML='<div style="color:var(--text-muted);font-size:12px;padding:4px 0;">'+emptyMsg+'</div>';return;}
     function buildSlide(item){
       const p7=varFromHistory7(item.priceHistory);
       const cls=p7===null?'neu':p7>=0?'pos':'neg';
@@ -501,8 +504,8 @@
         <div class="wl-slide-name">${item.name}</div>
       </div>`;
     }
-    inner.innerHTML=[...wl,...wl,...wl].map(buildSlide).join('');
-    const SW=92, setW=wl.length*SW;
+    inner.innerHTML=[...list,...list,...list].map(buildSlide).join('');
+    const SW=92, setW=list.length*SW;
     let dragging=false, dragX=0, dragStart=0, hovering=false, prevT=null, wasDragged=false;
     wrap.scrollLeft = setW;
     function wrapScroll(){ if(wrap.scrollLeft<=0) wrap.scrollLeft += setW; else if(wrap.scrollLeft>=setW*2) wrap.scrollLeft -= setW; }
@@ -525,12 +528,13 @@
     });
   }
 
-  function renderPerfRow(c, pct){
+  function renderPerfRow(c, pct, valueMode){
     const pos = pct >= 0;
+    const label = valueMode ? fmt(pct) : (pos?'+':'')+pct.toFixed(1)+'%';
     return `<div class="perf-row" data-id="${c.id}">
       <img class="perf-img" src="${c.image}" alt="" onerror="this.style.opacity=0.1"/>
       <span class="perf-name">${c.name}</span>
-      <span class="perf-pct ${pos?'pos':'neg'}">${(pos?'+':'')+pct.toFixed(1)}%</span>
+      <span class="perf-pct ${valueMode?'':(pos?'pos':'neg')}">${label}</span>
     </div>`;
   }
 
@@ -573,27 +577,25 @@
     const upd=window.portfolioData.updatedAt;
     if(upd)document.getElementById('updated-label').textContent='Updated '+new Date(upd+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
 
-    initWatchlist(allCards);
+    initCarousel(holding, 'holding-carousel', 'holding-inner', 'No cards in Holding yet');
+    initCarousel(watchlist, 'wl-carousel', 'wl-inner', 'No watchlist items yet');
+    document.getElementById('holding-count-label').textContent = holding.length + (holding.length===1?' item':' items');
     document.getElementById('wl-count-label').textContent = watchlist.length + (watchlist.length===1?' item':' items');
 
-    // ── STAT CHIPS ──
-    document.getElementById('stat-units').textContent = holding.length;
-    document.getElementById('stat-split').textContent = singles.length + ' / ' + sealed.length;
-    const setsSet = new Set(holding.map(c=>c.set).filter(Boolean));
-    document.getElementById('stat-sets').textContent = setsSet.size;
-    document.getElementById('stat-watchlist').textContent = watchlist.length;
-
-    // ── TOP / WORST PERFORMERS ──
+    // ── TOP PERFORMERS (Holding) ──
     const withPct = paid.map(c => ({ c, pct: (c.currentPrice-c.buyPrice)/c.buyPrice*100 }));
     const top = [...withPct].sort((a,b)=>b.pct-a.pct).slice(0,5);
-    const worst = [...withPct].sort((a,b)=>a.pct-b.pct).slice(0,5).filter(x=>x.pct<0);
     document.getElementById('top-performers').innerHTML = top.length ? top.map(x=>renderPerfRow(x.c,x.pct)).join('') : '<div class="empty-mini">Not enough data yet.</div>';
-    document.getElementById('worst-performers').innerHTML = worst.length ? worst.map(x=>renderPerfRow(x.c,x.pct)).join('') : '<div class="empty-mini">No positions in the red right now 🎉</div>';
+
+    // ── TOP DECREASES (Watchlist, 7d) ──
+    const wlWithPct = watchlist.map(c => ({ c, pct: varFromHistory7(c.priceHistory) })).filter(x => x.pct !== null && x.pct < 0);
+    const decreases = wlWithPct.sort((a,b)=>a.pct-b.pct).slice(0,5);
+    document.getElementById('watchlist-decreases').innerHTML = decreases.length ? decreases.map(x=>renderPerfRow(x.c,x.pct)).join('') : '<div class="empty-mini">No drops in the last 7 days.</div>';
 
     // ── DISTRIBUCIÓN POR SET ──
     const bySet = {};
     holding.forEach(c => {
-      const key = c.set || 'Sin set';
+      const key = c.set || 'No set';
       if (!bySet[key]) bySet[key] = { qty: 0, value: 0 };
       bySet[key].qty += 1;
       bySet[key].value += c.currentPrice * (c.qty||1);
@@ -607,15 +609,6 @@
         <div class="set-bar-wrap"><div class="set-bar" style="width:${Math.max(4,(d.value/maxSetValue*100)).toFixed(1)}%"></div></div>
         <span class="set-val">${fmt(d.value)}</span>
         <span class="set-qty">${d.qty} uds</span>
-      </div>`).join('') : '<div class="empty-mini">No cards in Holding yet.</div>';
-
-    // ── ITEMS MÁS CAROS ──
-    const priciest = [...holding].sort((a,b)=>b.currentPrice-a.currentPrice).slice(0,6);
-    document.getElementById('most-expensive').innerHTML = priciest.length ? priciest.map(c=>`
-      <div class="perf-row" data-id="${c.id}">
-        <img class="perf-img" src="${c.image}" alt="" onerror="this.style.opacity=0.1"/>
-        <span class="perf-name">${c.name}</span>
-        <span class="perf-pct" style="color:var(--gold)">${fmt(c.currentPrice)}</span>
       </div>`).join('') : '<div class="empty-mini">No cards in Holding yet.</div>';
 
     document.querySelectorAll('.perf-row').forEach(el=>{
