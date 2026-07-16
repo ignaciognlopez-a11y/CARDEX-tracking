@@ -154,7 +154,7 @@
   // ---------- Menú hamburguesa ----------
   const PAGES = [
     { href: 'index.html', label: 'Overview' },
-    { href: 'holding.html', label: 'Holding' },
+    { href: 'holding.html', label: 'My Collection' },
     { href: 'watchlist.html', label: 'Watchlist' },
     { href: 'invested.html', label: 'Invested' },
     { href: 'sold.html', label: 'Sold' },
@@ -166,6 +166,15 @@
     if (!p) p = 'index.html';
     return p;
   }
+
+  function defaultStatusForPage() {
+    const map = { 'holding.html': 'Holding', 'watchlist.html': 'Watchlist', 'sold.html': 'Sold' };
+    return map[currentFile()] || 'Holding';
+  }
+
+  // El valor interno sigue siendo 'Holding' (así se guarda en Supabase, sin tocar datos existentes);
+  // esto solo cambia lo que se muestra en pantalla.
+  function statusLabel(s) { return s === 'Holding' ? 'My Collection' : s; }
 
   function buildMenu() {
     const cur = currentFile();
@@ -203,7 +212,9 @@
       headerAddBtn.className = 'cx-header-add';
       headerAddBtn.id = 'cx-header-add';
       headerAddBtn.textContent = '+ Add card';
-      headerAddBtn.addEventListener('click', function () { requirePassword(function () { openAddModal(); }); });
+      headerAddBtn.addEventListener('click', function () {
+        requirePassword(function () { openAddModal(defaultStatusForPage()); });
+      });
       header.appendChild(headerAddBtn);
     }
   }
@@ -258,6 +269,32 @@
     return '';
   }
 
+  const SELLER_COUNTRY_LIST = '1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4';
+
+  // El pegado rápido de "+ Add card" no valida el enlace que traigas — si lo copiaste
+  // navegando normal, puede venir en otro idioma de interfaz (/es/, /de/…) o sin los
+  // filtros de precio mínimo/orden. Esto lo normaliza siempre al formato canónico,
+  // igual que exige la metodología de price-check, para que nunca se guarde "roto".
+  function normalizeCardmarketUrl(url) {
+    try {
+      const u = new URL(url);
+      const parts = u.pathname.split('/').filter(Boolean);
+      if (parts[0] && parts[0].length === 2) parts[0] = 'en'; // /es/, /de/, etc. -> /en/
+      u.pathname = '/' + parts.join('/');
+      const isSealed = parts.indexOf('Sealed') !== -1;
+      const existingLanguage = u.searchParams.get('language');
+      const params = new URLSearchParams();
+      params.set('language', existingLanguage || '1'); // respeta language=6 si ya lo trae (p.ej. Project K Promos)
+      if (!isSealed) params.set('minCondition', '2');
+      params.set('sellerCountry', SELLER_COUNTRY_LIST);
+      params.set('sortBy', 'price_asc');
+      u.search = params.toString();
+      return u.toString().replace(/%2C/g, ',');
+    } catch (e) {
+      return url; // si no parsea como URL, se deja tal cual y fallará de forma visible luego
+    }
+  }
+
   function parseCardmarketUrl(url) {
     try {
       const u = new URL(url);
@@ -290,7 +327,7 @@
         '<div class="cx-form-title">Add card</div>' +
         '<div class="cx-form-status-tabs" id="cx-add-tabs">' +
         ['Holding', 'Watchlist', 'Sold'].map(function (s) {
-          return '<div class="cx-status-tab' + (s === status ? ' active' : '') + '" data-status="' + s + '">' + s + '</div>';
+          return '<div class="cx-status-tab' + (s === status ? ' active' : '') + '" data-status="' + s + '">' + statusLabel(s) + '</div>';
         }).join('') +
         '</div>' +
         '<div class="cx-form-row"><label>Cardmarket link</label><input type="text" id="cx-f-url" placeholder="https://www.cardmarket.com/en/Riftbound/Products/..."/></div>' +
@@ -321,13 +358,14 @@
       if (!priceEl.value) { errEl.textContent = 'Enter the price.'; errEl.style.display = 'block'; return; }
       price = Number(priceEl.value);
     }
-    const parsed = parseCardmarketUrl(url);
+    const normalizedUrl = normalizeCardmarketUrl(url);
+    const parsed = parseCardmarketUrl(normalizedUrl);
     const today = new Date().toISOString().slice(0, 10);
     const fields = {
       card_name: parsed.name || 'Unnamed card (please update)',
       set: parsed.set || null,
       condition: parsed.condition || null,
-      cardmarket_url: url,
+      cardmarket_url: normalizedUrl,
       status: status,
       current_price: price
     };
@@ -358,7 +396,7 @@
         '<div class="cx-form-title">Move / edit «' + item.name + '»</div>' +
         '<div class="cx-move-row" id="cx-move-tabs">' +
         ['Holding', 'Watchlist', 'Sold'].map(function (s) {
-          return '<div class="cx-move-btn' + (s === targetStatus ? ' current' : '') + '" data-status="' + s + '">' + s + '</div>';
+          return '<div class="cx-move-btn' + (s === targetStatus ? ' current' : '') + '" data-status="' + s + '">' + statusLabel(s) + '</div>';
         }).join('') +
         '</div>' +
         '<div id="cx-move-status-fields">' + statusFieldsHtml(targetStatus, item) + '</div>' +
