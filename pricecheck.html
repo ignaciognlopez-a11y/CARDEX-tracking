@@ -42,9 +42,12 @@
 <div class="controls">
   <label><input type="checkbox" id="f-holding" checked/> Holding</label>
   <label><input type="checkbox" id="f-watchlist" checked/> Watchlist</label>
+  <label><input type="checkbox" id="f-skip-done" checked/> Saltar ya comprobadas hoy</label>
   <button class="btn" id="reset-progress">Reiniciar progreso de hoy</button>
   <button class="btn" id="reload">Recargar de Supabase</button>
+  <button class="btn" id="bulk-start" style="background:#b8912e;color:#000;font-weight:700;border-color:#b8912e;">▶ Comprobar todo en bloque</button>
 </div>
+<div class="sub" style="margin-top:-10px;">"En bloque" abre la primera carta y va encadenando el resto sola: si el precio cambia de forma normal lo escribe y avanza; si detecta algo raro (precio que rompe el orden, o un salto muy grande) para y te pide confirmación. Solo tienes que intervenir para captchas o esas confirmaciones.</div>
 
 <div class="progress" id="progress"></div>
 <table>
@@ -123,6 +126,51 @@ function toggleDone(url) {
   setDone(d);
   render();
 }
+
+document.getElementById('bulk-start').addEventListener('click', () => {
+  const showHolding = document.getElementById('f-holding').checked;
+  const showWatchlist = document.getElementById('f-watchlist').checked;
+  const skipDone = document.getElementById('f-skip-done').checked;
+  const done = getDone();
+
+  const filtered = allRows.filter(r =>
+    r.cardmarket_url && (
+      (showHolding && r.status === 'Holding') ||
+      (showWatchlist && r.status === 'Watchlist')
+    )
+  );
+  const byUrl = {};
+  filtered.forEach(r => {
+    if (!byUrl[r.cardmarket_url]) byUrl[r.cardmarket_url] = [];
+    byUrl[r.cardmarket_url].push(r.id);
+  });
+  let urls = Object.keys(byUrl);
+  if (skipDone) urls = urls.filter(u => !done.includes(u));
+
+  if (!urls.length) { alert('No hay cartas pendientes con los filtros actuales.'); return; }
+
+  const queue = urls.map(u => ({ u, i: byUrl[u] }));
+  const backUrl = location.href.split('#')[0] + '#bulkdone=' + encodeURIComponent(JSON.stringify(urls));
+  const first = queue[0];
+  const rest = queue.slice(1);
+  const launchUrl = first.u + '#cdx=' + first.i.join(',') +
+    '&next=' + encodeURIComponent(JSON.stringify(rest)) +
+    '&back=' + encodeURIComponent(backUrl);
+  window.open(launchUrl, '_blank');
+});
+
+// Al volver de una tanda en bloque, el script deja aquí #bulkdone=[...urls...]
+(function handleBulkReturn() {
+  const m = location.hash.match(/bulkdone=([^&]+)/);
+  if (!m) return;
+  try {
+    const urls = JSON.parse(decodeURIComponent(m[1]));
+    const d = getDone();
+    urls.forEach(u => { if (!d.includes(u)) d.push(u); });
+    setDone(d);
+  } catch (e) { /* noop */ }
+  history.replaceState(null, '', location.pathname + location.search);
+})();
 
 document.getElementById('f-holding').addEventListener('change', render);
 document.getElementById('f-watchlist').addEventListener('change', render);
