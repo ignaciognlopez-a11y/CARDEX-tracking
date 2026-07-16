@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CARDEX — Price Check</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Montserrat:wght@800&display=swap" rel="stylesheet"/>
+<style>
+  :root { --gold:#b8912e; --text:#f2f2f2; --muted:#9a9a9a; --green:#3ddc84; }
+  * { box-sizing:border-box; }
+  body { background:#0a0a0a; color:var(--text); font-family:'DM Sans',sans-serif; margin:0; padding:24px; }
+  h1 { font-family:'Montserrat',sans-serif; font-size:22px; background:linear-gradient(135deg,#e8c766,#b8912e 55%,#8a6d1a); -webkit-background-clip:text; background-clip:text; color:transparent; margin:0 0 4px; }
+  .sub { color:var(--muted); font-size:13px; margin-bottom:20px; }
+  .controls { display:flex; gap:10px; align-items:center; margin-bottom:18px; flex-wrap:wrap; }
+  .controls label { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:5px; }
+  .btn { background:rgba(255,255,255,0.06); border:1px solid rgba(184,145,46,0.3); color:var(--text); padding:6px 12px; border-radius:7px; font-size:12px; cursor:pointer; }
+  .btn:hover { border-color:var(--gold); }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; font-size:10px; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); padding:8px; border-bottom:1px solid rgba(184,145,46,0.25); }
+  td { padding:8px; border-bottom:1px solid rgba(255,255,255,0.05); vertical-align:middle; }
+  tr.done { opacity:0.4; }
+  tr.done .name { text-decoration:line-through; }
+  .check-btn { background:var(--gold); color:#000; text-decoration:none; font-weight:700; padding:5px 12px; border-radius:6px; font-size:12px; display:inline-block; }
+  .check-btn:hover { background:#d9b04a; }
+  .mark-done { background:none; border:1px solid rgba(255,255,255,0.15); color:var(--muted); padding:5px 10px; border-radius:6px; font-size:11px; cursor:pointer; margin-left:6px; }
+  .badge { font-size:10px; padding:2px 7px; border-radius:10px; background:rgba(184,145,46,0.15); color:var(--gold); }
+  .progress { font-size:12px; color:var(--muted); margin-bottom:12px; }
+  .empty { color:var(--muted); padding:30px; text-align:center; }
+</style>
+</head>
+<body>
+
+<h1>CARDEX — Price Check</h1>
+<div class="sub">Abre cada carta en Cardmarket, resuelve el captcha si aparece, y usa el panel flotante de Tampermonkey para actualizar el precio. Nada de esto pasa por Claude.</div>
+
+<div class="controls">
+  <label><input type="checkbox" id="f-holding" checked/> Holding</label>
+  <label><input type="checkbox" id="f-watchlist" checked/> Watchlist</label>
+  <button class="btn" id="reset-progress">Reiniciar progreso de hoy</button>
+  <button class="btn" id="reload">Recargar de Supabase</button>
+</div>
+
+<div class="progress" id="progress"></div>
+<table>
+  <thead><tr><th>Carta</th><th>Set</th><th>Precio guardado</th><th>Actualizado</th><th></th></tr></thead>
+  <tbody id="rows"><tr><td colspan="5" class="empty">Cargando…</td></tr></tbody>
+</table>
+
+<script>
+const SUPABASE_URL = "https://fsmuhcvmifvyvjjpmtdx.supabase.co";
+const SUPABASE_KEY = "sb_publishable_WJTVFkd8c12jW6VJOwXcQQ_0XBkU_Bn";
+const headers = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_KEY };
+const DONE_KEY = 'cdx_pricecheck_done_' + new Date().toISOString().slice(0,10);
+
+function getDone() { try { return JSON.parse(localStorage.getItem(DONE_KEY) || '[]'); } catch(e) { return []; } }
+function setDone(arr) { localStorage.setItem(DONE_KEY, JSON.stringify(arr)); }
+function markDone(url) { const d = getDone(); if (!d.includes(url)) { d.push(url); setDone(d); } }
+
+let allRows = [];
+
+async function load() {
+  document.getElementById('rows').innerHTML = '<tr><td colspan="5" class="empty">Cargando…</td></tr>';
+  const res = await fetch(SUPABASE_URL + "/rest/v1/riftbound_inversiones?select=id,card_name,set,current_price,cardmarket_url,status&order=cardmarket_url", { headers });
+  allRows = await res.json();
+  render();
+}
+
+function render() {
+  const showHolding = document.getElementById('f-holding').checked;
+  const showWatchlist = document.getElementById('f-watchlist').checked;
+  const filtered = allRows.filter(r =>
+    r.cardmarket_url && (
+      (showHolding && r.status === 'Holding') ||
+      (showWatchlist && r.status === 'Watchlist')
+    )
+  );
+
+  // Agrupar por URL única (varias filas pueden compartir carta)
+  const byUrl = {};
+  filtered.forEach(r => {
+    if (!byUrl[r.cardmarket_url]) byUrl[r.cardmarket_url] = { name: r.card_name, set: r.set, price: r.current_price, ids: [] };
+    byUrl[r.cardmarket_url].ids.push(r.id);
+  });
+
+  const done = getDone();
+  const entries = Object.entries(byUrl).sort((a,b) => (a[1].name||'').localeCompare(b[1].name||''));
+
+  document.getElementById('progress').textContent = done.length + ' / ' + entries.length + ' comprobadas hoy';
+
+  if (!entries.length) {
+    document.getElementById('rows').innerHTML = '<tr><td colspan="5" class="empty">No hay cartas con enlace de Cardmarket en el filtro seleccionado.</td></tr>';
+    return;
+  }
+
+  document.getElementById('rows').innerHTML = entries.map(([url, info]) => {
+    const isDone = done.includes(url);
+    const launchUrl = url + (url.includes('#') ? '' : '#cdx=' + info.ids.join(','));
+    const priceTxt = info.price != null ? Number(info.price).toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €' : '—';
+    return `<tr class="${isDone ? 'done' : ''}" data-url="${url}">
+      <td class="name">${info.name}</td>
+      <td>${info.set || '—'} ${info.ids.length > 1 ? '<span class="badge">x' + info.ids.length + '</span>' : ''}</td>
+      <td>${priceTxt}</td>
+      <td>${isDone ? '✅' : '—'}</td>
+      <td>
+        <a class="check-btn" href="${launchUrl}" target="_blank" rel="noopener" onclick="setTimeout(()=>markThenRender('${url}'), 300)">Comprobar →</a>
+        <button class="mark-done" onclick="toggleDone('${url}')">${isDone ? 'Desmarcar' : 'Marcar hecho'}</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function markThenRender(url) { markDone(url); render(); }
+function toggleDone(url) {
+  const d = getDone();
+  const idx = d.indexOf(url);
+  if (idx >= 0) d.splice(idx, 1); else d.push(url);
+  setDone(d);
+  render();
+}
+
+document.getElementById('f-holding').addEventListener('change', render);
+document.getElementById('f-watchlist').addEventListener('change', render);
+document.getElementById('reload').addEventListener('click', load);
+document.getElementById('reset-progress').addEventListener('click', () => { setDone([]); render(); });
+
+load();
+</script>
+</body>
+</html>
