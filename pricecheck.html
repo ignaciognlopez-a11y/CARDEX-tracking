@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -9,8 +9,6 @@
   :root { --gold:#b8912e; --text:#f2f2f2; --muted:#9a9a9a; --green:#3ddc84; }
   * { box-sizing:border-box; }
   body { background:#0a0a0a; color:var(--text); font-family:'DM Sans',sans-serif; margin:0; padding:24px; }
-  h1 { font-family:'Montserrat',sans-serif; font-size:22px; background:linear-gradient(135deg,#e8c766,#b8912e 55%,#8a6d1a); -webkit-background-clip:text; background-clip:text; color:transparent; margin:0 0 4px; }
-  .sub { color:var(--muted); font-size:13px; margin-bottom:20px; }
   .controls { display:flex; gap:10px; align-items:center; margin-bottom:18px; flex-wrap:wrap; }
   .controls label { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:5px; }
   .btn { background:rgba(255,255,255,0.06); border:1px solid rgba(184,145,46,0.3); color:var(--text); padding:6px 12px; border-radius:7px; font-size:12px; cursor:pointer; }
@@ -24,6 +22,7 @@
   .check-btn:hover { background:#d9b04a; }
   .mark-done { background:none; border:1px solid rgba(255,255,255,0.15); color:var(--muted); padding:5px 10px; border-radius:6px; font-size:11px; cursor:pointer; margin-left:6px; }
   .badge { font-size:10px; padding:2px 7px; border-radius:10px; background:rgba(184,145,46,0.15); color:var(--gold); }
+  .new-price { color:var(--green); font-weight:700; }
   .progress { font-size:12px; color:var(--muted); margin-bottom:12px; }
   .empty { color:var(--muted); padding:30px; text-align:center; }
   header { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
@@ -36,23 +35,18 @@
   <span class="logo-text">CARDEX</span>
   <span style="font-size:13px;font-weight:700;color:var(--muted);">Price Check</span>
 </header>
-<h1>CARDEX — Price Check</h1>
-<div class="sub">Abre cada carta en Cardmarket, resuelve el captcha si aparece, y usa el panel flotante de Tampermonkey para actualizar el precio. Nada de esto pasa por Claude.</div>
 
 <div class="controls">
   <label><input type="checkbox" id="f-holding" checked/> Holding</label>
   <label><input type="checkbox" id="f-watchlist" checked/> Watchlist</label>
-  <label><input type="checkbox" id="f-skip-done" checked/> Saltar ya comprobadas hoy</label>
-  <button class="btn" id="reset-progress">Reiniciar progreso de hoy</button>
-  <button class="btn" id="reload">Recargar de Supabase</button>
-  <button class="btn" id="bulk-start" style="background:#b8912e;color:#000;font-weight:700;border-color:#b8912e;">▶ Comprobar todo en bloque</button>
+  <button class="btn" id="reload">Load DB</button>
+  <button class="btn" id="bulk-start" style="background:#b8912e;color:#000;font-weight:700;border-color:#b8912e;">Full Price Check</button>
 </div>
-<div class="sub" style="margin-top:-10px;">"En bloque" abre la primera carta y va encadenando el resto sola: si el precio cambia de forma normal lo escribe y avanza; si detecta algo raro (precio que rompe el orden, o un salto muy grande) para y te pide confirmación. Solo tienes que intervenir para captchas o esas confirmaciones.</div>
 
 <div class="progress" id="progress"></div>
 <table>
-  <thead><tr><th>Carta</th><th>Set</th><th>Precio guardado</th><th>Actualizado</th><th></th></tr></thead>
-  <tbody id="rows"><tr><td colspan="5" class="empty">Cargando…</td></tr></tbody>
+  <thead><tr><th>Card</th><th>Set</th><th>Price</th><th>New Price</th><th>Updated</th><th></th></tr></thead>
+  <tbody id="rows"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
 </table>
 
 <script>
@@ -66,11 +60,16 @@ function setDone(arr) { localStorage.setItem(DONE_KEY, JSON.stringify(arr)); }
 function markDone(url) { const d = getDone(); if (!d.includes(url)) { d.push(url); setDone(d); } }
 
 let allRows = [];
+let baselinePrices = null; // precio guardado en la primera carga de esta sesión, por cardmarket_url
 
 async function load() {
-  document.getElementById('rows').innerHTML = '<tr><td colspan="5" class="empty">Cargando…</td></tr>';
+  document.getElementById('rows').innerHTML = '<tr><td colspan="6" class="empty">Loading…</td></tr>';
   const res = await fetch(SUPABASE_URL + "/rest/v1/riftbound_inversiones?select=id,card_name,set,current_price,cardmarket_url,status&order=cardmarket_url", { headers });
   allRows = await res.json();
+  if (!baselinePrices) {
+    baselinePrices = {};
+    allRows.forEach(r => { if (r.cardmarket_url && !(r.cardmarket_url in baselinePrices)) baselinePrices[r.cardmarket_url] = r.current_price; });
+  }
   render();
 }
 
@@ -94,25 +93,29 @@ function render() {
   const done = getDone();
   const entries = Object.entries(byUrl).sort((a,b) => (a[1].name||'').localeCompare(b[1].name||''));
 
-  document.getElementById('progress').textContent = done.length + ' / ' + entries.length + ' comprobadas hoy';
+  document.getElementById('progress').textContent = done.length + ' / ' + entries.length + ' checked today';
 
   if (!entries.length) {
-    document.getElementById('rows').innerHTML = '<tr><td colspan="5" class="empty">No hay cartas con enlace de Cardmarket en el filtro seleccionado.</td></tr>';
+    document.getElementById('rows').innerHTML = '<tr><td colspan="6" class="empty">No cards with a Cardmarket link in the current filter.</td></tr>';
     return;
   }
 
   document.getElementById('rows').innerHTML = entries.map(([url, info]) => {
     const isDone = done.includes(url);
     const launchUrl = url + (url.includes('#') ? '' : '#cdx=' + info.ids.join(','));
-    const priceTxt = info.price != null ? Number(info.price).toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €' : '—';
+    const baseline = baselinePrices ? baselinePrices[url] : null;
+    const priceTxt = baseline != null ? Number(baseline).toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €' : '—';
+    const changed = isDone && baseline != null && Number(info.price) !== Number(baseline);
+    const newPriceTxt = isDone ? (info.price != null ? Number(info.price).toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €' : '—') : '—';
     return `<tr class="${isDone ? 'done' : ''}" data-url="${url}">
       <td class="name">${info.name}</td>
       <td>${info.set || '—'} ${info.ids.length > 1 ? '<span class="badge">x' + info.ids.length + '</span>' : ''}</td>
       <td>${priceTxt}</td>
+      <td class="${changed ? 'new-price' : ''}">${newPriceTxt}</td>
       <td>${isDone ? '✅' : '—'}</td>
       <td>
-        <a class="check-btn" href="${launchUrl}" target="_blank" rel="noopener" onclick="setTimeout(()=>markThenRender('${url}'), 300)">Comprobar →</a>
-        <button class="mark-done" onclick="toggleDone('${url}')">${isDone ? 'Desmarcar' : 'Marcar hecho'}</button>
+        <a class="check-btn" href="${launchUrl}" target="_blank" rel="noopener" onclick="setTimeout(()=>markThenRender('${url}'), 300)">Check →</a>
+        <button class="mark-done" onclick="toggleDone('${url}')">${isDone ? 'Unmark' : 'Mark done'}</button>
       </td>
     </tr>`;
   }).join('');
@@ -130,8 +133,6 @@ function toggleDone(url) {
 document.getElementById('bulk-start').addEventListener('click', () => {
   const showHolding = document.getElementById('f-holding').checked;
   const showWatchlist = document.getElementById('f-watchlist').checked;
-  const skipDone = document.getElementById('f-skip-done').checked;
-  const done = getDone();
 
   const filtered = allRows.filter(r =>
     r.cardmarket_url && (
@@ -144,10 +145,9 @@ document.getElementById('bulk-start').addEventListener('click', () => {
     if (!byUrl[r.cardmarket_url]) byUrl[r.cardmarket_url] = [];
     byUrl[r.cardmarket_url].push(r.id);
   });
-  let urls = Object.keys(byUrl);
-  if (skipDone) urls = urls.filter(u => !done.includes(u));
+  const urls = Object.keys(byUrl);
 
-  if (!urls.length) { alert('No hay cartas pendientes con los filtros actuales.'); return; }
+  if (!urls.length) { alert('No cards match the current filter.'); return; }
 
   const queue = urls.map(u => ({ u, i: byUrl[u] }));
   const backUrl = location.href.split('#')[0] + '#bulkdone=' + encodeURIComponent(JSON.stringify(urls));
@@ -175,7 +175,6 @@ document.getElementById('bulk-start').addEventListener('click', () => {
 document.getElementById('f-holding').addEventListener('change', render);
 document.getElementById('f-watchlist').addEventListener('change', render);
 document.getElementById('reload').addEventListener('click', load);
-document.getElementById('reset-progress').addEventListener('click', () => { setDone([]); render(); });
 
 load();
 </script>
