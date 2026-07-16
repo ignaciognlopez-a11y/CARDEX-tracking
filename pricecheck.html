@@ -42,6 +42,7 @@
   <label><input type="checkbox" id="f-watchlist" checked/> Watchlist</label>
   <button class="btn" id="reload">Load DB</button>
   <button class="btn" id="bulk-start" style="background:#b8912e;color:#000;font-weight:700;border-color:#b8912e;">Full Price Check</button>
+  <button class="btn" id="bulk-remaining">Check Remaining</button>
 </div>
 
 <div class="progress" id="progress"></div>
@@ -149,9 +150,10 @@ function toggleDone(url) {
   render();
 }
 
-document.getElementById('bulk-start').addEventListener('click', () => {
+function startBulkCheck(onlyRemaining) {
   const showHolding = document.getElementById('f-holding').checked;
   const showWatchlist = document.getElementById('f-watchlist').checked;
+  const done = getDone();
 
   const filtered = allRows.filter(r =>
     r.cardmarket_url && (
@@ -164,9 +166,10 @@ document.getElementById('bulk-start').addEventListener('click', () => {
     if (!byUrl[r.cardmarket_url]) byUrl[r.cardmarket_url] = { ids: [], name: r.card_name };
     byUrl[r.cardmarket_url].ids.push(r.id);
   });
-  const urls = Object.keys(byUrl).sort((a, b) => (byUrl[a].name || '').localeCompare(byUrl[b].name || ''));
+  let urls = Object.keys(byUrl).sort((a, b) => (byUrl[a].name || '').localeCompare(byUrl[b].name || ''));
+  if (onlyRemaining) urls = urls.filter(u => !done.includes(u));
 
-  if (!urls.length) { alert('No cards match the current filter.'); return; }
+  if (!urls.length) { alert(onlyRemaining ? 'Nothing left to check today with the current filter.' : 'No cards match the current filter.'); return; }
 
   const queue = urls.map(u => ({ u, i: byUrl[u].ids }));
   const backUrl = location.href.split('#')[0] + '#bulkdone=' + b64urlEncode(urls);
@@ -176,7 +179,9 @@ document.getElementById('bulk-start').addEventListener('click', () => {
     '&next=' + b64urlEncode(rest) +
     '&back=' + b64urlEncode(backUrl);
   window.open(launchUrl, '_blank');
-});
+}
+document.getElementById('bulk-start').addEventListener('click', () => startBulkCheck(false));
+document.getElementById('bulk-remaining').addEventListener('click', () => startBulkCheck(true));
 
 // Al volver de una tanda en bloque, el script deja aquí #bulkdone=<base64url>
 (function handleBulkReturn() {
@@ -196,6 +201,11 @@ document.getElementById('f-watchlist').addEventListener('change', render);
 document.getElementById('reload').addEventListener('click', load);
 
 load();
+
+// Auto-refresco silencioso: mientras la pestaña esté abierta, vuelve a leer Supabase
+// cada 8s para que "New Price" se vaya viendo casi al momento según se van comprobando cartas
+// (sin esto, solo se actualizaría al pulsar "Load DB" a mano).
+setInterval(() => { if (!document.hidden) load(); }, 8000);
 </script>
 <script src="cardex-shared.js"></script>
 </body>
