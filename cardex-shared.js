@@ -560,6 +560,17 @@
   window.CardexOpenAdd = function (status) { requirePassword(function () { openAddModal(status); }); };
   window.CardexOpenRetiro = function () { requirePassword(function () { openRetiroModal(); }); };
 
+  // ---------- Atajo de teclado para añadir carta desde cualquier página ----------
+  // Windows / Linux: Ctrl+Shift+A · Mac: Cmd+Shift+A (metaKey cubre la tecla Cmd)
+  document.addEventListener('keydown', function (e) {
+    const tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target && e.target.isContentEditable)) return;
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'a' || e.key === 'A')) {
+      e.preventDefault();
+      window.CardexOpenAdd(defaultStatusForPage());
+    }
+  });
+
   document.addEventListener('DOMContentLoaded', function () {
     buildMenu();
     buildFormOverlay();
