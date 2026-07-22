@@ -317,8 +317,7 @@
 
   // ---------- Formulario Añadir / Editar / Mover ----------
   const SET_OPTIONS = ['Origins', 'Unleashed', 'Spiritforged', 'Proving Grounds', 'Project K Promos', 'Origins Promos', 'Spiritforged Promos', 'Unleashed Promos'];
-  const RARITY_OPTIONS = ['Epic', 'Rare', 'Uncommon', 'Common', 'Showcase', 'Overnumbered', 'Signed Showcase', 'Plated', 'Promo', 'Other', 'N/A'];
-
+ const RARITY_OPTIONS = ['Epic', 'Rare', 'Uncommon', 'Common', 'Overnumbered', 'Signature Overnumber', 'Ultimate', 'Plated', 'Promo', 'Other', 'N/A'];
   // Condición física de la carta (solo singles, no sealed). Mapea al parámetro
   // minCondition de Cardmarket: minCondition=N muestra listings de esa condición
   // o mejor, y como esas son casi siempre las más baratas, el mínimo del filtro
