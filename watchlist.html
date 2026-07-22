@@ -225,6 +225,16 @@
     @media (max-width: 460px)  { .card-grid { grid-template-columns: repeat(2,1fr); column-gap: 2.5vw; padding: 0 2.5vw; } }
 
     .section-header.section-header-spaced { margin-top: 34px; }
+
+    /* ── PESTAÑAS DE WATCHLISTS ── */
+    .wl-tabs-bar { position: fixed; top: 57px; left: 0; right: 0; z-index: 40; display: flex; align-items: center; gap: 8px; padding: 10px 28px; background: rgba(0,0,0,0.92); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+    .wl-tabs-bar::-webkit-scrollbar { display: none; }
+    .wl-tab { flex-shrink: 0; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 7px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+    .wl-tab:hover { color: var(--text); border-color: var(--gold); }
+    .wl-tab.active { background: var(--gold); border-color: var(--gold); color: #000; }
+    .wl-tab-new { flex-shrink: 0; font-size: 12.5px; font-weight: 700; padding: 6px 14px; border-radius: 7px; border: 1px dashed rgba(184,145,46,0.5); background: transparent; color: var(--gold); cursor: pointer; white-space: nowrap; margin-left: 4px; }
+    .wl-tab-new:hover { background: rgba(184,145,46,0.12); }
+    main { padding-top: calc(22px + 57px + 44px) !important; }
   </style>
 </head>
 <body>
@@ -235,6 +245,7 @@
   <span class="updated" id="updated-label"></span>
 </header>
 
+<div class="wl-tabs-bar" id="wl-tabs-bar"></div>
 <main id="main-content">
 </main>
 
@@ -548,10 +559,51 @@
       + '</div>';
   }
 
+  let activeWatchlist = (function () { try { return localStorage.getItem('cdx_active_watchlist') || 'General'; } catch(e) { return 'General'; } })();
+
+  function renderTabs() {
+    const names = (window.portfolioData && window.portfolioData.watchlists) || ['General'];
+    if (names.indexOf(activeWatchlist) === -1) activeWatchlist = names[0] || 'General';
+    const bar = document.getElementById('wl-tabs-bar');
+    const cards = (window.portfolioData && window.portfolioData.cards) || [];
+    bar.innerHTML = names.map(function(n) {
+      const count = cards.filter(function(c){ return c.status==='Watchlist' && (c.watchlistName||'General')===n; }).length;
+      return '<button class="wl-tab' + (n===activeWatchlist?' active':'') + '" data-name="' + n + '">' + n + ' <span style="opacity:0.6">(' + count + ')</span></button>';
+    }).join('') + '<button class="wl-tab-new" id="wl-tab-new">+ New Watchlist</button>';
+
+    bar.querySelectorAll('.wl-tab').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        activeWatchlist = btn.dataset.name;
+        try { localStorage.setItem('cdx_active_watchlist', activeWatchlist); } catch(e){}
+        render();
+      });
+    });
+    document.getElementById('wl-tab-new').addEventListener('click', function() {
+      if (window.CardexAuth && !window.CardexAuth.isUnlocked()) { window.CardexAuth.requirePassword(function(){ createNewWatchlist(); }); return; }
+      createNewWatchlist();
+    });
+  }
+
+  function createNewWatchlist() {
+    const name = window.prompt('Name for the new watchlist:');
+    if (!name || !name.trim()) return;
+    const clean = name.trim();
+    window.CardexAPI.insertWatchlist(clean).then(function() {
+      return window.CardexReload();
+    }).then(function() {
+      activeWatchlist = clean;
+      try { localStorage.setItem('cdx_active_watchlist', activeWatchlist); } catch(e){}
+      render();
+    }).catch(function(err) {
+      window.alert('Could not create the watchlist (maybe that name already exists): ' + err.message);
+    });
+  }
+
   function render() {
     if (!window.portfolioData || !window.portfolioData.cards) return;
     const cards = window.portfolioData.cards;
-    const wl = cards.filter(function(c){ return c.status === 'Watchlist'; });
+    renderTabs();
+    const wl = cards.filter(function(c){ return c.status === 'Watchlist' && (c.watchlistName||'General') === activeWatchlist; });
 
     const upd = window.portfolioData.updatedAt;
     if (upd) document.getElementById('updated-label').textContent =
@@ -560,7 +612,7 @@
     const main = document.getElementById('main-content');
 
     if (!wl.length) {
-      main.innerHTML = '<div class="empty-state"><div class="empty-icon">👁</div><div class="empty-title">Watchlist is empty</div></div>';
+      main.innerHTML = '<div class="empty-state"><div class="empty-icon">👁</div><div class="empty-title">"' + activeWatchlist + '" is empty</div></div>';
       return;
     }
 

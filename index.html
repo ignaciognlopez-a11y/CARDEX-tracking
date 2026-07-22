@@ -40,8 +40,6 @@
     .summary-panel { flex:1 1 0; min-width:320px; display:flex; flex-direction:column; gap:8px; }
     .wl-panel { flex:1 1 0; min-width:280px; display:flex; }
     .summary-panel .summary-box { width:100%; }
-    .hobby-total-line { font-size:10.5px; color:rgba(255,255,255,0.45); text-align:center; padding:2px 4px; }
-    .hobby-total-line b { color:var(--text-muted); font-weight:700; }
     .wl-panel .wl-strip { margin-bottom:0; width:100%; }
 
     .summary-box { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; background:rgba(20,20,20,0.85); border:1px solid rgba(184,145,46,0.32); border-radius:var(--radius); padding:12px; backdrop-filter:blur(20px); box-shadow:0 6px 28px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.04),inset 0 1px 0 rgba(255,255,255,0.07); }
@@ -157,9 +155,19 @@
     .modal-stat-sub.pos { color:var(--green); } .modal-stat-sub.neg { color:var(--red); }
     .modal-chart-col { padding:24px 24px 20px; display:flex; flex-direction:column; height:100%; }
     .modal-spark-label { font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); font-weight:700; }
-    .range-filters { display:flex; gap:4px; }
+    .range-filters { display:flex; gap:4px; flex-wrap:wrap; }
     .range-btn { font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:6px; border:1px solid rgba(184,145,46,0.24); background:rgba(255,255,255,0.03); color:var(--text-muted); cursor:pointer; }
     .range-btn.active { background:var(--orange); border-color:var(--orange); color:#000; }
+
+    .chart-legend { display:flex; gap:16px; font-size:11px; color:var(--text-muted); font-weight:600; margin-bottom:8px; }
+    .legend-item { display:flex; align-items:center; gap:6px; }
+    .legend-dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
+    .legend-dot-inv { background:#b8912e; }
+    .legend-dot-paid { background:#3ddc84; }
+    .chart-controls { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+    .partition-toggle { display:flex; gap:3px; background:rgba(255,255,255,0.03); border:1px solid rgba(184,145,46,0.2); border-radius:7px; padding:2px; }
+    .partition-btn { font-size:10.5px; font-weight:700; padding:4px 10px; border-radius:5px; border:none; background:transparent; color:var(--text-muted); cursor:pointer; }
+    .partition-btn.active { background:var(--orange); color:#000; }
     .modal-chart-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; padding-right:38px; }
     .chart-price-range { display:flex; justify-content:space-between; font-size:10.5px; color:var(--text-muted); margin-bottom:2px; }
     .chart-price-range .hi { color:var(--green); } .chart-price-range .lo { color:var(--red); }
@@ -193,49 +201,51 @@
     <div class="summary-panel">
       <div class="panel-title" style="margin-bottom:2px;"><span class="p-main">Overall Performance</span></div>
       <div class="summary-box">
-        <div class="summary-metric clickable" id="invested-metric" title="Total amount paid for positions currently in My Collection. Click to see the breakdown.">
+        <div class="summary-metric clickable" id="invested-metric" title="Total amount paid for positions currently in My Collection. Hover to see the breakdown.">
           <span class="sm-label">Total Invested ↗</span>
           <span class="sm-value" id="s-invested">—</span>
           <span class="sm-sub">cost basis</span>
         </div>
-        <div class="summary-metric clickable" id="pnl-metric" title="Change in value of your paid positions compared to what you paid for them. Click to see the breakdown.">
+        <div class="summary-metric clickable" id="pnl-metric" title="Change in value of your paid positions compared to what you paid for them. Hover to see the breakdown.">
           <span class="sm-label">P&amp;L ↗</span>
           <span class="sm-value" id="s-pnl">—</span>
           <span class="sm-sub" id="s-pct">—</span>
         </div>
-        <div class="summary-metric clickable" id="paid-metric" title="Current market value of only the positions you paid for, excluding free items. Click to see the breakdown.">
+        <div class="summary-metric clickable" id="paid-metric" title="Current market value of only the positions you paid for, excluding free items. Hover to see the breakdown.">
           <span class="sm-label">Paid Positions Value ↗</span>
           <span class="sm-value" id="s-paid">—</span>
           <span class="sm-sub">paid items only</span>
         </div>
-        <div class="summary-metric clickable" id="total-metric" title="Current market value of all My Collection items, including free ones. Click to see the breakdown.">
+        <div class="summary-metric clickable" id="total-metric" title="Current market value of all My Collection items, including free ones. Hover to see the breakdown.">
           <span class="sm-label">Total Market Value ↗</span>
           <span class="sm-value" id="s-total">—</span>
           <span class="sm-sub">all positions</span>
         </div>
-        <div class="summary-metric clickable" id="sold-metric" title="Total amount already received from completed sales. Click to see the breakdown.">
+        <div class="summary-metric clickable" id="sold-metric" title="Total amount already received from completed sales. Hover to see the breakdown.">
           <span class="sm-label">Total Sold ↗</span>
           <span class="sm-value" id="s-sold">—</span>
           <span class="sm-sub" id="s-sold-count">no sales yet</span>
         </div>
       </div>
-      <div class="hobby-total-line" title="Total Invested (My Collection) plus everything logged in your supplies/equipment expenses.">Total hobby spend (cards + supplies): <b id="s-hobby-total">—</b></div>
     </div>
 
     <div class="wl-panel">
       <div class="panel" style="width:100%;">
         <div class="panel-title">
-          <span class="p-main" id="metric-chart-title">Total Market Value</span>
-          <div class="range-filters" id="metric-range-filters">
-            <button class="range-btn" data-range="1">1D</button>
-            <button class="range-btn active" data-range="7">7D</button>
-            <button class="range-btn" data-range="30">30D</button>
-            <button class="range-btn" data-range="90">3M</button>
-            <button class="range-btn" data-range="180">6M</button>
-            <button class="range-btn" data-range="365">1A</button>
-          </div>
+          <span class="p-main">Total Invested vs Paid Positions Value</span>
         </div>
-        <div class="chart-price-range" id="metric-chart-price-range" style="display:none"><span class="hi" id="metric-chart-hi"></span><span class="lo" id="metric-chart-lo"></span></div>
+        <div class="chart-legend" id="chart-legend">
+          <span class="legend-item"><span class="legend-dot legend-dot-inv"></span>Total Invested</span>
+          <span class="legend-item"><span class="legend-dot legend-dot-paid"></span>Paid Positions Value</span>
+        </div>
+        <div class="chart-controls">
+          <div class="partition-toggle" id="partition-toggle">
+            <button class="partition-btn" data-p="daily">Daily</button>
+            <button class="partition-btn active" data-p="weekly">Weekly</button>
+            <button class="partition-btn" data-p="monthly">Monthly</button>
+          </div>
+          <div class="range-filters" id="metric-range-filters"></div>
+        </div>
         <div class="chart-wrap" id="metric-chart-wrap" style="display:none;min-height:172px;"><canvas id="metric-spark"></canvas><div class="chart-tip" id="metric-chart-tip"></div></div>
         <div class="chart-axis-dates" id="metric-chart-axis-dates" style="display:none"></div>
         <div class="modal-spark-empty" id="metric-spark-empty" style="min-height:172px;"><span>Not enough data yet.</span></div>
@@ -361,7 +371,7 @@
   let allCards = [];
   let modalFullHistory = [], modalRangeDays = 30, currentModalItem = null;
   let cachedHolding = [], cachedPaid = [], cachedSold = [], cachedTotals = {};
-  let currentMetricId = null, currentMetricSeriesFull = [], currentMetricRangeDays = 7, metricChartInitialized = false;
+  let metricChartInitialized = false;
 
   // ── Reconstrucción de series históricas por métrica (a partir del price_history de cada carta) ──
   function allEventDates(){
@@ -371,6 +381,7 @@
       if (c.buyDate) set.add(c.buyDate);
       if (c.sellDate) set.add(c.sellDate);
     });
+    ((window.portfolioData && window.portfolioData.gastos) || []).forEach(g=>{ if(g.purchase_date) set.add(g.purchase_date); });
     set.add(new Date().toISOString().slice(0,10));
     return Array.from(set).sort();
   }
@@ -383,10 +394,16 @@
   function buildSeries(fn){
     return allEventDates().map(d=>({ date:d, price: fn(d) }));
   }
+  // Gasto acumulado en hobby (cajas, álbumes, fundas...) hasta una fecha dada,
+  // para que "Total Invested" en la gráfica también lo refleje a lo largo del tiempo.
+  function suppliesUpTo(d){
+    const gastos = (window.portfolioData && window.portfolioData.gastos) || [];
+    return gastos.filter(g=>g.purchase_date && g.purchase_date<=d).reduce((s,g)=>s+Number(g.price||0),0);
+  }
   const METRICS = {
     'invested-metric': {
       title: 'Total Invested',
-      series: () => buildSeries(d => allCards.filter(c=>c.status==='Holding' && c.buyPrice>0 && c.buyDate && c.buyDate<=d).reduce((s,c)=>s+Number(c.buyPrice),0)),
+      series: () => buildSeries(d => allCards.filter(c=>c.status==='Holding' && c.buyPrice>0 && c.buyDate && c.buyDate<=d).reduce((s,c)=>s+Number(c.buyPrice),0) + suppliesUpTo(d)),
       rows: () => cachedPaid.map(c=>({ item:c, v:Number(c.buyPrice),
         m1:{label:'Buy Price', value: fmt(c.buyPrice)},
         m2:{label:'Buy Date', value: c.buyDate ? new Date(c.buyDate+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'} })).sort((a,b)=>b.v-a.v),
@@ -429,14 +446,15 @@
     }
   };
 
-  function selectMetric(id, skipBreakdown){
-    currentMetricId = id;
-    document.querySelectorAll('.summary-metric.active-metric').forEach(el=>el.classList.remove('active-metric'));
-    const el = document.getElementById(id); if (el) el.classList.add('active-metric');
-    document.getElementById('metric-chart-title').textContent = METRICS[id].title;
-    currentMetricSeriesFull = METRICS[id].series();
-    renderMetricChartForRange(currentMetricRangeDays);
-    if (!skipBreakdown) openBreakdown(id);
+  // ── BREAKDOWN AL PASAR EL RATÓN (ya no al hacer click) ──
+  let breakdownHoverTimer = null;
+  function showBreakdownHover(id){
+    clearTimeout(breakdownHoverTimer);
+    openBreakdown(id);
+  }
+  function scheduleBreakdownClose(){
+    clearTimeout(breakdownHoverTimer);
+    breakdownHoverTimer = setTimeout(closeBreakdown, 120);
   }
 
   function openBreakdown(id){
@@ -463,39 +481,101 @@
   document.getElementById('breakdown-close-x').addEventListener('click', closeBreakdown);
   document.getElementById('breakdown-overlay').addEventListener('click', e=>{ if(e.target.id==='breakdown-overlay') closeBreakdown(); });
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeBreakdown(); });
+  // Si el ratón entra en el propio panel del breakdown, que no se cierre (por si el
+  // usuario mueve el cursor desde la métrica hasta la lista para hacer scroll).
+  document.getElementById('breakdown-overlay').addEventListener('mouseenter', ()=>clearTimeout(breakdownHoverTimer));
+  document.getElementById('breakdown-overlay').addEventListener('mouseleave', scheduleBreakdownClose);
 
-  document.querySelectorAll('#metric-range-filters .range-btn').forEach(btn=>{
+  // ── GRÁFICA FIJA: TOTAL INVESTED vs PAID POSITIONS VALUE, con date partition ──
+  const PARTITION_RANGES = {
+    daily:   [{label:'Last 7 days',   n:7},  {label:'Last 14 days',  n:14}, {label:'Last 30 days',  n:30}, {label:'Last 90 days',  n:90}],
+    weekly:  [{label:'Last 3 weeks',  n:3},  {label:'Last 6 weeks',  n:6},  {label:'Last 10 weeks', n:10}, {label:'Last 26 weeks', n:26}, {label:'Last 52 weeks', n:52}],
+    monthly: [{label:'Last 3 months', n:3},  {label:'Last 6 months', n:6},  {label:'Last 12 months',n:12}, {label:'Last 24 months',n:24}]
+  };
+  const PARTITION_DEFAULT_N = { daily: 30, weekly: 10, monthly: 6 };
+  let currentPartition = 'weekly', currentPartitionN = 10;
+
+  // Clave de "bucket" para agrupar una fecha según la partición elegida.
+  function bucketKey(dateStr, partition){
+    if (partition === 'daily') return dateStr;
+    const d = new Date(dateStr+'T12:00:00');
+    if (partition === 'monthly') return dateStr.slice(0,7); // YYYY-MM
+    // weekly: clave = lunes de esa semana
+    const day = (d.getDay()+6)%7; // 0=lunes
+    const monday = new Date(d); monday.setDate(d.getDate()-day);
+    return monday.toISOString().slice(0,10);
+  }
+  // Agrupa una serie diaria en buckets daily/weekly/monthly, quedándose con el
+  // último valor conocido de cada bucket (como un "cierre" de vela).
+  function aggregateSeries(series, partition){
+    if (!series || !series.length) return [];
+    const buckets = new Map();
+    series.forEach(p=>{
+      const k = bucketKey(p.date, partition);
+      buckets.set(k, p); // como series viene ordenada ascendente, el último gana
+    });
+    return Array.from(buckets.values()).sort((a,b)=>a.date.localeCompare(b.date));
+  }
+
+  function renderPartitionRangeButtons(){
+    const wrap = document.getElementById('metric-range-filters');
+    const opts = PARTITION_RANGES[currentPartition];
+    wrap.innerHTML = opts.map(o=>`<button class="range-btn${o.n===currentPartitionN?' active':''}" data-n="${o.n}">${o.label}</button>`).join('');
+    wrap.querySelectorAll('.range-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        wrap.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        currentPartitionN = parseInt(btn.dataset.n,10);
+        renderOverviewChart();
+      });
+    });
+  }
+
+  document.querySelectorAll('#partition-toggle .partition-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      document.querySelectorAll('#metric-range-filters .range-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('#partition-toggle .partition-btn').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
-      currentMetricRangeDays = parseInt(btn.dataset.range,10);
-      renderMetricChartForRange(currentMetricRangeDays);
+      currentPartition = btn.dataset.p;
+      currentPartitionN = PARTITION_DEFAULT_N[currentPartition];
+      renderPartitionRangeButtons();
+      renderOverviewChart();
     });
   });
 
-  function renderMetricChartForRange(days){
-    const full = currentMetricSeriesFull;
+  function renderOverviewChart(){
     const cw=document.getElementById('metric-chart-wrap'), se=document.getElementById('metric-spark-empty');
-    const priceRangeEl=document.getElementById('metric-chart-price-range'), axisEl=document.getElementById('metric-chart-axis-dates'), noteEl=document.getElementById('metric-chart-fallback-note');
-    if(!full || full.length<2){ cw.style.display='none'; se.style.display='flex'; priceRangeEl.style.display='none'; axisEl.style.display='none'; noteEl.style.display='none'; return; }
-    let filtered = filterHistoryByRange(full, days);
-    let usedFallback=false;
-    if(filtered.length<2){ filtered=full; usedFallback=true; }
-    cw.style.display='block'; se.style.display='none';
-    priceRangeEl.style.display='flex'; axisEl.style.display='flex';
-    const values=filtered.map(p=>p.price);
-    const hi=Math.max(...values), lo=Math.min(...values);
-    document.getElementById('metric-chart-hi').textContent='High '+fmt(hi);
-    document.getElementById('metric-chart-lo').textContent='Low '+fmt(lo);
+    const axisEl=document.getElementById('metric-chart-axis-dates'), noteEl=document.getElementById('metric-chart-fallback-note');
+    const investedFull = METRICS['invested-metric'].series();
+    const paidFull = METRICS['paid-metric'].series();
+    if (!investedFull.length || !paidFull.length || investedFull.length<2){
+      cw.style.display='none'; se.style.display='flex'; axisEl.style.display='none'; noteEl.style.display='none';
+      return;
+    }
+    let aggInv = aggregateSeries(investedFull, currentPartition);
+    let aggPaid = aggregateSeries(paidFull, currentPartition);
+    let usedFallback = false;
+    if (aggInv.length < 2){
+      // no hay suficientes buckets en el rango elegido: usamos todo el histórico disponible
+      usedFallback = true;
+    } else {
+      aggInv = aggInv.slice(-currentPartitionN);
+      aggPaid = aggPaid.slice(-currentPartitionN);
+      if (aggInv.length < 2) usedFallback = true;
+    }
+    if (usedFallback){
+      aggInv = aggregateSeries(investedFull, currentPartition);
+      aggPaid = aggregateSeries(paidFull, currentPartition);
+    }
+    cw.style.display='block'; se.style.display='none'; axisEl.style.display='flex';
     const df=d=>new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-    const n=filtered.length;
-    const labelDates=[filtered[0].date, filtered[Math.floor((n-1)/2)].date, filtered[n-1].date];
+    const n=aggInv.length;
+    const labelDates=[aggInv[0].date, aggInv[Math.floor((n-1)/2)].date, aggInv[n-1].date];
     axisEl.innerHTML = labelDates.map(d=>`<span>${df(d)}</span>`).join('');
     noteEl.style.display = 'block';
     noteEl.textContent = usedFallback
-      ? 'Not enough data points in this range yet — showing full history instead. Reconstructed from each card\'s price history, so it may not reflect exact day-by-day changes.'
+      ? 'Not enough data points for this range yet — showing full history instead. Reconstructed from each card\'s price history, so it may not reflect exact day-by-day changes.'
       : 'Reconstructed from each card\'s price history, so it may not reflect exact day-by-day changes.';
-    requestAnimationFrame(()=>drawSpark('metric-spark', filtered, null, true));
+    requestAnimationFrame(()=>drawSparkDual('metric-spark', aggInv, aggPaid));
   }
 
   function filterHistoryByRange(history, days){
@@ -577,6 +657,76 @@
           tip.textContent=df+'  ·  '+pf; tip.style.display='block';
           const relX=e.clientX-r.left,cw=r.width;
           if(relX>cw/2){tip.style.right=(cw-relX+10)+'px';tip.style.left='auto';}
+          else{tip.style.left=(relX+10)+'px';tip.style.right='auto';}
+        }
+      };
+      canvas._ml=()=>{render();if(tip)tip.style.display='none';};
+      canvas.addEventListener('mousemove',canvas._mv);
+      canvas.addEventListener('mouseleave',canvas._ml);
+    }
+  }
+
+  // Gráfica de dos líneas para el Overview: Total Invested (dorado) vs Paid Positions Value (verde/rojo).
+  // seriesA / seriesB deben tener las mismas fechas (vienen del mismo allEventDates()).
+  function drawSparkDual(id, seriesA, seriesB){
+    const canvas=document.getElementById(id); if(!canvas)return;
+    const ctx=canvas.getContext('2d'),dpr=window.devicePixelRatio||1;
+    const W=canvas.offsetWidth*dpr,H=canvas.offsetHeight*dpr;
+    canvas.width=W;canvas.height=H;
+    const a=seriesA.map(x=>x.price), b=seriesB.map(x=>x.price), dates=seriesA.map(x=>x.date);
+    const allVals=a.concat(b);
+    const mn=Math.min(...allVals), mxRaw=Math.max(...allVals);
+    // Más margen por arriba: dejamos ~14% de aire por encima del valor más alto.
+    const headroom=(mxRaw-mn||mxRaw||1)*0.14;
+    const mx=mxRaw+headroom, rng=(mx-mn)||1;
+    const padL=46*dpr,padR=10*dpr,padTop=26*dpr,padBot=10*dpr;
+    const n=a.length;
+    const xp=i=>padL+(i/(n-1||1))*(W-padL-padR),yp=v=>H-padBot-((v-mn)/rng)*(H-padTop-padBot);
+    const colInv='#b8912e', colPaid='#3ddc84';
+    function drawLine(vals,color){
+      ctx.beginPath();vals.forEach((v,i)=>i===0?ctx.moveTo(xp(i),yp(v)):ctx.lineTo(xp(i),yp(v)));
+      ctx.strokeStyle=color;ctx.lineWidth=2.3*dpr;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
+      ctx.beginPath();ctx.arc(xp(vals.length-1),yp(vals[vals.length-1]),3.2*dpr,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+    }
+    function render(hlIdx){
+      ctx.clearRect(0,0,W,H);
+      ctx.font=(10*dpr)+'px DM Sans, sans-serif'; ctx.textBaseline='middle'; ctx.textAlign='right';
+      [0,0.5,1].forEach(t=>{
+        const v=mn+t*rng, y=yp(v);
+        ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(W-padR,y);
+        ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1*dpr;ctx.setLineDash([3*dpr,3*dpr]);ctx.stroke();ctx.setLineDash([]);
+        ctx.fillStyle='rgba(255,255,255,0.32)';
+        ctx.fillText(v.toLocaleString('de-DE',{maximumFractionDigits:0}), padL-8*dpr, y);
+      });
+      drawLine(a,colInv);
+      drawLine(b,colPaid);
+      if(hlIdx!==undefined){
+        const hx=xp(hlIdx);
+        ctx.save();ctx.beginPath();ctx.moveTo(hx,padTop);ctx.lineTo(hx,H-padBot);
+        ctx.strokeStyle='rgba(255,255,255,0.18)';ctx.lineWidth=1*dpr;ctx.setLineDash([4*dpr,4*dpr]);ctx.stroke();ctx.restore();
+        [[a,colInv],[b,colPaid]].forEach(([vals,color])=>{
+          const hy=yp(vals[hlIdx]);
+          ctx.beginPath();ctx.arc(hx,hy,5*dpr,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,0.18)';ctx.fill();
+          ctx.beginPath();ctx.arc(hx,hy,3*dpr,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+        });
+      }
+    }
+    render();
+    const tip=document.getElementById('metric-chart-tip');
+    if(canvas._mv)canvas.removeEventListener('mousemove',canvas._mv);
+    if(canvas._ml)canvas.removeEventListener('mouseleave',canvas._ml);
+    if(n>1){
+      canvas._mv=e=>{
+        const r=canvas.getBoundingClientRect(),rx=(e.clientX-r.left)*dpr;
+        let best=0,bd=Infinity;a.forEach((_,i)=>{const d=Math.abs(xp(i)-rx);if(d<bd){bd=d;best=i;}});
+        render(best);
+        if(tip){
+          const invTxt=a[best].toLocaleString('de-DE',{maximumFractionDigits:0})+' €';
+          const paidTxt=b[best].toLocaleString('de-DE',{maximumFractionDigits:0})+' €';
+          const df=new Date(dates[best]+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+          tip.innerHTML=df+'<br>Invested: '+invTxt+'<br>Paid Value: '+paidTxt; tip.style.display='block';
+          const relX=e.clientX-r.left,cwidth=r.width;
+          if(relX>cwidth/2){tip.style.right=(cwidth-relX+10)+'px';tip.style.left='auto';}
           else{tip.style.left=(relX+10)+'px';tip.style.right='auto';}
         }
       };
@@ -762,7 +912,10 @@
     const totalValue=holding.reduce((s,c)=>s+c.currentPrice*(c.qty||1),0);
     const paid=holding.filter(c=>c.buyPrice>0);
     const paidMarket=paid.reduce((s,c)=>s+c.currentPrice*(c.qty||1),0);
-    const totalInvested=paid.reduce((s,c)=>s+c.buyPrice*(c.qty||1),0);
+    const cardsInvested=paid.reduce((s,c)=>s+c.buyPrice*(c.qty||1),0);
+    const suppliesTotal = window.portfolioData.suppliesTotal || 0;
+    // Total Invested incluye ahora también el gasto en hobby (cajas, álbumes, fundas, etc.)
+    const totalInvested=cardsInvested+suppliesTotal;
     const pnl=paidMarket-totalInvested;
     const pct=totalInvested>0?pnl/totalInvested*100:0;
     const totalSold=sold.reduce((s,c)=>s+(c.sellPrice||0)*(c.qty||1),0);
@@ -774,11 +927,6 @@
     const pctEl=document.getElementById('s-pct'); pctEl.textContent=fmtPct(pct)+' on cost';pctEl.className='sm-sub '+(pnl>=0?'pos':'neg');
     document.getElementById('s-sold').textContent=fmt(totalSold);
     document.getElementById('s-sold-count').textContent=sold.length?(sold.length+(sold.length===1?' sale':' sales')):'no sales yet';
-
-    const suppliesTotal = window.portfolioData.suppliesTotal || 0;
-    const hobbyTotalEl = document.getElementById('s-hobby-total');
-    hobbyTotalEl.textContent = fmt(totalInvested + suppliesTotal);
-    hobbyTotalEl.parentElement.title = `Cards: ${fmt(totalInvested)} + Supplies: ${fmt(suppliesTotal)}`;
 
     const upd=window.portfolioData.updatedAt;
     if(upd)document.getElementById('updated-label').textContent='Updated '+new Date(upd+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
@@ -815,19 +963,20 @@
         <span class="set-qty">${d.qty} uds</span>
       </div>`).join('') : '<div class="empty-mini">No cards in My Collection yet.</div>';
 
-    // ── CADA MÉTRICA ABRE SU BREAKDOWN Y CAMBIA LA GRÁFICA ──
+    // ── CADA MÉTRICA ABRE SU BREAKDOWN AL PASAR EL RATÓN POR ENCIMA (ya no al hacer click) ──
     Object.keys(METRICS).forEach(id=>{
       const el = document.getElementById(id);
-      if (el) el.onclick = () => selectMetric(id);
+      if (el) {
+        el.onclick = null;
+        el.onmouseenter = () => showBreakdownHover(id);
+        el.onmouseleave = () => scheduleBreakdownClose();
+      }
     });
     if (!metricChartInitialized) {
       metricChartInitialized = true;
-      selectMetric('total-metric', true);
-    } else if (currentMetricId) {
-      // recalcula la serie de la métrica activa con los datos nuevos, sin reabrir el breakdown
-      currentMetricSeriesFull = METRICS[currentMetricId].series();
-      renderMetricChartForRange(currentMetricRangeDays);
+      renderPartitionRangeButtons();
     }
+    renderOverviewChart();
   }
 
   window.CardexOnDataChange = render;

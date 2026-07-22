@@ -41,7 +41,8 @@
       sellDate: row.sell_date,
       trackingCode: row.tracking_code,
       trackingAdded: row.tracking_added,
-      excludeFromCap: row.exclude_from_cap === true
+      excludeFromCap: row.exclude_from_cap === true,
+      watchlistName: row.watchlist_name || 'General'
     };
   }
 
@@ -49,14 +50,17 @@
     return Promise.all([
       fetch(SUPABASE_URL + "/rest/v1/riftbound_inversiones?select=*", { headers: baseHeaders })
         .then(function (r) { if (!r.ok) throw new Error("Supabase fetch failed: " + r.status); return r.json(); }),
-      fetch(SUPABASE_URL + "/rest/v1/riftbound_gastos?select=price", { headers: baseHeaders })
+      fetch(SUPABASE_URL + "/rest/v1/riftbound_gastos?select=id,item_name,category,price,purchase_date&order=purchase_date", { headers: baseHeaders })
         .then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; }),
       fetch(SUPABASE_URL + "/rest/v1/riftbound_retiros?select=*&order=withdrawal_date.desc", { headers: baseHeaders })
+        .then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; }),
+      fetch(SUPABASE_URL + "/rest/v1/riftbound_watchlists?select=*&order=created_at", { headers: baseHeaders })
         .then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; })
     ]).then(function (results) {
       const rows = results[0];
-      const gastos = results[1];
+      const gastos = results[1] || [];
       const retiros = results[2] || [];
+      const watchlistRows = results[3] || [];
       const suppliesTotal = gastos.reduce(function (s, g) { return s + Number(g.price || 0); }, 0);
       const cards = rows.map(mapRow);
       const updatedAt = rows.reduce(function (max, row) {
@@ -64,11 +68,23 @@
         return (u && (!max || u > max)) ? u : max;
       }, null);
       const retirosTotal = retiros.reduce(function (s, r) { return s + Number(r.amount || 0); }, 0);
-      window.portfolioData = { updatedAt: updatedAt || new Date().toISOString().slice(0, 10), cards: cards, suppliesTotal: suppliesTotal, retiros: retiros, retirosTotal: retirosTotal };
+      // Nombres de watchlist: los que existan como fila propia + cualquiera que aparezca
+      // ya en una carta (por si acaso) + "General" siempre presente.
+      const namesSet = {};
+      watchlistRows.forEach(function (w) { namesSet[w.name] = true; });
+      cards.forEach(function (c) { if (c.status === 'Watchlist') namesSet[c.watchlistName || 'General'] = true; });
+      namesSet['General'] = true;
+      const watchlists = Object.keys(namesSet).sort(function (a, b) { return a === 'General' ? -1 : b === 'General' ? 1 : a.localeCompare(b); });
+      window.portfolioData = {
+        updatedAt: updatedAt || new Date().toISOString().slice(0, 10),
+        cards: cards, gastos: gastos, suppliesTotal: suppliesTotal,
+        retiros: retiros, retirosTotal: retirosTotal,
+        watchlists: watchlists
+      };
       return window.portfolioData;
     }).catch(function (err) {
       console.error("Error cargando datos de Supabase:", err);
-      window.portfolioData = { updatedAt: null, cards: [], suppliesTotal: 0, retiros: [], retirosTotal: 0 };
+      window.portfolioData = { updatedAt: null, cards: [], gastos: [], suppliesTotal: 0, retiros: [], retirosTotal: 0, watchlists: ['General'] };
       return window.portfolioData;
     });
   }
@@ -106,6 +122,14 @@
       method: "DELETE",
       headers: writeHeaders
     }).then(function (r) { if (!r.ok) return r.text().then(function(t){throw new Error(t);}); return true; });
+  }
+
+  function insertWatchlist(name) {
+    return fetch(SUPABASE_URL + "/rest/v1/riftbound_watchlists", {
+      method: "POST",
+      headers: Object.assign({ "Prefer": "return=representation" }, writeHeaders),
+      body: JSON.stringify({ name: name })
+    }).then(function (r) { if (!r.ok) return r.text().then(function(t){throw new Error(t);}); return r.json(); });
   }
 
   function insertRetiro(fields) {
@@ -270,14 +294,16 @@
         logo.addEventListener('click', function () { window.location.href = 'index.html'; });
       }
 
-      const headerAddBtn = document.createElement('button');
-      headerAddBtn.className = 'cx-header-add';
-      headerAddBtn.id = 'cx-header-add';
-      headerAddBtn.textContent = '+ Add card';
-      headerAddBtn.addEventListener('click', function () {
-        requirePassword(function () { openAddModal(defaultStatusForPage()); });
-      });
-      header.appendChild(headerAddBtn);
+      if (cur !== 'pricecheck.html') {
+        const headerAddBtn = document.createElement('button');
+        headerAddBtn.className = 'cx-header-add';
+        headerAddBtn.id = 'cx-header-add';
+        headerAddBtn.textContent = '+ Add card';
+        headerAddBtn.addEventListener('click', function () {
+          requirePassword(function () { openAddModal(defaultStatusForPage()); });
+        });
+        header.appendChild(headerAddBtn);
+      }
     }
   }
   function openMenu() { document.getElementById('cx-side-overlay').classList.add('open'); }
@@ -292,6 +318,29 @@
   // ---------- Formulario Añadir / Editar / Mover ----------
   const SET_OPTIONS = ['Origins', 'Unleashed', 'Spiritforged', 'Proving Grounds', 'Project K Promos', 'Origins Promos', 'Spiritforged Promos', 'Unleashed Promos'];
   const RARITY_OPTIONS = ['Epic', 'Rare', 'Uncommon', 'Common', 'Showcase', 'Overnumbered', 'Signed Showcase', 'Plated', 'Promo', 'Other', 'N/A'];
+
+  // Condición física de la carta (solo singles, no sealed). Mapea al parámetro
+  // minCondition de Cardmarket: minCondition=N muestra listings de esa condición
+  // o mejor, y como esas son casi siempre las más baratas, el mínimo del filtro
+  // equivale en la práctica al precio de esa condición concreta.
+  const CONDITION_OPTIONS = ['NM', 'EX', 'GD', 'LP', 'PL'];
+  const CONDITION_MIN_MAP = { MT: 1, NM: 2, EX: 3, GD: 4, LP: 5, PL: 6, PO: 7 };
+  function isSealedUrl(url) {
+    try { return new URL(url).pathname.split('/').filter(Boolean).indexOf('Sealed') !== -1; }
+    catch (e) { return false; }
+  }
+  // Reescribe el parámetro minCondition de una cardmarket_url ya normalizada
+  // para que refleje la condición física elegida (NM, EX, ...). No toca nada si es sellado.
+  function applyConditionToUrl(url, conditionCode) {
+    if (!url || isSealedUrl(url)) return url;
+    const minC = CONDITION_MIN_MAP[conditionCode] || 2;
+    try {
+      const u = new URL(url);
+      u.searchParams.set('minCondition', String(minC));
+      return u.toString().replace(/%2C/g, ',');
+    } catch (e) { return url; }
+  }
+  window.CardexConditions = { options: CONDITION_OPTIONS, isSealedUrl: isSealedUrl, applyConditionToUrl: applyConditionToUrl };
 
   function buildFormOverlay() {
     const overlay = document.createElement('div');
@@ -316,19 +365,25 @@
 
   function statusFieldsHtml(status, item) {
     item = item || {};
+    const isSealed = item.cardmarketUrl ? isSealedUrl(item.cardmarketUrl) : (item.condition === 'Sealed');
+    const conditionRow = (!isSealed) ?
+      '<div class="cx-form-row"><label>Condition</label><select id="cx-f-condition">' + conditionOptionsHtml(CONDITION_OPTIONS.indexOf(item.condition) !== -1 ? item.condition : 'NM') + '</select></div>' : '';
     if (status === 'Holding') {
       return '<div class="cx-form-grid2">' +
         '<div class="cx-form-row"><label>Buy Price (€)</label><input type="number" step="0.01" id="cx-f-buyPrice" value="' + (item.buyPrice != null ? item.buyPrice : '') + '"/></div>' +
         '<div class="cx-form-row"><label>Buy Date</label><input type="date" id="cx-f-buyDate" value="' + (item.buyDate || '') + '"/></div>' +
-        '</div>';
+        '</div>' + conditionRow;
     }
     if (status === 'Sold') {
       return '<div class="cx-form-grid2">' +
         '<div class="cx-form-row"><label>Sell Price (€)</label><input type="number" step="0.01" id="cx-f-sellPrice" value="' + (item.sellPrice != null ? item.sellPrice : '') + '"/></div>' +
         '<div class="cx-form-row"><label>Sell Date</label><input type="date" id="cx-f-sellDate" value="' + (item.sellDate || '') + '"/></div>' +
-        '</div>';
+        '</div>' + conditionRow;
     }
-    return '';
+    if (status === 'Watchlist') {
+      return '<div class="cx-form-row"><label>Watchlist</label><select id="cx-f-watchlist">' + watchlistOptionsHtml(item.watchlistName || 'General') + '</select></div>' + conditionRow;
+    }
+    return conditionRow;
   }
 
   const SELLER_COUNTRY_LIST = '1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4';
@@ -380,10 +435,41 @@
     }
   }
 
+  function watchlistOptionsHtml(selected) {
+    const names = (window.portfolioData && window.portfolioData.watchlists) || ['General'];
+    return names.map(function (n) {
+      return '<option value="' + n + '"' + (n === selected ? ' selected' : '') + '>' + n + '</option>';
+    }).join('') + '<option value="__new__">+ New watchlist…</option>';
+  }
+  function conditionOptionsHtml(selected) {
+    return CONDITION_OPTIONS.map(function (c) {
+      return '<option value="' + c + '"' + (c === selected ? ' selected' : '') + '>' + c + '</option>';
+    }).join('');
+  }
+  function wireWatchlistSelect(selectId) {
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    sel.addEventListener('change', function () {
+      if (sel.value !== '__new__') return;
+      const name = window.prompt('Name for the new watchlist:');
+      if (!name || !name.trim()) { sel.value = 'General'; return; }
+      const clean = name.trim();
+      insertWatchlist(clean).then(function () {
+        if (!window.portfolioData.watchlists.includes(clean)) window.portfolioData.watchlists.push(clean);
+        sel.innerHTML = watchlistOptionsHtml(clean);
+      }).catch(function () {
+        // probablemente ya existe ese nombre — la usamos igualmente
+        if (!window.portfolioData.watchlists.includes(clean)) window.portfolioData.watchlists.push(clean);
+        sel.innerHTML = watchlistOptionsHtml(clean);
+      });
+    });
+  }
+
   function openAddModal(prefillStatus) {
     let status = prefillStatus || 'Holding';
     function render() {
       const showPrice = status !== 'Watchlist';
+      const showCondition = status !== 'Watchlist';
       const priceLabel = status === 'Sold' ? 'Sell price (€)' : 'Price paid (€)';
       openForm(
         '<div class="cx-form-title">Add card</div>' +
@@ -394,7 +480,9 @@
         '</div>' +
         '<div class="cx-form-row"><label>Cardmarket link</label><input type="text" id="cx-f-url" placeholder="https://www.cardmarket.com/en/Riftbound/Products/..."/></div>' +
         (showPrice ? '<div class="cx-form-row"><label>' + priceLabel + '</label><input type="number" step="0.01" id="cx-f-price"/></div>' : '') +
-        '<div style="font-size:11px;color:var(--text-muted);margin:2px 0 10px;line-height:1.4;">Card name, set and condition are guessed from the link — you can refine them anytime from chat. The image fills in automatically later, no need to add it here.</div>' +
+        (showCondition ? '<div class="cx-form-row"><label>Condition</label><select id="cx-f-condition">' + conditionOptionsHtml('NM') + '</select></div>' : '') +
+        (status === 'Watchlist' ? '<div class="cx-form-row"><label>Watchlist</label><select id="cx-f-watchlist">' + watchlistOptionsHtml('General') + '</select></div>' : '') +
+        '<div style="font-size:11px;color:var(--text-muted);margin:2px 0 10px;line-height:1.4;">Card name and set are guessed from the link — you can refine them anytime from chat. The image fills in automatically later, no need to add it here.</div>' +
         '<div class="cx-form-error" id="cx-form-error"></div>' +
         '<div class="cx-form-actions">' +
         '<button class="cx-btn cx-btn-ghost" id="cx-form-cancel">Cancel</button>' +
@@ -404,6 +492,7 @@
       document.querySelectorAll('#cx-add-tabs .cx-status-tab').forEach(function (t) {
         t.addEventListener('click', function () { status = t.dataset.status; render(); });
       });
+      wireWatchlistSelect('cx-f-watchlist');
       document.getElementById('cx-form-cancel').addEventListener('click', closeForm);
       document.getElementById('cx-form-save').addEventListener('click', function () { submitAdd(status); });
     }
@@ -420,13 +509,19 @@
       if (!priceEl.value) { errEl.textContent = 'Enter the price.'; errEl.style.display = 'block'; return; }
       price = Number(priceEl.value);
     }
-    const normalizedUrl = normalizeCardmarketUrl(url);
+    let normalizedUrl = normalizeCardmarketUrl(url);
     const parsed = parseCardmarketUrl(normalizedUrl);
+    const conditionEl = document.getElementById('cx-f-condition');
+    let conditionValue = parsed.condition || null;
+    if (conditionEl && !isSealedUrl(normalizedUrl)) {
+      conditionValue = conditionEl.value;
+      normalizedUrl = applyConditionToUrl(normalizedUrl, conditionValue);
+    }
     const today = new Date().toISOString().slice(0, 10);
     const fields = {
       card_name: parsed.name || 'Unnamed card (please update)',
       set: parsed.set || null,
-      condition: parsed.condition || null,
+      condition: conditionValue,
       cardmarket_url: normalizedUrl,
       card_image: null,
       status: status,
@@ -439,6 +534,10 @@
     if (status === 'Sold') {
       fields.sell_price = price;
       fields.sell_date = today;
+    }
+    if (status === 'Watchlist') {
+      const wlEl = document.getElementById('cx-f-watchlist');
+      fields.watchlist_name = (wlEl && wlEl.value && wlEl.value !== '__new__') ? wlEl.value : 'General';
     }
     insertCard(fields).then(function () {
       closeForm();
@@ -473,6 +572,7 @@
       document.querySelectorAll('#cx-move-tabs .cx-move-btn').forEach(function (b) {
         b.addEventListener('click', function () { targetStatus = b.dataset.status; render(); });
       });
+      wireWatchlistSelect('cx-f-watchlist');
       document.getElementById('cx-form-cancel').addEventListener('click', closeForm);
       document.getElementById('cx-form-save').addEventListener('click', function () { submitMove(item, targetStatus); });
       document.getElementById('cx-form-delete').addEventListener('click', function () { submitDelete(item); });
@@ -492,6 +592,15 @@
       const sp = document.getElementById('cx-f-sellPrice'), sd = document.getElementById('cx-f-sellDate');
       if (sp) patch.sell_price = sp.value ? Number(sp.value) : null;
       if (sd) patch.sell_date = sd.value || null;
+    }
+    if (targetStatus === 'Watchlist') {
+      const wlEl = document.getElementById('cx-f-watchlist');
+      patch.watchlist_name = (wlEl && wlEl.value && wlEl.value !== '__new__') ? wlEl.value : 'General';
+    }
+    const condEl = document.getElementById('cx-f-condition');
+    if (condEl) {
+      patch.condition = condEl.value;
+      if (item.cardmarketUrl) patch.cardmarket_url = applyConditionToUrl(item.cardmarketUrl, condEl.value);
     }
     updateCard(item.dbId, patch).then(function () {
       closeForm();
@@ -555,7 +664,7 @@
   }
 
   window.CardexAuth = { requirePassword: requirePassword, isUnlocked: isUnlocked };
-  window.CardexAPI = { insertCard: insertCard, updateCard: updateCard, deleteCard: deleteCard, insertRetiro: insertRetiro, deleteRetiro: deleteRetiro };
+  window.CardexAPI = { insertCard: insertCard, updateCard: updateCard, deleteCard: deleteCard, insertRetiro: insertRetiro, deleteRetiro: deleteRetiro, insertWatchlist: insertWatchlist };
   window.CardexOpenMove = function (item) { requirePassword(function () { openMoveModal(item); }); };
   window.CardexOpenAdd = function (status) { requirePassword(function () { openAddModal(status); }); };
   window.CardexOpenRetiro = function () { requirePassword(function () { openRetiroModal(); }); };

@@ -3,35 +3,50 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="icon" type="image/svg+xml" href="favicon.svg"/>
 <title>CARDEX — Price Check</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Montserrat:wght@800&display=swap" rel="stylesheet"/>
 <style>
-  :root { --gold:#b8912e; --text:#f2f2f2; --muted:#9a9a9a; --green:#3ddc84; }
+  :root { --gold:#b8912e; --text:#f2f2f2; --muted:#9a9a9a; --green:#3ddc84; --border: rgba(184,145,46,0.3); }
   * { box-sizing:border-box; }
-  body { background:#0a0a0a; color:var(--text); font-family:'DM Sans',sans-serif; margin:0; padding:24px; }
-  .controls { display:flex; gap:10px; align-items:center; margin-bottom:18px; flex-wrap:wrap; }
-  .controls label { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:5px; }
-  .btn { background:rgba(255,255,255,0.06); border:1px solid rgba(184,145,46,0.3); color:var(--text); padding:6px 12px; border-radius:7px; font-size:12px; cursor:pointer; }
+  body { background:#0a0a0a; color:var(--text); font-family:'DM Sans',sans-serif; margin:0; padding:24px; padding-top:80px; }
+  header { position:fixed; top:0; left:0; right:0; z-index:50; background:#000; border-bottom:1px solid var(--border); padding:14px 28px; display:flex; align-items:center; gap:14px; }
+  .logo-text { font-family:'Montserrat',sans-serif; font-weight:800; font-size:22px; letter-spacing:0.02em; background:linear-gradient(135deg,#e8c766,#b8912e 55%,#8a6d1a); -webkit-background-clip:text; background-clip:text; color:transparent; line-height:1; }
+
+  .panel { background:rgba(20,20,20,0.78); border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin-bottom:14px; }
+  .panel-label { font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); font-weight:700; margin-bottom:8px; }
+
+  .scope-panel { display:flex; align-items:center; gap:10px; position:relative; }
+  .scope-dropdown-btn { background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text); padding:8px 14px; border-radius:7px; font-size:13px; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:8px; }
+  .scope-dropdown-btn:hover { border-color:var(--gold); }
+  .scope-dropdown { position:absolute; top:calc(100% + 6px); left:0; background:#161616; border:1px solid var(--border); border-radius:8px; padding:8px; min-width:220px; z-index:60; box-shadow:0 12px 30px rgba(0,0,0,0.6); display:none; }
+  .scope-dropdown.open { display:block; }
+  .scope-option { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:6px; font-size:13px; cursor:pointer; }
+  .scope-option:hover { background:rgba(184,145,46,0.1); }
+  .scope-option input { accent-color:var(--gold); }
+  .scope-divider { height:1px; background:rgba(255,255,255,0.08); margin:6px 0; }
+
+  .actions-panel { display:flex; gap:10px; align-items:center; }
+  .btn { background:rgba(255,255,255,0.06); border:1px solid var(--border); color:var(--text); padding:8px 14px; border-radius:7px; font-size:12.5px; cursor:pointer; font-family:inherit; font-weight:600; }
   .btn:hover { border-color:var(--gold); }
+  .btn.primary { background:var(--gold); color:#000; font-weight:700; border-color:var(--gold); }
+  .btn.primary:hover { background:#d9b04a; }
+
   table { width:100%; border-collapse:collapse; font-size:13px; }
   th { text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); padding:10px 8px; border-bottom:1px solid rgba(184,145,46,0.25); }
   td { padding:8px; border-bottom:1px solid rgba(255,255,255,0.05); vertical-align:middle; }
   td.name { font-size:14px; font-weight:600; }
+  .row-thumb { width:34px; height:34px; border-radius:5px; object-fit:contain; background:#050505; display:block; }
+  .name-cell { display:flex; align-items:center; gap:10px; }
   .check-btn { background:var(--gold); color:#000; text-decoration:none; font-weight:700; padding:5px 12px; border-radius:6px; font-size:12px; display:inline-block; border:none; cursor:pointer; font-family:inherit; }
   .check-btn:hover { background:#d9b04a; }
-  .mark-done { background:none; border:1px solid rgba(255,255,255,0.15); color:var(--muted); padding:5px 10px; border-radius:6px; font-size:11px; cursor:pointer; margin-left:6px; }
   .badge { font-size:10px; padding:2px 7px; border-radius:10px; background:rgba(184,145,46,0.15); color:var(--gold); }
   .new-price-up { color:var(--green); font-weight:700; }
   .new-price-down { color:#ff5a5a; font-weight:700; }
+  .growth-pct { font-size:11px; font-weight:700; margin-left:6px; }
+  .growth-pct.up { color:var(--green); } .growth-pct.down { color:#ff5a5a; }
   .progress { font-size:12px; color:var(--muted); margin-bottom:12px; }
   .empty { color:var(--muted); padding:30px; text-align:center; }
-  header { display:flex; align-items:center; gap:14px; margin-bottom:22px; }
-  .logo-text { font-family:'Montserrat',sans-serif; font-weight:800; font-size:22px; letter-spacing:0.02em; background:linear-gradient(135deg,#e8c766,#b8912e 55%,#8a6d1a); -webkit-background-clip:text; background-clip:text; color:transparent; line-height:1; }
-  .scope-filter { display:flex; gap:6px; }
-  .scope-btn { font-size:12px; font-weight:700; padding:6px 14px; border-radius:7px; border:1px solid rgba(184,145,46,0.35); background:rgba(20,20,20,0.75); color:var(--muted); cursor:pointer; transition:all 0.15s; }
-  .scope-btn:hover { color:var(--text); border-color:rgba(184,145,46,0.6); }
-  .scope-btn.active { background:var(--gold); border-color:var(--gold); color:#000; }
-  .filter-label { font-size:12px; color:var(--muted); font-weight:700; }
 </style>
 </head>
 <body>
@@ -41,15 +56,15 @@
   <span style="font-size:13px;font-weight:700;color:var(--muted);">Price Check</span>
 </header>
 
-<div class="controls">
-  <span class="filter-label">Filter:</span>
-  <div class="scope-filter" id="scope-filter">
-    <button class="scope-btn active" data-scope="holding">My Collection</button>
-    <button class="scope-btn active" data-scope="watchlist">Watchlist</button>
-  </div>
+<div class="panel scope-panel">
+  <span class="panel-label" style="margin:0;">Qué comprobar:</span>
+  <button class="scope-dropdown-btn" id="scope-dropdown-btn"><span id="scope-summary">Todo</span> ▾</button>
+  <div class="scope-dropdown" id="scope-dropdown"></div>
+</div>
+
+<div class="panel actions-panel">
   <button class="btn" id="reload">Load DB</button>
-  <button class="btn" id="bulk-start" style="background:#b8912e;color:#000;font-weight:700;border-color:#b8912e;">Full Price Check</button>
-  <button class="btn" id="bulk-remaining">Check Remaining</button>
+  <button class="btn primary" id="bulk-start">Full Price Check</button>
 </div>
 
 <div class="progress" id="progress"></div>
@@ -65,7 +80,7 @@ const headers = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + SUPABASE_
 const DONE_KEY = 'cdx_pricecheck_done_' + new Date().toISOString().slice(0,10);
 
 // "manualDone" ya no se puede marcar a mano: solo lo rellena el propio script en bloque
-// cuando termina una tanda (handleBulkReturn), para que "Check Remaining" sepa retomar
+// cuando termina una tanda (handleBulkReturn), para que se pueda retomar
 // aunque el updated_at de Supabase tarde en llegar.
 function getDone() { try { return JSON.parse(localStorage.getItem(DONE_KEY) || '[]'); } catch(e) { return []; } }
 function setDone(arr) { localStorage.setItem(DONE_KEY, JSON.stringify(arr)); }
@@ -89,12 +104,84 @@ function b64urlDecode(str) {
 }
 
 let allRows = [];
+let allWatchlistNames = ['General'];
 let baselinePrices = null; // precio guardado en la primera carga de esta sesión, por cardmarket_url
-let scopeHolding = true, scopeWatchlist = true;
+// Selección del multi-select: set de tokens, p.ej. 'holding', 'watchlist:General'
+let selectedScopes = new Set(['holding']);
+let sortByGrowth = false; // se activa al terminar una tanda de bulk-check
+let lastRenderedHtml = null; // para evitar redibujar la tabla si no ha cambiado nada (parpadeo)
+
+async function loadWatchlistNames() {
+  try {
+    const res = await fetch(SUPABASE_URL + "/rest/v1/riftbound_watchlists?select=name&order=created_at", { headers });
+    const rows = await res.json();
+    const names = rows.map(r => r.name);
+    if (!names.includes('General')) names.unshift('General');
+    allWatchlistNames = names;
+  } catch (e) { allWatchlistNames = ['General']; }
+}
+
+function buildScopeDropdown() {
+  const dd = document.getElementById('scope-dropdown');
+  const watchlistOptions = allWatchlistNames.map(n =>
+    `<label class="scope-option"><input type="checkbox" data-scope="watchlist:${n}" ${selectedScopes.has('watchlist:'+n)?'checked':''}/> Watchlist — ${n}</label>`
+  ).join('');
+  dd.innerHTML = `
+    <label class="scope-option"><input type="checkbox" id="scope-all"/> Todo</label>
+    <div class="scope-divider"></div>
+    <label class="scope-option"><input type="checkbox" data-scope="holding" ${selectedScopes.has('holding')?'checked':''}/> My Collection</label>
+    ${watchlistOptions}
+  `;
+  syncAllCheckbox();
+  dd.querySelectorAll('input[data-scope]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      if (cb.checked) selectedScopes.add(cb.dataset.scope); else selectedScopes.delete(cb.dataset.scope);
+      syncAllCheckbox();
+      updateScopeSummary();
+      render();
+    });
+  });
+  document.getElementById('scope-all').addEventListener('change', (e) => {
+    const allTokens = ['holding', ...allWatchlistNames.map(n => 'watchlist:'+n)];
+    if (e.target.checked) { allTokens.forEach(t => selectedScopes.add(t)); }
+    else { selectedScopes.clear(); }
+    buildScopeDropdown();
+    updateScopeSummary();
+    render();
+  });
+}
+
+function syncAllCheckbox() {
+  const allTokens = ['holding', ...allWatchlistNames.map(n => 'watchlist:'+n)];
+  const allChecked = allTokens.every(t => selectedScopes.has(t));
+  const allEl = document.getElementById('scope-all');
+  if (allEl) allEl.checked = allChecked;
+}
+
+function updateScopeSummary() {
+  const allTokens = ['holding', ...allWatchlistNames.map(n => 'watchlist:'+n)];
+  const allChecked = allTokens.every(t => selectedScopes.has(t));
+  let label;
+  if (allChecked) label = 'Todo';
+  else if (selectedScopes.size === 0) label = 'Nothing selected';
+  else if (selectedScopes.size === 1) {
+    const only = Array.from(selectedScopes)[0];
+    label = only === 'holding' ? 'My Collection' : 'Watchlist — ' + only.split(':')[1];
+  } else label = selectedScopes.size + ' selected';
+  document.getElementById('scope-summary').textContent = label;
+}
+
+document.getElementById('scope-dropdown-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('scope-dropdown').classList.toggle('open');
+});
+document.addEventListener('click', (e) => {
+  const dd = document.getElementById('scope-dropdown');
+  if (dd.classList.contains('open') && !dd.contains(e.target) && e.target.id !== 'scope-dropdown-btn') dd.classList.remove('open');
+});
 
 async function load() {
-  document.getElementById('rows').innerHTML = '<tr><td colspan="5" class="empty">Loading…</td></tr>';
-  const res = await fetch(SUPABASE_URL + "/rest/v1/riftbound_inversiones?select=id,card_name,set,current_price,cardmarket_url,status,updated_at&order=cardmarket_url", { headers });
+  const res = await fetch(SUPABASE_URL + "/rest/v1/riftbound_inversiones?select=id,card_name,set,current_price,card_image,cardmarket_url,status,watchlist_name,updated_at&order=cardmarket_url", { headers });
   allRows = await res.json();
   if (!baselinePrices) {
     baselinePrices = {};
@@ -104,19 +191,20 @@ async function load() {
 }
 
 function filteredRows() {
-  return allRows.filter(r =>
-    r.cardmarket_url && (
-      (scopeHolding && r.status === 'Holding') ||
-      (scopeWatchlist && r.status === 'Watchlist')
-    )
-  );
+  return allRows.filter(r => {
+    if (!r.cardmarket_url) return false;
+    if (r.status === 'Holding') return selectedScopes.has('holding');
+    if (r.status === 'Watchlist') return selectedScopes.has('watchlist:' + (r.watchlist_name || 'General'));
+    return false;
+  });
 }
 
 function groupByUrl(rows) {
   const byUrl = {};
   rows.forEach(r => {
-    if (!byUrl[r.cardmarket_url]) byUrl[r.cardmarket_url] = { name: r.card_name, set: r.set, price: r.current_price, ids: [], updatedAt: null };
+    if (!byUrl[r.cardmarket_url]) byUrl[r.cardmarket_url] = { name: r.card_name, set: r.set, price: r.current_price, image: r.card_image, ids: [], updatedAt: null };
     byUrl[r.cardmarket_url].ids.push(r.id);
+    if (!byUrl[r.cardmarket_url].image && r.card_image) byUrl[r.cardmarket_url].image = r.card_image;
     if (!byUrl[r.cardmarket_url].updatedAt || (r.updated_at && r.updated_at > byUrl[r.cardmarket_url].updatedAt)) {
       byUrl[r.cardmarket_url].updatedAt = r.updated_at;
     }
@@ -124,22 +212,46 @@ function groupByUrl(rows) {
   return byUrl;
 }
 
+const FALLBACK_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='34'%3E%3Crect width='34' height='34' fill='%23111'/%3E%3C/svg%3E";
+
 function render() {
   const byUrl = groupByUrl(filteredRows());
   const today = new Date().toISOString().slice(0, 10);
   const manualDone = getDone();
-  const entries = Object.entries(byUrl).sort((a,b) => (a[1].name||'').localeCompare(b[1].name||''));
-  const doneCount = entries.filter(([url, info]) => isDoneToday(url, info, today, manualDone)).length;
+  let entries = Object.entries(byUrl);
 
+  // Cálculo de % de crecimiento respecto al precio base de esta sesión
+  entries.forEach(([url, info]) => {
+    const isDone = isDoneToday(url, info, today, manualDone);
+    const baseline = baselinePrices ? baselinePrices[url] : null;
+    const newPriceNum = info.price != null ? Number(info.price) : null;
+    const baselineNum = baseline != null ? Number(baseline) : null;
+    info._isDone = isDone;
+    info._pct = (isDone && newPriceNum != null && baselineNum) ? (newPriceNum - baselineNum) / baselineNum * 100 : null;
+  });
+
+  if (sortByGrowth) {
+    entries.sort((a, b) => {
+      const pa = a[1]._pct, pb = b[1]._pct;
+      if (pa == null && pb == null) return (a[1].name||'').localeCompare(b[1].name||'');
+      if (pa == null) return 1;
+      if (pb == null) return -1;
+      return pb - pa;
+    });
+  } else {
+    entries.sort((a,b) => (a[1].name||'').localeCompare(b[1].name||''));
+  }
+
+  const doneCount = entries.filter(([url, info]) => info._isDone).length;
   document.getElementById('progress').textContent = doneCount + ' / ' + entries.length + ' checked today';
 
   if (!entries.length) {
-    document.getElementById('rows').innerHTML = '<tr><td colspan="5" class="empty">No cards with a Cardmarket link in the current filter.</td></tr>';
+    setRowsHtml('<tr><td colspan="5" class="empty">No cards with a Cardmarket link in the current selection.</td></tr>');
     return;
   }
 
-  document.getElementById('rows').innerHTML = entries.map(([url, info]) => {
-    const isDone = isDoneToday(url, info, today, manualDone);
+  const html = entries.map(([url, info]) => {
+    const isDone = info._isDone;
     const baseline = baselinePrices ? baselinePrices[url] : null;
     const priceTxt = baseline != null ? Number(baseline).toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €' : '—';
     const newPriceNum = info.price != null ? Number(info.price) : null;
@@ -149,19 +261,29 @@ function render() {
       newPriceClass = newPriceNum > baselineNum ? 'new-price-up' : 'new-price-down';
     }
     const newPriceTxt = isDone ? (newPriceNum != null ? newPriceNum.toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €' : '—') : '—';
+    const pctTxt = (isDone && info._pct != null) ? `<span class="growth-pct ${info._pct>=0?'up':'down'}">${info._pct>=0?'+':''}${info._pct.toFixed(1)}%</span>` : '';
     return `<tr data-url="${url}">
-      <td class="name">${info.name}</td>
+      <td class="name"><div class="name-cell"><img class="row-thumb" src="${info.image || FALLBACK_IMG}" onerror="this.src='${FALLBACK_IMG}'"/><span>${info.name}</span></div></td>
       <td>${info.set || '—'} ${info.ids.length > 1 ? '<span class="badge">x' + info.ids.length + '</span>' : ''}</td>
       <td>${priceTxt}</td>
-      <td class="${newPriceClass}">${newPriceTxt}</td>
+      <td class="${newPriceClass}">${newPriceTxt}${pctTxt}</td>
       <td><button class="check-btn" onclick="startCheckFrom('${url}')">Start checking here</button></td>
     </tr>`;
   }).join('');
+
+  setRowsHtml(html);
+}
+
+// Evita el "parpadeo": solo reescribe el DOM si el contenido realmente ha cambiado.
+function setRowsHtml(html) {
+  if (html === lastRenderedHtml) return;
+  lastRenderedHtml = html;
+  document.getElementById('rows').innerHTML = html;
 }
 
 // Construye la cadena (queue + back-url) y abre la primera carta en una pestaña nueva.
 function openChain(urls, byUrl) {
-  if (!urls.length) { alert('No cards match the current filter.'); return; }
+  if (!urls.length) { alert('No cards match the current selection.'); return; }
   const queue = urls.map(u => ({ u, i: byUrl[u].ids }));
   const backUrl = location.href.split('#')[0] + '#bulkdone=' + b64urlEncode(urls);
   const first = queue[0];
@@ -172,38 +294,26 @@ function openChain(urls, byUrl) {
   window.open(launchUrl, '_blank');
 }
 
-function startBulkCheck(onlyRemaining) {
-  const manualDone = getDone();
-  const today = new Date().toISOString().slice(0, 10);
+function startBulkCheck() {
+  sortByGrowth = false; // durante la tanda, mantenemos el orden alfabético habitual
   const byUrl = groupByUrl(filteredRows());
   let urls = Object.keys(byUrl).sort((a, b) => (byUrl[a].name || '').localeCompare(byUrl[b].name || ''));
-  if (onlyRemaining) urls = urls.filter(u => !isDoneToday(u, byUrl[u], today, manualDone));
-  if (!urls.length) { alert(onlyRemaining ? 'Nothing left to check today with the current filter.' : 'No cards match the current filter.'); return; }
+  if (!urls.length) { alert('No cards match the current selection.'); return; }
   openChain(urls, byUrl);
 }
 
 // Arranca la cadena de comprobación empezando por una carta concreta (por si el script
-// se corta a mitad y hay que retomar desde ahí), respetando el orden y el filtro actual.
+// se corta a mitad y hay que retomar desde ahí), respetando el orden y la selección actual.
 function startCheckFrom(startUrl) {
   const byUrl = groupByUrl(filteredRows());
   let urls = Object.keys(byUrl).sort((a, b) => (byUrl[a].name || '').localeCompare(byUrl[b].name || ''));
   const idx = urls.indexOf(startUrl);
-  if (idx === -1) { alert('This card is not in the current filter.'); return; }
+  if (idx === -1) { alert('This card is not in the current selection.'); return; }
   urls = urls.slice(idx);
   openChain(urls, byUrl);
 }
 
-document.getElementById('bulk-start').addEventListener('click', () => startBulkCheck(false));
-document.getElementById('bulk-remaining').addEventListener('click', () => startBulkCheck(true));
-
-document.querySelectorAll('.scope-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    btn.classList.toggle('active');
-    scopeHolding = document.querySelector('.scope-btn[data-scope="holding"]').classList.contains('active');
-    scopeWatchlist = document.querySelector('.scope-btn[data-scope="watchlist"]').classList.contains('active');
-    render();
-  });
-});
+document.getElementById('bulk-start').addEventListener('click', startBulkCheck);
 
 // Al volver de una tanda en bloque, el script deja aquí #bulkdone=<base64url>
 (function handleBulkReturn() {
@@ -214,17 +324,24 @@ document.querySelectorAll('.scope-btn').forEach(btn => {
     const d = getDone();
     urls.forEach(u => { if (!d.includes(u)) d.push(u); });
     setDone(d);
+    sortByGrowth = true; // al terminar, ordenar por mayor crecimiento %
   } catch (e) { /* noop */ }
   history.replaceState(null, '', location.pathname + location.search);
 })();
 
 document.getElementById('reload').addEventListener('click', load);
 
-load();
+(async function init() {
+  await loadWatchlistNames();
+  buildScopeDropdown();
+  updateScopeSummary();
+  await load();
+})();
 
 // Auto-refresco silencioso: mientras la pestaña esté abierta, vuelve a leer Supabase
 // cada 8s para que "New Price" se vaya viendo casi al momento según se van comprobando cartas
-// (sin esto, solo se actualizaría al pulsar "Load DB" a mano).
+// (sin esto, solo se actualizaría al pulsar "Load DB" a mano). Como render() ahora solo
+// toca el DOM si algo cambió de verdad, esto ya no produce parpadeo visual.
 setInterval(() => { if (!document.hidden) load(); }, 8000);
 </script>
 <script src="cardex-shared.js"></script>

@@ -284,6 +284,20 @@
     @media (max-width:860px)  { .card-grid { grid-template-columns:repeat(4,1fr); column-gap:3vw; padding:0 3vw; } }
     @media (max-width:540px)  { .card-grid { grid-template-columns:repeat(2,1fr); column-gap:2.5vw; padding:0 2.5vw; } .summary-box { grid-template-columns:repeat(2,1fr); } }
     @media (max-width:760px) { .chart-wrap, #modal-spark, .modal-spark-empty { height:220px; } }
+
+    /* ── HOBBY SPEND (cartas + supplies) ── */
+    .hobby-summary { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+    @media (max-width:700px) { .hobby-summary { grid-template-columns:1fr; } }
+    .hobby-stat { background:rgba(20,20,20,0.78); border:1px solid rgba(184,145,46,0.29); border-radius:10px; padding:12px 14px; }
+    .hobby-stat-label { font-size:9.5px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); font-weight:700; }
+    .hobby-stat-value { font-family:'DM Sans',sans-serif; font-size:19px; font-weight:800; letter-spacing:-0.5px; margin-top:3px; }
+    .hobby-list { display:flex; flex-direction:column; gap:4px; margin-bottom:6px; }
+    .hobby-row { display:flex; align-items:center; gap:10px; padding:8px 12px; background:rgba(20,20,20,0.6); border:1px solid rgba(184,145,46,0.16); border-radius:8px; font-size:13px; }
+    .hobby-row-cat { font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--gold); background:rgba(184,145,46,0.12); padding:2px 8px; border-radius:10px; flex-shrink:0; }
+    .hobby-row-name { flex:1; min-width:0; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .hobby-row-date { font-size:11px; color:var(--text-muted); flex-shrink:0; }
+    .hobby-row-price { font-weight:700; flex-shrink:0; }
+    .hobby-empty { font-size:12px; color:var(--text-muted); padding:12px; text-align:center; }
   </style>
 </head>
 <body>
@@ -294,6 +308,15 @@
 </header>
 
 <main>
+  <div class="section-wrap" id="hobby-section">
+    <div class="section-header">
+      <h2>Hobby Spend</h2>
+      <span class="section-count" id="hobby-count"></span>
+    </div>
+    <div class="hobby-summary" id="hobby-summary"></div>
+    <div class="hobby-list" id="hobby-list"></div>
+  </div>
+
   <div class="section-wrap" id="monthly-section">
     <div class="section-header">
       <h2>Monthly Investment</h2>
@@ -565,8 +588,35 @@
     });
   }
 
+  function renderHobbySpend(holding){
+    const paid = holding.filter(c=>c.buyPrice>0);
+    const cardsInvested = paid.reduce((s,c)=>s+c.buyPrice*(c.qty||1),0);
+    const gastos = (window.portfolioData && window.portfolioData.gastos) || [];
+    const suppliesTotal = window.portfolioData.suppliesTotal || 0;
+    const combined = cardsInvested + suppliesTotal;
+
+    document.getElementById('hobby-count').textContent = gastos.length + (gastos.length===1?' item':' items');
+    document.getElementById('hobby-summary').innerHTML = `
+      <div class="hobby-stat"><div class="hobby-stat-label">Cards (Total Invested)</div><div class="hobby-stat-value">${fmt(cardsInvested)}</div></div>
+      <div class="hobby-stat"><div class="hobby-stat-label">Supplies (cases, albums, sleeves…)</div><div class="hobby-stat-value">${fmt(suppliesTotal)}</div></div>
+      <div class="hobby-stat"><div class="hobby-stat-label">Combined — counts towards Total Invested</div><div class="hobby-stat-value">${fmt(combined)}</div></div>
+    `;
+
+    const sorted = gastos.slice().sort((a,b)=> (b.purchase_date||'').localeCompare(a.purchase_date||''));
+    document.getElementById('hobby-list').innerHTML = sorted.length ? sorted.map(g => {
+      const dateTxt = g.purchase_date ? new Date(g.purchase_date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
+      return `<div class="hobby-row">
+        <span class="hobby-row-cat">${g.category || 'Other'}</span>
+        <span class="hobby-row-name">${g.item_name}</span>
+        <span class="hobby-row-date">${dateTxt}</span>
+        <span class="hobby-row-price">${fmt(g.price)}</span>
+      </div>`;
+    }).join('') : '<div class="hobby-empty">No supply expenses logged yet.</div>';
+  }
+
   function renderPage(){
     const holding = (window.portfolioData?.cards || []).filter(c => c.status === 'Holding');
+    renderHobbySpend(holding);
     renderMonthly(holding);
     const upd = window.portfolioData.updatedAt;
     if (upd) document.getElementById('updated-label').textContent = 'Updated ' + new Date(upd+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
