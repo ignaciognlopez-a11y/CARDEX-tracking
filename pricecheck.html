@@ -33,18 +33,20 @@
   .btn.primary:hover { background:#d9b04a; }
 
   table { width:100%; border-collapse:collapse; font-size:13px; }
-  th { text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); padding:10px 8px; border-bottom:1px solid rgba(184,145,46,0.25); }
+  th { text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); padding:10px 8px; border-bottom:1px solid rgba(184,145,46,0.25); white-space:nowrap; }
+  th.sortable { cursor:pointer; user-select:none; }
+  th.sortable:hover { color:var(--text); }
+  .sort-arrow { font-size:9px; margin-left:3px; opacity:0.35; display:inline-block; }
   td { padding:8px; border-bottom:1px solid rgba(255,255,255,0.05); vertical-align:middle; }
   td.name { font-size:14px; font-weight:600; }
   .row-thumb { width:34px; height:34px; border-radius:5px; object-fit:contain; background:#050505; display:block; }
-  .name-cell { display:flex; align-items:center; gap:10px; }
   .check-btn { background:var(--gold); color:#000; text-decoration:none; font-weight:700; padding:5px 12px; border-radius:6px; font-size:12px; display:inline-block; border:none; cursor:pointer; font-family:inherit; }
   .check-btn:hover { background:#d9b04a; }
   .badge { font-size:10px; padding:2px 7px; border-radius:10px; background:rgba(184,145,46,0.15); color:var(--gold); }
+  .list-badge { font-size:11px; padding:3px 9px; border-radius:10px; background:rgba(255,255,255,0.06); color:var(--muted); cursor:pointer; white-space:nowrap; display:inline-block; }
+  .list-badge:hover { background:rgba(184,145,46,0.18); color:var(--gold); }
   .new-price-up { color:var(--green); font-weight:700; }
   .new-price-down { color:#ff5a5a; font-weight:700; }
-  .growth-pct { font-size:11px; font-weight:700; margin-left:6px; }
-  .growth-pct.up { color:var(--green); } .growth-pct.down { color:#ff5a5a; }
   .progress { font-size:12px; color:var(--muted); margin-bottom:12px; }
   .empty { color:var(--muted); padding:30px; text-align:center; }
 </style>
@@ -69,8 +71,18 @@
 
 <div class="progress" id="progress"></div>
 <table>
-  <thead><tr><th>Card</th><th>Set</th><th>Last Price Checked</th><th>New Price</th><th></th></tr></thead>
-  <tbody id="rows"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
+  <thead><tr>
+    <th></th>
+    <th class="sortable" onclick="setSort('list')">List<span class="sort-arrow" id="arrow-list"></span></th>
+    <th class="sortable" onclick="setSort('name')">Card<span class="sort-arrow" id="arrow-name"></span></th>
+    <th class="sortable" onclick="setSort('set')">Set<span class="sort-arrow" id="arrow-set"></span></th>
+    <th class="sortable" onclick="setSort('lastChecked')">Last Price Checked<span class="sort-arrow" id="arrow-lastChecked"></span></th>
+    <th class="sortable" onclick="setSort('newPrice')">New Price<span class="sort-arrow" id="arrow-newPrice"></span></th>
+    <th class="sortable" onclick="setSort('pct')">% Change<span class="sort-arrow" id="arrow-pct"></span></th>
+    <th class="sortable" onclick="setSort('abs')">Total Change<span class="sort-arrow" id="arrow-abs"></span></th>
+    <th></th>
+  </tr></thead>
+  <tbody id="rows"><tr><td colspan="9" class="empty">Loading…</td></tr></tbody>
 </table>
 
 <script>
@@ -84,11 +96,6 @@ const DONE_KEY = 'cdx_pricecheck_done_' + new Date().toISOString().slice(0,10);
 // aunque el updated_at de Supabase tarde en llegar.
 function getDone() { try { return JSON.parse(localStorage.getItem(DONE_KEY) || '[]'); } catch(e) { return []; } }
 function setDone(arr) { localStorage.setItem(DONE_KEY, JSON.stringify(arr)); }
-
-function isDoneToday(url, info, today, manualDone) {
-  const updatedToday = info.updatedAt && info.updatedAt.slice(0, 10) === today;
-  return updatedToday || manualDone.includes(url);
-}
 
 // Codificamos los datos que van en el hash de la URL en base64url (solo A-Z a-z 0-9 - _)
 // para que ningún script de la propia Cardmarket se atragante con corchetes/comillas/comas.
@@ -105,11 +112,13 @@ function b64urlDecode(str) {
 
 let allRows = [];
 let allWatchlistNames = ['General'];
-let baselinePrices = null; // precio guardado en la primera carga de esta sesión, por cardmarket_url
 // Selección del multi-select: set de tokens, p.ej. 'holding', 'watchlist:General'
 let selectedScopes = new Set(['holding']);
-let sortByGrowth = false; // se activa al terminar una tanda de bulk-check
+let sortColumn = 'name'; // por defecto, ordenado por Card asc
+let sortDir = 'asc';
 let lastRenderedHtml = null; // para evitar redibujar la tabla si no ha cambiado nada (parpadeo)
+
+const SORT_KEYS = ['list','name','set','lastChecked','newPrice','pct','abs'];
 
 async function loadWatchlistNames() {
   try {
@@ -171,6 +180,52 @@ function updateScopeSummary() {
   document.getElementById('scope-summary').textContent = label;
 }
 
+// Clic en el badge de "List" de una fila: filtra rápidamente a esa lista en concreto.
+function filterToList(token) {
+  selectedScopes = new Set([token]);
+  buildScopeDropdown();
+  updateScopeSummary();
+  render();
+}
+
+// Clic en la cabecera de una columna: ordena por esa métrica (asc -> desc -> asc...).
+function setSort(key) {
+  if (sortColumn === key) {
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortColumn = key;
+    sortDir = 'asc';
+  }
+  render();
+}
+
+function updateSortArrows() {
+  SORT_KEYS.forEach(k => {
+    const el = document.getElementById('arrow-' + k);
+    if (!el) return;
+    if (sortColumn === k) {
+      el.textContent = sortDir === 'asc' ? '▲' : '▼';
+      el.style.opacity = '1';
+    } else {
+      el.textContent = '⇅';
+      el.style.opacity = '0.35';
+    }
+  });
+}
+
+function compareValues(a, b, key, dir) {
+  const va = a[1][key], vb = b[1][key];
+  const aNull = va == null || va === '';
+  const bNull = vb == null || vb === '';
+  if (aNull && bNull) return 0;
+  if (aNull) return 1; // los vacíos siempre al final, sea cual sea la dirección
+  if (bNull) return -1;
+  if (typeof va === 'string') {
+    return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+  }
+  return dir === 'asc' ? va - vb : vb - va;
+}
+
 document.getElementById('scope-dropdown-btn').addEventListener('click', (e) => {
   e.stopPropagation();
   document.getElementById('scope-dropdown').classList.toggle('open');
@@ -181,12 +236,8 @@ document.addEventListener('click', (e) => {
 });
 
 async function load() {
-  const res = await fetch(SUPABASE_URL + "/rest/v1/riftbound_inversiones?select=id,card_name,set,current_price,card_image,cardmarket_url,status,watchlist_name,updated_at&order=cardmarket_url", { headers });
+  const res = await fetch(SUPABASE_URL + "/rest/v1/riftbound_inversiones?select=id,card_name,set,current_price,card_image,cardmarket_url,status,watchlist_name,updated_at,price_history&order=cardmarket_url", { headers });
   allRows = await res.json();
-  if (!baselinePrices) {
-    baselinePrices = {};
-    allRows.forEach(r => { if (r.cardmarket_url && !(r.cardmarket_url in baselinePrices)) baselinePrices[r.cardmarket_url] = r.current_price; });
-  }
   render();
 }
 
@@ -202,11 +253,22 @@ function filteredRows() {
 function groupByUrl(rows) {
   const byUrl = {};
   rows.forEach(r => {
-    if (!byUrl[r.cardmarket_url]) byUrl[r.cardmarket_url] = { name: r.card_name, set: r.set, price: r.current_price, image: r.card_image, ids: [], updatedAt: null };
-    byUrl[r.cardmarket_url].ids.push(r.id);
-    if (!byUrl[r.cardmarket_url].image && r.card_image) byUrl[r.cardmarket_url].image = r.card_image;
-    if (!byUrl[r.cardmarket_url].updatedAt || (r.updated_at && r.updated_at > byUrl[r.cardmarket_url].updatedAt)) {
-      byUrl[r.cardmarket_url].updatedAt = r.updated_at;
+    if (!byUrl[r.cardmarket_url]) {
+      byUrl[r.cardmarket_url] = {
+        name: r.card_name, set: r.set, price: r.current_price, image: r.card_image,
+        ids: [], updatedAt: null, history: r.price_history || [],
+        list: r.status === 'Holding' ? 'My Collection' : ('Watchlist — ' + (r.watchlist_name || 'General')),
+        listToken: r.status === 'Holding' ? 'holding' : ('watchlist:' + (r.watchlist_name || 'General'))
+      };
+    }
+    const g = byUrl[r.cardmarket_url];
+    g.ids.push(r.id);
+    if (!g.image && r.card_image) g.image = r.card_image;
+    // Nos quedamos con el precio y el historial de la fila más recientemente actualizada.
+    if (!g.updatedAt || (r.updated_at && r.updated_at > g.updatedAt)) {
+      g.updatedAt = r.updated_at;
+      g.history = r.price_history || [];
+      g.price = r.current_price;
     }
   });
   return byUrl;
@@ -220,53 +282,63 @@ function render() {
   const manualDone = getDone();
   let entries = Object.entries(byUrl);
 
-  // Cálculo de % de crecimiento respecto al precio base de esta sesión
+  // "Last Price Checked" = último precio registrado en el historial ANTES de hoy (nunca cambia
+  // aunque vuelvas a comprobar la carta hoy varias veces). "New Price" = precio actual, solo
+  // se muestra si ya se ha comprobado hoy. % y variación total se calculan entre esos dos valores.
   entries.forEach(([url, info]) => {
-    const isDone = isDoneToday(url, info, today, manualDone);
-    const baseline = baselinePrices ? baselinePrices[url] : null;
-    const newPriceNum = info.price != null ? Number(info.price) : null;
-    const baselineNum = baseline != null ? Number(baseline) : null;
+    const history = info.history || [];
+    const priorEntries = history.filter(h => h.date < today);
+    const lastChecked = priorEntries.length ? Number(priorEntries[priorEntries.length - 1].price) : null;
+    const hasTodayEntry = history.some(h => h.date === today);
+    const isDone = hasTodayEntry || (info.updatedAt && info.updatedAt.slice(0, 10) === today) || manualDone.includes(url);
+    const newPrice = isDone ? Number(info.price) : null;
+    const pct = (newPrice != null && lastChecked != null && lastChecked !== 0) ? (newPrice - lastChecked) / lastChecked * 100 : null;
+    const abs = (newPrice != null && lastChecked != null) ? newPrice - lastChecked : null;
+
     info._isDone = isDone;
-    info._pct = (isDone && newPriceNum != null && baselineNum) ? (newPriceNum - baselineNum) / baselineNum * 100 : null;
+    info.lastChecked = lastChecked;
+    info.newPrice = newPrice;
+    info.pct = pct;
+    info.abs = abs;
   });
 
-  if (sortByGrowth) {
-    entries.sort((a, b) => {
-      const pa = a[1]._pct, pb = b[1]._pct;
-      if (pa == null && pb == null) return (a[1].name||'').localeCompare(b[1].name||'');
-      if (pa == null) return 1;
-      if (pb == null) return -1;
-      return pb - pa;
-    });
-  } else {
-    entries.sort((a,b) => (a[1].name||'').localeCompare(b[1].name||''));
-  }
+  entries.sort((a, b) => {
+    const c = compareValues(a, b, sortColumn, sortDir);
+    if (c !== 0) return c;
+    return (a[1].name || '').localeCompare(b[1].name || ''); // desempate estable
+  });
 
   const doneCount = entries.filter(([url, info]) => info._isDone).length;
   document.getElementById('progress').textContent = doneCount + ' / ' + entries.length + ' checked today';
 
+  updateSortArrows();
+
   if (!entries.length) {
-    setRowsHtml('<tr><td colspan="5" class="empty">No cards with a Cardmarket link in the current selection.</td></tr>');
+    setRowsHtml('<tr><td colspan="9" class="empty">No cards with a Cardmarket link in the current selection.</td></tr>');
     return;
   }
 
   const html = entries.map(([url, info]) => {
-    const isDone = info._isDone;
-    const baseline = baselinePrices ? baselinePrices[url] : null;
-    const priceTxt = baseline != null ? Number(baseline).toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €' : '—';
-    const newPriceNum = info.price != null ? Number(info.price) : null;
-    const baselineNum = baseline != null ? Number(baseline) : null;
+    const lastCheckedTxt = info.lastChecked != null ? Number(info.lastChecked).toLocaleString('de-DE', {minimumFractionDigits:2}) + ' €' : '—';
+    const newPriceTxt = info.newPrice != null ? Number(info.newPrice).toLocaleString('de-DE', {minimumFractionDigits:2}) + ' €' : '—';
     let newPriceClass = '';
-    if (isDone && newPriceNum != null && baselineNum != null && newPriceNum !== baselineNum) {
-      newPriceClass = newPriceNum > baselineNum ? 'new-price-up' : 'new-price-down';
+    if (info.newPrice != null && info.lastChecked != null && info.newPrice !== info.lastChecked) {
+      newPriceClass = info.newPrice > info.lastChecked ? 'new-price-up' : 'new-price-down';
     }
-    const newPriceTxt = isDone ? (newPriceNum != null ? newPriceNum.toLocaleString('de-DE',{minimumFractionDigits:2}) + ' €' : '—') : '—';
-    const pctTxt = (isDone && info._pct != null) ? `<span class="growth-pct ${info._pct>=0?'up':'down'}">${info._pct>=0?'+':''}${info._pct.toFixed(1)}%</span>` : '';
+    const pctTxt = info.pct != null ? (info.pct >= 0 ? '+' : '') + info.pct.toFixed(1) + '%' : '—';
+    const pctClass = info.pct != null ? (info.pct >= 0 ? 'new-price-up' : 'new-price-down') : '';
+    const absTxt = info.abs != null ? (info.abs >= 0 ? '+' : '') + Number(info.abs).toLocaleString('de-DE', {minimumFractionDigits:2}) + ' €' : '—';
+    const absClass = info.abs != null ? (info.abs >= 0 ? 'new-price-up' : 'new-price-down') : '';
+
     return `<tr data-url="${url}">
-      <td class="name"><div class="name-cell"><a href="${url}" target="_blank" rel="noopener" title="Abrir en Cardmarket"><img class="row-thumb" src="${info.image || FALLBACK_IMG}" onerror="this.src='${FALLBACK_IMG}'" style="cursor:pointer;"/></a><span>${info.name}</span></div></td>
+      <td><a href="${url}" target="_blank" rel="noopener" title="Abrir en Cardmarket"><img class="row-thumb" src="${info.image || FALLBACK_IMG}" onerror="this.src='${FALLBACK_IMG}'" style="cursor:pointer;"/></a></td>
+      <td><span class="list-badge" onclick="filterToList('${info.listToken}')" title="Filtrar por esta lista">${info.list}</span></td>
+      <td class="name">${info.name}</td>
       <td>${info.set || '—'} ${info.ids.length > 1 ? '<span class="badge">x' + info.ids.length + '</span>' : ''}</td>
-      <td>${priceTxt}</td>
-      <td class="${newPriceClass}">${newPriceTxt}${pctTxt}</td>
+      <td>${lastCheckedTxt}</td>
+      <td class="${newPriceClass}">${newPriceTxt}</td>
+      <td class="${pctClass}">${pctTxt}</td>
+      <td class="${absClass}">${absTxt}</td>
       <td><button class="check-btn" onclick="startCheckFrom('${url}')">Start checking here</button></td>
     </tr>`;
   }).join('');
@@ -295,7 +367,7 @@ function openChain(urls, byUrl) {
 }
 
 function startBulkCheck() {
-  sortByGrowth = false; // durante la tanda, mantenemos el orden alfabético habitual
+  sortColumn = 'name'; sortDir = 'asc'; // durante la tanda, mantenemos el orden alfabético habitual
   const byUrl = groupByUrl(filteredRows());
   let urls = Object.keys(byUrl).sort((a, b) => (byUrl[a].name || '').localeCompare(byUrl[b].name || ''));
   if (!urls.length) { alert('No cards match the current selection.'); return; }
@@ -324,7 +396,7 @@ document.getElementById('bulk-start').addEventListener('click', startBulkCheck);
     const d = getDone();
     urls.forEach(u => { if (!d.includes(u)) d.push(u); });
     setDone(d);
-    sortByGrowth = true; // al terminar, ordenar por mayor crecimiento %
+    sortColumn = 'pct'; sortDir = 'desc'; // al terminar, ordenar por mayor variación %
   } catch (e) { /* noop */ }
   history.replaceState(null, '', location.pathname + location.search);
 })();
