@@ -153,69 +153,220 @@
   }
 
   // ---------- Autocompletado de imagen a partir del Card Number ----------
-  // Nota de fiabilidad: static.dotgg.gg indexa las imágenes por número de carta,
-  // y ese número puede repetirse entre sets distintos con arte diferente (mismo
-  // caveat que ya usamos en las sesiones manuales de precios). Por eso esto es
-  // "mejor esfuerzo": si detectas que alguna imagen rellenada automáticamente no
-  // coincide con la carta real, dímelo en el chat y la corrijo a mano.
-  function candidateImageUrls(cardNumber) {
-    const n = String(cardNumber).trim();
-    if (!n) return [];
-    const padded = n.length < 3 ? ('000' + n).slice(-3) : n;
-    const urls = ['https://static.dotgg.gg/riftbound/cards/' + padded + '.webp'];
-    if (padded !== n) urls.push('https://static.dotgg.gg/riftbound/cards/' + n + '.webp');
+  // dotgg.gg indexa por número de carta, pero las VARIANTES (Overnumbered,
+  // Signature, alt art) llevan un sufijo de letra en el nombre del fichero
+  // (p. ej. 303s = signature, 246b = alt art). La versión anterior de este
+  // código sólo probaba el número pelado, así que fallaba en toda variante.
+  // Ahora probamos una matriz de candidatos y nos quedamos con el primero que
+  // exista, priorizando el sufijo más probable según la rareza de la carta.
+  //
+  // El prefijo de set (p. ej. "OGN-") no se adivina: se APRENDE de las cartas
+  // del mismo set que ya tienen imagen de dotgg guardada. Así el patrón se
+  // ajusta solo a cada set nuevo sin tocar el código.
+  const DOTGG_BASE = 'https://static.dotgg.gg/riftbound/cards/';
+
+  function learnPrefixesBySet(cards) {
+    const map = {};
+    (cards || []).forEach(function (c) {
+      if (!c.image || c.image.indexOf(DOTGG_BASE) !== 0) return;
+      const file = c.image.slice(DOTGG_BASE.length).replace(/\.webp$/i, '');
+      const m = file.match(/^(.*?)(\d{1,4})[a-z]?$/i);   // "OGN-303s" -> prefijo "OGN-"
+      if (!m) return;
+      const key = (c.set || '').trim();
+      if (!map[key]) map[key] = {};
+      map[key][m[1]] = (map[key][m[1]] || 0) + 1;
+    });
+    // nos quedamos con el prefijo más frecuente de cada set
+    const best = {};
+    Object.keys(map).forEach(function (setName) {
+      best[setName] = Object.keys(map[setName]).sort(function (a, b) {
+        return map[setName][b] - map[setName][a];
+      })[0];
+    });
+    return best;
+  }
+
+  function suffixOrderFor(card) {
+    const r = (card.rarity || '').toLowerCase();
+    const n = (card.name || '').toLowerCase();
+    // Signature / firmadas -> "s" primero
+    if (r.indexOf('signature') !== -1 || n.indexOf('signed') !== -1) return ['s', 'b', 'a', '', 'c'];
+    // Overnumbered / Showcase / alt art -> letras primero
+    if (r.indexOf('overnumbered') !== -1 || r.indexOf('plated') !== -1 ||
+        n.indexOf('showcase') !== -1 || n.indexOf('alt') !== -1) return ['b', 'a', 's', 'c', ''];
+    // resto: número pelado primero
+    return ['', 'b', 'a', 's', 'c'];
+  }
+
+  function candidateImageUrls(card, prefixBySet) {
+    const raw = String(card.cardNumber == null ? '' : card.cardNumber).trim();
+    if (!raw) return [];
+    // el card_number puede venir ya como "OGN-237" o como "237"
+    const m = raw.match(/^(.*?)(\d{1,4})([a-z]?)$/i);
+    if (!m) return [];
+    const ownPrefix = m[1];
+    const digits = m[2];
+    const ownSuffix = (m[3] || '').toLowerCase();
+    const padded = digits.length < 3 ? ('000' + digits).slice(-3) : digits;
+
+    const learned = (prefixBySet && prefixBySet[(card.set || '').trim()]) || '';
+    // prefijos a probar, sin duplicados y en orden de confianza
+    const prefixes = [];
+    [ownPrefix, learned, ''].forEach(function (p) {
+      if (p && prefixes.indexOf(p) === -1) prefixes.push(p);
+    });
+    if (prefixes.indexOf('') === -1) prefixes.push('');   // el número pelado, siempre el último recurso
+    // si el propio número ya traía sufijo, ése manda
+    const suffixes = ownSuffix ? [ownSuffix].concat(suffixOrderFor(card)) : suffixOrderFor(card);
+
+    const urls = [];
+    prefixes.forEach(function (p) {
+      suffixes.forEach(function (sfx) {
+        [padded, digits].forEach(function (num) {
+          const u = DOTGG_BASE + p + num + sfx + '.webp';
+          if (urls.indexOf(u) === -1) urls.push(u);
+        });
+      });
+    });
     return urls;
   }
+
   function probeImage(url) {
     return new Promise(function (resolve) {
       const img = new Image();
       let done = false;
       const finish = function (result) { if (!done) { done = true; resolve(result); } };
-      img.onload = function () { finish(url); };
+      img.onload = function () { finish(img.naturalWidth > 1 ? url : null); };
       img.onerror = function () { finish(null); };
-      setTimeout(function () { finish(null); }, 6000); // por si la petición se queda colgada sin disparar onload/onerror
+      setTimeout(function () { finish(null); }, 8000);
       img.src = url;
     });
   }
-  function resolveImageForCardNumber(cardNumber) {
-    const candidates = candidateImageUrls(cardNumber);
+
+  // Lanzamos todos los candidatos a la vez (son peticiones de imagen, baratas)
+  // y nos quedamos con el primero que exista SEGÚN EL ORDEN DE PRIORIDAD,
+  // no según cuál conteste antes.
+  function resolveImageForCard(card, prefixBySet) {
+    const candidates = candidateImageUrls(card, prefixBySet);
     if (!candidates.length) return Promise.resolve(null);
-    return candidates.reduce(function (p, url) {
-      return p.then(function (found) { return found ? found : probeImage(url); });
-    }, Promise.resolve(null));
+    return Promise.all(candidates.map(probeImage)).then(function (results) {
+      for (let i = 0; i < results.length; i++) { if (results[i]) return results[i]; }
+      return null;
+    });
   }
+
+  // ---------- Resolución de Card Number (y set real) por NOMBRE, via riftdecks.com ----------
+  // Las 42 cartas que llegan sin card_number (todas las añadidas con "+ Add card" antes de
+  // este arreglo) no tienen NADA que dotgg pueda buscar por número. riftdecks.com sí permite
+  // ir de nombre -> numero: sus URLs de ficha son slugs derivados del nombre, y la imagen que
+  // muestran codifica en el propio nombre de fichero el set de impresion real y el numero
+  // (p.ej. ven-149-166_full.png, o sfd-084-221_full.png para una carta que Cardmarket lista
+  // bajo "Vendetta" pero que en realidad se imprimio en Spiritforged - esto pasa a menudo con
+  // identidades de campeon reutilizadas entre sets, así que este paso corrige el set a la vez).
+  //
+  // IMPORTANTE - esto no está verificado en vivo: depende de que riftdecks.com permita que
+  // fetch() lea su respuesta desde otro dominio (CORS). Si el sitio no lo permite, el fetch
+  // fallará silenciosamente y esa carta caerá en la lista de "sin encontrar" de siempre, sin
+  // romper nada. Si tras subir esto la mayoría de cartas de Vendetta se resuelven solas, CORS
+  // está abierto y funciona; si no, hay que decírselo a Claude para que lo resuelva por chat.
+  const RIFTDECKS_SET_NAMES = { VEN: 'Vendetta', OGN: 'Origins', SFD: 'Spiritforged', UNL: 'Unleashed', OGS: 'Origins Promos' };
+
+  function riftdecksSlug(name) {
+    return String(name || '')
+      .toLowerCase()
+      .replace(/['']/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  function lookupRiftdecksByName(cardName) {
+    const slug = riftdecksSlug(cardName);
+    if (!slug) return Promise.resolve(null);
+    return fetch('https://riftdecks.com/cards/details-' + slug)
+      .then(function (r) { return r.ok ? r.text() : null; })
+      .then(function (html) {
+        if (!html) return null;
+        const m = html.match(/img\/cards\/riftbound\/([A-Z]+)\/[a-z]+-(\d{1,4}[a-z]?)-\d+_full\.png/i);
+        if (!m) return null;
+        const setCode = m[1].toUpperCase();
+        const numberRaw = m[2]; // puede venir como "149" o "046a"
+        return {
+          cardNumber: setCode + '-' + numberRaw,
+          set: RIFTDECKS_SET_NAMES[setCode] || null,
+          image: 'https://riftdecks.com/img/cards/riftbound/' + setCode + '/' + setCode.toLowerCase() + '-' + numberRaw + '-999_full.png'
+        };
+      })
+      .catch(function () { return null; }); // CORS u otro fallo de red: se trata como "sin match", nunca rompe el flujo
+  }
+
   function fixMissingImages() {
     const cards = (window.portfolioData && window.portfolioData.cards) || [];
+    const prefixBySet = learnPrefixesBySet(cards);
     const targets = cards.filter(function (c) { return !c.image && c.cardNumber; });
-    if (!targets.length) {
-      window.alert('Nothing to fix: every card without an image is also missing its Card Number, so there is nothing to look up yet.');
-      return;
-    }
-    window.alert('Checking ' + targets.length + ' card(s) for images — this can take a few seconds, please wait.');
-    const chain = targets.reduce(function (p, c) {
+    const noNumber = cards.filter(function (c) { return !c.image && !c.cardNumber; });
+    window.alert('Checking ' + (targets.length + noNumber.length) + ' card(s) for images — this can take a while, please wait.');
+
+    // FASE 1: cartas sin card_number - intentar resolver nombre -> numero/set via riftdecks
+    const phase1 = noNumber.reduce(function (p, c) {
       return p.then(function (results) {
-        return resolveImageForCardNumber(c.cardNumber).then(function (url) {
-          if (url) {
-            return updateCard(c.dbId, { card_image: url }).then(function () { results.fixed++; return results; }).catch(function (err) {
-              results.errors.push(c.name + ' (' + c.cardNumber + '): ' + err.message);
+        return lookupRiftdecksByName(c.name).then(function (found) {
+          if (found) {
+            const patch = { card_number: found.cardNumber, card_image: found.image };
+            if (found.set && !c.set) patch.set = found.set;
+            return updateCard(c.dbId, patch).then(function () {
+              results.fixedViaName++;
+              return results;
+            }).catch(function (err) {
+              results.errors.push(c.name + ': ' + err.message);
               return results;
             });
           }
-          results.skippedNames.push(c.name + ' (' + c.cardNumber + ')');
+          results.stillUnresolved.push(c.name);
           return results;
         });
       });
-    }, Promise.resolve({ fixed: 0, skippedNames: [], errors: [] }));
+    }, Promise.resolve({ fixedViaName: 0, stillUnresolved: [], errors: [] }));
+
+    // FASE 2: cartas que ya tenían card_number - matriz de candidatos en dotgg (como antes)
+    const chain = phase1.then(function (phase1Results) {
+      return targets.reduce(function (p, c) {
+        return p.then(function (results) {
+          return resolveImageForCard(c, prefixBySet).then(function (url) {
+            if (url) {
+              return updateCard(c.dbId, { card_image: url }).then(function () {
+                results.fixed++;
+                const file = url.slice(DOTGG_BASE.length).replace(/\.webp$/i, '');
+                const mm = file.match(/^(.*?)(\d{1,4})[a-z]?$/i);
+                if (mm) prefixBySet[(c.set || '').trim()] = mm[1];
+                return results;
+              }).catch(function (err) {
+                results.errors.push(c.name + ' (' + c.cardNumber + '): ' + err.message);
+                return results;
+              });
+            }
+            results.skippedNames.push(c.name + ' (' + c.cardNumber + ')');
+            return results;
+          });
+        });
+      }, Promise.resolve({ fixed: 0, skippedNames: [], errors: [], phase1: phase1Results }));
+    });
+
     chain.then(function (results) {
-      let msg = 'Done — ' + results.fixed + ' image(s) filled in automatically.';
+      const p1 = results.phase1;
+      let msg = 'Done.';
+      if (p1.fixedViaName) msg += '\n\n' + p1.fixedViaName + ' card(s) resolved automatically by NAME (riftdecks.com) - Card Number, set and image filled in.';
+      if (results.fixed) msg += '\n\n' + results.fixed + ' more image(s) filled in by Card Number (dotgg.gg).';
+      if (p1.stillUnresolved.length) {
+        msg += '\n\nCould not resolve by name (' + p1.stillUnresolved.length + '):\n' + p1.stillUnresolved.join('\n') +
+          '\n\nEither riftdecks.com does not have these, or this browser cannot read cross-origin data from it. Paste this list to Claude in chat.';
+      }
       if (results.skippedNames.length) {
-        msg += '\n\nNo match found for:\n' + results.skippedNames.join('\n') +
-          '\n\nTell Claude in chat about these — dotgg.gg doesn\'t have them, but they can usually be found on tcggo.com and added by hand.';
+        msg += '\n\nStill no image match on dotgg.gg for:\n' + results.skippedNames.join('\n');
       }
-      if (results.errors.length) {
-        msg += '\n\nCould not save to Supabase:\n' + results.errors.join('\n');
+      if (results.errors.length || p1.errors.length) {
+        msg += '\n\nCould not save to Supabase:\n' + results.errors.concat(p1.errors).join('\n');
       }
-      if (results.fixed) msg += '\n\nPlease double-check the new images look right — the same card number can exist in more than one set with different art.';
+      if (results.fixed || p1.fixedViaName) msg += '\n\nPlease double-check the new images and numbers look right.';
       window.alert(msg);
       return window.CardexReload();
     }).then(function () {
@@ -475,22 +626,26 @@
     const conditionRow = (!isSealed) ?
       '<div class="cx-form-row"><label>Condition</label><select id="cx-f-condition">' + conditionOptionsHtml(CONDITION_OPTIONS.indexOf(item.condition) !== -1 ? item.condition : 'NM') + '</select></div>' : '';
     const qtyRow = '<div class="cx-form-row"><label>Quantity</label><input type="number" step="1" min="1" id="cx-f-qty" value="' + (item.qty != null ? item.qty : 1) + '"/></div>';
+    // Editable en cualquier estado: sin esto no había forma de rellenar el Card Number
+    // de una carta ya guardada, ni siquiera abriendo su ficha - solo se pedía (opcional)
+    // al darla de alta por primera vez. Sin numero, Fix Images no puede resolver su imagen.
+    const cardNumberRow = '<div class="cx-form-row"><label>Card Number</label><input type="text" id="cx-f-cardnumber" value="' + (item.cardNumber != null ? item.cardNumber : '') + '" placeholder="e.g. 303 or OGN-303"/></div>';
     if (status === 'Holding') {
       return '<div class="cx-form-grid2">' +
         '<div class="cx-form-row"><label>Buy Price (€ / unit)</label><input type="number" step="0.01" id="cx-f-buyPrice" value="' + (item.buyPrice != null ? item.buyPrice : '') + '"/></div>' +
         '<div class="cx-form-row"><label>Buy Date</label><input type="date" id="cx-f-buyDate" value="' + (item.buyDate || '') + '"/></div>' +
-        '</div>' + qtyRow + conditionRow;
+        '</div>' + qtyRow + conditionRow + cardNumberRow;
     }
     if (status === 'Sold') {
       return '<div class="cx-form-grid2">' +
         '<div class="cx-form-row"><label>Sell Price (€ / unit)</label><input type="number" step="0.01" id="cx-f-sellPrice" value="' + (item.sellPrice != null ? item.sellPrice : '') + '"/></div>' +
         '<div class="cx-form-row"><label>Sell Date</label><input type="date" id="cx-f-sellDate" value="' + (item.sellDate || '') + '"/></div>' +
-        '</div>' + qtyRow + conditionRow;
+        '</div>' + qtyRow + conditionRow + cardNumberRow;
     }
     if (status === 'Watchlist') {
-      return '<div class="cx-form-row"><label>Watchlist</label><select id="cx-f-watchlist">' + watchlistOptionsHtml(item.watchlistName || 'General') + '</select></div>' + conditionRow;
+      return '<div class="cx-form-row"><label>Watchlist</label><select id="cx-f-watchlist">' + watchlistOptionsHtml(item.watchlistName || 'General') + '</select></div>' + conditionRow + cardNumberRow;
     }
-    return conditionRow;
+    return conditionRow + cardNumberRow;
   }
 
   const SELLER_COUNTRY_LIST = '1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4';
@@ -585,6 +740,8 @@
         }).join('') +
         '</div>' +
         '<div class="cx-form-row"><label>Cardmarket link(s)</label><textarea id="cx-f-url" rows="3" placeholder="Paste one or several links, one per line.&#10;Optional: add a price at the end of a line, e.g. https://... 25.50"></textarea><div id="cx-f-url-count" style="font-size:11px;color:var(--text-muted);margin-top:3px;min-height:14px;"></div></div>' +
+        '<div class="cx-form-row"><label>Card Number (optional)</label><input type="text" id="cx-f-cardnumber" placeholder="e.g. 303 or OGN-303 - check the Cardmarket page or card gallery"/></div>' +
+        '<div style="font-size:11px;color:var(--text-muted);margin:-6px 0 8px;line-height:1.4;">Without a Card Number, Fix Images cannot find this card automatically later. If pasting several links with different numbers, leave blank and set each one from its detail view afterward.</div>' +
         (showPrice ? '<div class="cx-form-grid2">' +
           '<div class="cx-form-row"><label>' + priceLabel + '</label><input type="number" step="0.01" id="cx-f-price"/></div>' +
           '<div class="cx-form-row"><label>Quantity</label><input type="number" step="1" min="1" id="cx-f-qty" value="1"/></div>' +
@@ -690,6 +847,9 @@
     let qty = qtyEl ? parseInt(qtyEl.value, 10) : 1;
     if (!qty || qty < 1) qty = 1;
 
+    const cardNumberEl = document.getElementById('cx-f-cardnumber');
+    const cardNumberValue = (cardNumberEl && cardNumberEl.value.trim()) ? cardNumberEl.value.trim() : null;
+
     if (priceRequired) {
       const missing = lines.filter(function (l) { return l.inlinePrice == null && (globalPrice == null || isNaN(globalPrice)); });
       if (missing.length) {
@@ -727,6 +887,7 @@
         condition: conditionValue,
         cardmarket_url: normalizedUrl,
         card_image: null,
+        card_number: cardNumberValue,
         status: status,
         quantity: qty,
         current_price: unitPrice
@@ -813,6 +974,8 @@
       patch.condition = condEl.value;
       if (item.cardmarketUrl) patch.cardmarket_url = applyConditionToUrl(item.cardmarketUrl, condEl.value);
     }
+    const cardNumberEl2 = document.getElementById('cx-f-cardnumber');
+    if (cardNumberEl2) patch.card_number = cardNumberEl2.value.trim() || null;
     updateCard(item.dbId, patch).then(function () {
       closeForm();
       return window.CardexReload();

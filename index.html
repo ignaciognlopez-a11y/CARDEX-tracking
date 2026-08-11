@@ -408,7 +408,7 @@
   const METRICS = {
     'invested-metric': {
       title: 'Total Invested',
-      series: () => buildSeries(d => allCards.filter(c=>c.status==='Holding' && c.buyPrice>0 && c.buyDate && c.buyDate<=d).reduce((s,c)=>s+Number(c.buyPrice),0) + suppliesUpTo(d)),
+      series: () => buildSeries(d => allCards.filter(c=>c.status==='Holding' && c.buyPrice>0 && c.buyDate && c.buyDate<=d).reduce((s,c)=>s+Number(c.buyPrice)*(c.qty||1),0) + suppliesUpTo(d)),
       rows: () => cachedPaid.map(c=>({ item:c, v:Number(c.buyPrice),
         m1:{label:'Buy Price', value: fmt(c.buyPrice)},
         m2:{label:'Buy Date', value: c.buyDate ? new Date(c.buyDate+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'} })).sort((a,b)=>b.v-a.v),
@@ -417,8 +417,8 @@
     'pnl-metric': {
       title: 'P&L',
       series: () => buildSeries(d => {
-        const inv = allCards.filter(c=>c.status==='Holding' && c.buyPrice>0 && c.buyDate && c.buyDate<=d).reduce((s,c)=>s+Number(c.buyPrice),0);
-        const val = allCards.filter(c=>c.status==='Holding' && c.buyPrice>0 && c.buyDate && c.buyDate<=d).reduce((s,c)=>s+(priceOfCardAt(c,d)||0),0);
+        const inv = allCards.filter(c=>c.status==='Holding' && c.buyPrice>0 && c.buyDate && c.buyDate<=d).reduce((s,c)=>s+Number(c.buyPrice)*(c.qty||1),0);
+        const val = allCards.filter(c=>c.status==='Holding' && c.buyPrice>0 && c.buyDate && c.buyDate<=d).reduce((s,c)=>s+(priceOfCardAt(c,d)||0)*(c.qty||1),0);
         return val - inv;
       }),
       rows: () => cachedPaid.map(c=>{ const eur=(c.currentPrice-c.buyPrice)*(c.qty||1); const pct=c.buyPrice? (c.currentPrice-c.buyPrice)/c.buyPrice*100 : 0;
@@ -427,7 +427,7 @@
     },
     'paid-metric': {
       title: 'Paid Positions Value',
-      series: () => buildSeries(d => allCards.filter(c=>c.status==='Holding' && c.buyPrice>0 && c.buyDate && c.buyDate<=d).reduce((s,c)=>s+(priceOfCardAt(c,d)||0),0)),
+      series: () => buildSeries(d => allCards.filter(c=>c.status==='Holding' && c.buyPrice>0 && c.buyDate && c.buyDate<=d).reduce((s,c)=>s+(priceOfCardAt(c,d)||0)*(c.qty||1),0)),
       rows: () => cachedPaid.map(c=>({ item:c, v:c.currentPrice,
         m1:{label:'Current Price', value: fmt(c.currentPrice)},
         m2:{label:'Buy Price', value: fmt(c.buyPrice)} })).sort((a,b)=>b.v-a.v),
@@ -435,7 +435,7 @@
     },
     'total-metric': {
       title: 'Total Market Value',
-      series: () => buildSeries(d => allCards.filter(c=>c.status==='Holding' && c.buyDate && c.buyDate<=d).reduce((s,c)=>s+(priceOfCardAt(c,d)||0),0)),
+      series: () => buildSeries(d => allCards.filter(c=>c.status==='Holding' && c.buyDate && c.buyDate<=d).reduce((s,c)=>s+(priceOfCardAt(c,d)||0)*(c.qty||1),0)),
       rows: () => cachedHolding.map(c=>({ item:c, v:c.currentPrice,
         m1:{label:'Current Price', value: fmt(c.currentPrice)},
         m2:{label:'Buy Price', value: c.buyPrice>0 ? fmt(c.buyPrice) : 'Free'} })).sort((a,b)=>b.v-a.v),
@@ -443,7 +443,7 @@
     },
     'sold-metric': {
       title: 'Total Sold',
-      series: () => buildSeries(d => allCards.filter(c=>c.status==='Sold' && c.sellDate && c.sellDate<=d).reduce((s,c)=>s+(c.sellPrice||0),0)),
+      series: () => buildSeries(d => allCards.filter(c=>c.status==='Sold' && c.sellDate && c.sellDate<=d).reduce((s,c)=>s+(c.sellPrice||0)*(c.qty||1),0)),
       rows: () => cachedSold.map(c=>({ item:c, v:(c.sellPrice||0),
         m1:{label:'Sell Price', value: fmt(c.sellPrice)},
         m2:{label:'Sell Date', value: c.sellDate ? new Date(c.sellDate+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—'} })).sort((a,b)=>b.v-a.v),
