@@ -201,12 +201,23 @@
   function candidateImageUrls(card, prefixBySet) {
     const raw = String(card.cardNumber == null ? '' : card.cardNumber).trim();
     if (!raw) return [];
-    // el card_number puede venir ya como "OGN-237" o como "237"
-    const m = raw.match(/^(.*?)(\d{1,4})([a-z]?)$/i);
+    // En la base de datos conviven DOS formatos de card_number:
+    //  - simple:    "OGN-237", "237", "046a"          (numero, con o sin prefijo/sufijo)
+    //  - con total: "OGN-299-298", "VEN-139-166"       (numero + total de cartas del set,
+    //                                                    formato que usa riftcodex)
+    // La regex anterior cogia SIEMPRE el ultimo grupo de digitos como "el numero", así que en
+    // formato "con total" cogia el TOTAL (298) en vez del numero real (299) - eso fue lo que
+    // paso con Kai'Sa: busco la carta "298" en vez de la "299" y encontro una completamente
+    // distinta. Probamos primero el patron "con total" (mas especifico) y si no encaja, el simple.
+    const withTotal = raw.match(/^([A-Za-z]*-?)(\d{1,4}[a-z]?)-\d{2,4}$/i);
+    const simple = raw.match(/^([A-Za-z]*-?)(\d{1,4}[a-z]?)$/i);
+    const m = withTotal || simple;
     if (!m) return [];
-    const ownPrefix = m[1];
-    const digits = m[2];
-    const ownSuffix = (m[3] || '').toLowerCase();
+    const ownPrefix = m[1] || '';
+    const digitsMatch = m[2].match(/^(\d{1,4})([a-z]?)$/i);
+    if (!digitsMatch) return [];
+    const digits = digitsMatch[1];
+    const ownSuffix = (digitsMatch[2] || '').toLowerCase();
     const padded = digits.length < 3 ? ('000' + digits).slice(-3) : digits;
 
     const learned = (prefixBySet && prefixBySet[(card.set || '').trim()]) || '';
