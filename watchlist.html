@@ -95,6 +95,7 @@
     .badge-spiritforged { background: rgba(50,180,100,0.9); color: #fff; }
     .badge-proving      { background: rgba(212,166,53,0.9); color: #000; }
     .badge-sealed-tag   { background: rgba(80,200,255,0.9); color: #000; }
+    .badge-condition    { background: rgba(255,255,255,0.1); color: var(--text-muted); }
 
     .price-pill { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 800; color: #d9b04a; letter-spacing: -0.2px; line-height: 1.15; display: inline-flex; align-items: center; gap: 5px; flex-wrap: wrap; }
     .card-price-block { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
@@ -239,7 +240,7 @@
     .wl-tab-delete:hover { background: rgba(255,90,90,0.22); }
     .wl-tab-wrap.dragging { opacity: 0.4; }
     .wl-tab-wrap.drag-over .wl-tab { box-shadow: 0 0 0 2px rgba(184,145,46,0.45); }
-    .wl-tab-wrap[draggable="true"] { cursor: grab; }
+    .wl-tab-wrap[data-draggable="true"] { cursor: grab; }
     main { padding-top: calc(22px + 57px + 44px) !important; }
   </style>
 </head>
@@ -531,7 +532,7 @@
       <div class="card-body">
         <div class="card-badge-row">
           ${item.set ? `<span class="badge ${badgeClass(item.set)}">${item.set}</span>` : ''}
-          ${item.condition==='Sealed' ? `<span class="badge badge-sealed-tag">Sealed</span>` : ''}
+          ${item.condition==='Sealed' ? `<span class="badge badge-sealed-tag">Sealed</span>` : item.condition ? `<span class="badge badge-condition">${item.condition}</span>` : ''}
         </div>
         <div class="card-name">${item.name}</div>
         <div class="card-price-block">
@@ -560,7 +561,7 @@
       + '<span class="list-rank">' + rank + '</span>'
       + '<img class="list-img" src="' + img + '" alt="' + item.name + '" onerror="this.style.opacity=0.2"/>'
       + '<div style="flex:1;min-width:0"><div class="list-name">' + item.name + '</div>'
-      + '<div class="list-set">' + (item.set||'unknown') + (item.condition==='Sealed'?' · Sealed':'') + '</div></div>'
+      + '<div class="list-set">' + (item.set||'unknown') + (item.condition==='Sealed'?' · Sealed':(item.condition?' · '+item.condition:'')) + '</div></div>'
       + (salesTxt ? '<span class="list-sales">' + salesTxt + '</span>' : '')
       + '<span class="list-price">' + fmt(item.currentPrice) + '</span>'
       + '<span class="list-var ' + varCls + '">' + varTxt + '</span>'
@@ -587,12 +588,16 @@
       const color = window.CardexAPI.watchlistColor(n);
       const tabBtn = '<button class="wl-tab' + (n===activeWatchlist?' active':'') + '" data-name="' + n + '" style="' + (n===activeWatchlist?'':'border-left:3px solid '+color+';') + '">' + n + ' <span style="opacity:0.6">(' + count + ')</span></button>';
       const deleteBtn = (n === 'General' || n === 'All') ? '' : '<button class="wl-tab-delete" data-name="' + n + '" title="Delete this watchlist">✕</button>';
-      const draggable = (n === 'General' || n === 'All') ? '' : ' draggable="true"';
+      const draggable = (n === 'General' || n === 'All') ? '' : ' data-draggable="true"';
       return '<div class="wl-tab-wrap" data-name="' + n + '"' + draggable + '>' + tabBtn + deleteBtn + '</div>';
     }).join('') + '<button class="wl-tab-new" id="wl-tab-new">+ New Watchlist</button>';
 
+    // El clic para cambiar de pestaña se ignora si el mousedown que lo precedió terminó
+    // arrastrando la pestaña a otra posición (ver el bloque de abajo) - si no, arrastrar
+    // "Vendetta" hasta el final abriría también esa pestaña justo al soltar el ratón.
     bar.querySelectorAll('.wl-tab').forEach(function(btn) {
       btn.addEventListener('click', function() {
+        if (btn.closest('.wl-tab-wrap').dataset.suppressClick) return;
         activeWatchlist = btn.dataset.name;
         try { localStorage.setItem('cdx_active_watchlist', activeWatchlist); } catch(e){}
         render();
@@ -614,33 +619,55 @@
       createNewWatchlist();
     });
 
-    // ── Arrastrar y soltar para reordenar pestañas ──
-    // "All" y "General" quedan siempre fijas al principio (no son arrastrables, ver arriba);
-    // el resto se puede reordenar libremente. El nuevo orden se guarda en Supabase al soltar.
-    let dragTab = null;
-    bar.querySelectorAll('.wl-tab-wrap[draggable="true"]').forEach(function(wrap) {
-      wrap.addEventListener('dragstart', function(e) {
-        dragTab = wrap;
-        wrap.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
+    // ── Arrastrar y soltar para reordenar pestañas (con mousedown/mousemove/mouseup) ──
+    // No usamos el drag-and-drop nativo del navegador (draggable="true" + eventos drag*)
+    // porque cada pestaña lleva un <button> dentro (y a veces también la X de borrar), y
+    // varios navegadores no inician bien un drag nativo cuando empieza sobre un elemento
+    // interactivo anidado - es la causa más probable de que no funcionara. Con mousedown/
+    // mousemove/mouseup en su lugar tenemos control total y no depende de eso.
+    // "All" y "General" quedan siempre fijas al principio (no llevan data-draggable).
+    let dragInfo = null;
+    bar.querySelectorAll('.wl-tab-wrap[data-draggable="true"]').forEach(function(wrap) {
+      wrap.addEventListener('mousedown', function(e) {
+        if (e.target.closest('.wl-tab-delete')) return; // no arrastrar al pulsar la X de borrar
+        dragInfo = { wrap: wrap, startX: e.clientX, moved: false };
       });
-      wrap.addEventListener('dragend', function() {
-        wrap.classList.remove('dragging');
-        bar.querySelectorAll('.wl-tab-wrap').forEach(function(w){ w.classList.remove('drag-over'); });
-        const newOrder = Array.from(bar.querySelectorAll('.wl-tab-wrap')).map(function(w){ return w.dataset.name; });
-        window.CardexAPI.reorderWatchlists(newOrder).then(function(){ return window.CardexReload(); });
-      });
-      wrap.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        if (!dragTab || dragTab === wrap || wrap.dataset.name === 'General' || wrap.dataset.name === 'All') return;
-        wrap.classList.add('drag-over');
-        const r = wrap.getBoundingClientRect();
-        const before = e.clientX < r.left + r.width / 2;
-        bar.insertBefore(dragTab, before ? wrap : wrap.nextSibling);
-      });
-      wrap.addEventListener('dragleave', function() { wrap.classList.remove('drag-over'); });
-      wrap.addEventListener('drop', function(e) { e.preventDefault(); wrap.classList.remove('drag-over'); });
     });
+    if (!bar.dataset.dragListenersBound) {
+      bar.dataset.dragListenersBound = '1';
+      document.addEventListener('mousemove', function(e) {
+        if (!dragInfo) return;
+        if (!dragInfo.moved && Math.abs(e.clientX - dragInfo.startX) > 6) {
+          dragInfo.moved = true;
+          dragInfo.wrap.classList.add('dragging');
+        }
+        if (!dragInfo.moved) return;
+        const wraps = Array.from(document.querySelectorAll('#wl-tabs-bar .wl-tab-wrap'));
+        const target = wraps.find(function(w) {
+          if (w === dragInfo.wrap) return false;
+          const r = w.getBoundingClientRect();
+          return e.clientX >= r.left && e.clientX <= r.right;
+        });
+        if (target && target.dataset.name !== 'General' && target.dataset.name !== 'All') {
+          const r = target.getBoundingClientRect();
+          const before = e.clientX < r.left + r.width / 2;
+          target.parentNode.insertBefore(dragInfo.wrap, before ? target : target.nextSibling);
+        }
+      });
+      document.addEventListener('mouseup', function() {
+        if (!dragInfo) return;
+        const info = dragInfo;
+        dragInfo = null;
+        info.wrap.classList.remove('dragging');
+        if (info.moved) {
+          const newOrder = Array.from(document.querySelectorAll('#wl-tabs-bar .wl-tab-wrap')).map(function(w){ return w.dataset.name; });
+          window.CardexAPI.reorderWatchlists(newOrder).then(function(){ return window.CardexReload(); });
+          // Evita que el click que sigue de forma natural al mouseup cambie de pestaña
+          info.wrap.dataset.suppressClick = '1';
+          setTimeout(function(){ delete info.wrap.dataset.suppressClick; }, 0);
+        }
+      });
+    }
   }
 
   function confirmDeleteWatchlist(name) {
