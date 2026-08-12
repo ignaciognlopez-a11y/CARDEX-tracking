@@ -255,7 +255,60 @@
     });
   }
 
-  // ---------- Resolución de Card Number (y set real) por NOMBRE, via riftdecks.com ----------
+  // ---------- FUENTE PRIMARIA: riftcodex.com - API abierta, hecha para esto ----------
+  // A diferencia de riftdecks (una web normal, sin CORS para lectura externa - lo comprobamos
+  // y bloqueó todas las peticiones), riftcodex.com es una API publica pensada explicitamente
+  // para que otras apps la consulten ("No authentication is required for read operations").
+  // Devuelve en un solo JSON: numero de carta (riftbound_id), el SET REAL de impresion,
+  // imagen, y si la carta es Overnumbered/Signature/Alt Art - justo lo que hace falta para
+  // elegir la variante correcta cuando el nombre guardado dice "V3 Signed Showcase" etc.
+  //
+  // Tampoco esto está 100% verificado en vivo por el motivo de siempre (no hay navegador real
+  // disponible ahora mismo para probarlo) - pero es una API construida a proposito para esto,
+  // así que es la apuesta con más probabilidad de funcionar sin CORS. Si falla, cae a riftdecks
+  // y luego a dotgg por numero, sin romper nada.
+  function riftcodexVariantWanted(cardName) {
+    const n = (cardName || '').toLowerCase();
+    return {
+      signature: /signature|signed/.test(n),
+      overnumbered: /overnumber|showcase/.test(n),
+      alternate_art: /alt art|alternate/.test(n)
+    };
+  }
+
+  function pickBestRiftcodexMatch(items, cardName) {
+    if (!items || !items.length) return null;
+    const wanted = riftcodexVariantWanted(cardName);
+    const anyVariantWanted = wanted.signature || wanted.overnumbered || wanted.alternate_art;
+    if (!anyVariantWanted) return items[0];
+    const exact = items.find(function (it) {
+      const m = it.metadata || {};
+      return !!m.signature === wanted.signature &&
+             !!m.overnumbered === wanted.overnumbered &&
+             !!m.alternate_art === wanted.alternate_art;
+    });
+    return exact || items[0];
+  }
+
+  function lookupRiftcodexByName(cardName) {
+    const clean = String(cardName || '').replace(/\([^)]*\)/g, '').replace(/[^a-zA-Z0-9\s]/g, ' ').trim();
+    if (!clean) return Promise.resolve(null);
+    return fetch('https://api.riftcodex.com/cards/name?fuzzy=' + encodeURIComponent(clean))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        const item = data && pickBestRiftcodexMatch(data.items, cardName);
+        if (!item) return null;
+        const setLabel = item.set && item.set.label;
+        return {
+          cardNumber: item.riftbound_id ? item.riftbound_id.toUpperCase() : null,
+          set: setLabel || null,
+          image: (item.media && item.media.image_url) || null
+        };
+      })
+      .catch(function () { return null; });
+  }
+
+
   // Las 42 cartas que llegan sin card_number (todas las añadidas con "+ Add card" antes de
   // este arreglo) no tienen NADA que dotgg pueda buscar por número. riftdecks.com sí permite
   // ir de nombre -> numero: sus URLs de ficha son slugs derivados del nombre, y la imagen que
@@ -309,7 +362,9 @@
     // FASE 1: cartas sin card_number - intentar resolver nombre -> numero/set via riftdecks
     const phase1 = noNumber.reduce(function (p, c) {
       return p.then(function (results) {
-        return lookupRiftdecksByName(c.name).then(function (found) {
+        return lookupRiftcodexByName(c.name).then(function (found) {
+          return found || lookupRiftdecksByName(c.name); // riftcodex falla -> probamos riftdecks
+        }).then(function (found) {
           if (found) {
             const patch = { card_number: found.cardNumber, card_image: found.image };
             if (found.set && !c.set) patch.set = found.set;
