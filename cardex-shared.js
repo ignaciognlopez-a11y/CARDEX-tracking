@@ -276,18 +276,44 @@
     };
   }
 
+  // Palabras que se ignoran al comparar nombres - ni identifican la carta ni el campeón
+  const NAME_STOPWORDS = ['v1', 'v2', 'v3', 'the', 'of', 'showcase', 'signed', 'signature',
+    'overnumbered', 'overnumber', 'alt', 'art', 'alternate', 'promo', 'promos'];
+
+  function coreNameTokens(name) {
+    return String(name || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter(function (w) { return w.length >= 3 && NAME_STOPWORDS.indexOf(w) === -1; });
+  }
+
+  // Comprueba que el resultado encontrado sea REALMENTE la carta buscada, no otra carta
+  // cualquiera que por casualidad tuviera el mismo tipo de variante (esto es lo que causó
+  // que "Riven Shattered V2 Showcase" se guardara con los datos de "Morgana Vindictive" -
+  // el filtro por variante (Showcase/Signature) coincidía, pero nunca se comprobó el nombre).
+  function namesLikelyMatch(inputName, candidateName) {
+    const inputTokens = coreNameTokens(inputName);
+    const candTokens = coreNameTokens(candidateName);
+    if (!inputTokens.length || !candTokens.length) return false;
+    return inputTokens.some(function (t) { return candTokens.indexOf(t) !== -1; });
+  }
+
   function pickBestRiftcodexMatch(items, cardName) {
     if (!items || !items.length) return null;
+    // Primero descartamos cualquier item cuyo nombre no tenga NADA que ver con lo buscado
+    const relevant = items.filter(function (it) { return namesLikelyMatch(cardName, it.name); });
+    if (!relevant.length) return null; // ninguno se parece -> mejor no encontrar nada que asignar mal
     const wanted = riftcodexVariantWanted(cardName);
     const anyVariantWanted = wanted.signature || wanted.overnumbered || wanted.alternate_art;
-    if (!anyVariantWanted) return items[0];
-    const exact = items.find(function (it) {
+    if (!anyVariantWanted) return relevant[0];
+    const exact = relevant.find(function (it) {
       const m = it.metadata || {};
       return !!m.signature === wanted.signature &&
              !!m.overnumbered === wanted.overnumbered &&
              !!m.alternate_art === wanted.alternate_art;
     });
-    return exact || items[0];
+    return exact || relevant[0];
   }
 
   function lookupRiftcodexByName(cardName) {
@@ -307,6 +333,7 @@
       })
       .catch(function () { return null; });
   }
+
 
 
   // Las 42 cartas que llegan sin card_number (todas las añadidas con "+ Add card" antes de
@@ -339,14 +366,15 @@
       .then(function (r) { return r.ok ? r.text() : null; })
       .then(function (html) {
         if (!html) return null;
-        const m = html.match(/img\/cards\/riftbound\/([A-Z]+)\/[a-z]+-(\d{1,4}[a-z]?)-\d+_full\.png/i);
+        const m = html.match(/img\/cards\/riftbound\/([A-Z]+)\/[a-z]+-(\d{1,4}[a-z]?)-(\d+)_full\.png/i);
         if (!m) return null;
         const setCode = m[1].toUpperCase();
         const numberRaw = m[2]; // puede venir como "149" o "046a"
+        const total = m[3];     // ANTES esto se inventaba como "999" y la imagen nunca existía - bug real, ya corregido
         return {
           cardNumber: setCode + '-' + numberRaw,
           set: RIFTDECKS_SET_NAMES[setCode] || null,
-          image: 'https://riftdecks.com/img/cards/riftbound/' + setCode + '/' + setCode.toLowerCase() + '-' + numberRaw + '-999_full.png'
+          image: 'https://riftdecks.com/img/cards/riftbound/' + setCode + '/' + setCode.toLowerCase() + '-' + numberRaw + '-' + total + '_full.png'
         };
       })
       .catch(function () { return null; }); // CORS u otro fallo de red: se trata como "sin match", nunca rompe el flujo
