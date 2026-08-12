@@ -283,6 +283,7 @@
   function coreNameTokens(name) {
     return String(name || '')
       .toLowerCase()
+      .replace(/['']/g, '')          // "Kai'Sa" y "KaiSa" deben tokenizar igual - sin esto se partían en dos palabras que nunca coincidían
       .replace(/[^a-z0-9\s]/g, ' ')
       .split(/\s+/)
       .filter(function (w) { return w.length >= 3 && NAME_STOPWORDS.indexOf(w) === -1; });
