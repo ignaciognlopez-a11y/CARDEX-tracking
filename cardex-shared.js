@@ -296,7 +296,11 @@
     const inputTokens = coreNameTokens(inputName);
     const candTokens = coreNameTokens(candidateName);
     if (!inputTokens.length || !candTokens.length) return false;
-    return inputTokens.some(function (t) { return candTokens.indexOf(t) !== -1; });
+    // ANTES bastaba con que UNA palabra coincidiera ("some") - así "Viktor Innovator" podía
+    // aceptar cualquier otra carta de Viktor (Herald of the Arcane, Leader...) con solo
+    // compartir el nombre del campeón. Ahora deben coincidir TODAS las palabras relevantes
+    // del nombre buscado (campeón + identidad/subtítulo), no solo el nombre del campeón.
+    return inputTokens.every(function (t) { return candTokens.indexOf(t) !== -1; });
   }
 
   function pickBestRiftcodexMatch(items, cardName) {
@@ -394,8 +398,12 @@
           return found || lookupRiftdecksByName(c.name); // riftcodex falla -> probamos riftdecks
         }).then(function (found) {
           if (found) {
+            // Solo tocamos card_number e imagen. El set NUNCA se sobreescribe: lo que ya
+            // hay guardado viene de la categoría de Cardmarket (p.ej. "Vendetta" para todo
+            // lo que esté en esa watchlist), que es lo que a Nacho le interesa para agrupar
+            // sus cartas - no el set de impresión original de la carta, que puede ser otro
+            // (p.ej. una identidad de Viktor reimpresa que originalmente salió en Origins).
             const patch = { card_number: found.cardNumber, card_image: found.image };
-            if (found.set && !c.set) patch.set = found.set;
             return updateCard(c.dbId, patch).then(function () {
               results.fixedViaName++;
               return results;
@@ -645,7 +653,7 @@
   });
 
   // ---------- Formulario Añadir / Editar / Mover ----------
-  const SET_OPTIONS = ['Origins', 'Unleashed', 'Spiritforged', 'Proving Grounds', 'Project K Promos', 'Origins Promos', 'Spiritforged Promos', 'Unleashed Promos'];
+  const SET_OPTIONS = ['Origins', 'Unleashed', 'Spiritforged', 'Vendetta', 'Proving Grounds', 'Project K Promos', 'Origins Promos', 'Spiritforged Promos', 'Unleashed Promos', 'Vendetta Promos'];
  const RARITY_OPTIONS = ['Epic', 'Rare', 'Uncommon', 'Common', 'Overnumbered', 'Signature Overnumber', 'Ultimate', 'Plated', 'Promo', 'Other', 'N/A'];
   // Condición física de la carta (solo singles, no sealed). Mapea al parámetro
   // minCondition de Cardmarket: minCondition=N muestra listings de esa condición
@@ -770,7 +778,16 @@
       if (setSeg) {
         const norm = decodeURIComponent(setSeg).replace(/-/g, ' ').trim().toLowerCase();
         const match = SET_OPTIONS.find(function (s) { return s.toLowerCase() === norm; });
-        if (match) setGuess = match;
+        if (match) {
+          setGuess = match; // set ya conocido -> usamos la grafía oficial
+        } else {
+          // Set nuevo que aún no está en SET_OPTIONS (p.ej. un lanzamiento reciente como
+          // Vendetta, que faltaba aqui y por eso se guardaba vacio). En vez de descartarlo,
+          // lo derivamos directamente del tramo de la URL de Cardmarket - asi cualquier set
+          // futuro se registra solo, sin depender de que alguien actualice esta lista a mano.
+          setGuess = decodeURIComponent(setSeg).replace(/-/g, ' ').trim()
+            .replace(/\w\S*/g, function (w) { return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase(); });
+        }
       }
       const condition = (category && category !== 'Singles') ? 'Sealed' : 'NM';
       return { name: nameGuess, set: setGuess, condition: condition };
