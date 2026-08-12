@@ -126,6 +126,7 @@
     .badge-proving { background:rgba(212,166,53,0.9); color:#000; }
     .badge-default { background:rgba(150,150,150,0.55); color:#fff; }
     .badge-sealed-tag { background:rgba(80,200,255,0.9); color:#000; }
+    .badge-condition { background:rgba(255,255,255,0.1); color:var(--text-muted); }
     .card-price-block { display:flex; flex-direction:column; gap:3px; margin-top:4px; }
     .card-price-row { display:flex; align-items:baseline; gap:4px; flex-wrap:wrap; }
     .card-price-label { font-size:9px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted); font-weight:600; min-width:56px; flex-shrink:0; }
@@ -250,6 +251,7 @@
       <div class="holding-table-wrap">
         <table class="holding-table">
           <thead><tr class="holding-table-head">
+            <th style="width:28px;"></th>
             <th data-sort="cardNumber">Card #</th><th data-sort="name">Card Name</th><th data-sort="set">Set</th>
             <th data-sort="buyPrice" style="text-align:right">Buy</th><th data-sort="currentPrice" style="text-align:right">Current</th>
             <th data-sort="condition">Cond.</th><th data-sort="buyDate">Date</th><th data-sort="pnl" style="text-align:right">P&amp;L</th>
@@ -261,6 +263,7 @@
       <div class="holding-table-wrap">
         <table class="holding-table">
           <thead><tr class="holding-table-head">
+            <th style="width:28px;"></th>
             <th data-sort="cardNumber">Card #</th><th data-sort="name">Card Name</th><th data-sort="set">Set</th>
             <th data-sort="buyPrice" style="text-align:right">Buy</th><th data-sort="currentPrice" style="text-align:right">Current</th>
             <th data-sort="condition">Cond.</th><th data-sort="buyDate">Date</th><th data-sort="pnl" style="text-align:right">P&amp;L</th>
@@ -464,7 +467,7 @@
     pnlEl.textContent=pnl!==null?fmtSign(pnl):'—';pnlEl.className='modal-stat-value'+(pnl===null?'':pnl>=0?' pos':' neg');
     const pctEl=document.getElementById('modal-pct');
     pctEl.textContent=pct!==null?fmtPct(pct)+' on cost':''; pctEl.className='modal-stat-sub'+(pct===null?'':pct>=0?' pos':' neg');
-    document.getElementById('modal-badges').innerHTML=(item.set?`<span class="badge ${badgeClass(item.set)}">${item.set}</span>`:'')+(item.condition==='Sealed'?`<span class="badge badge-sealed-tag">Sealed</span>`:'');
+    document.getElementById('modal-badges').innerHTML=(item.set?`<span class="badge ${badgeClass(item.set)}">${item.set}</span>`:'')+(item.condition==='Sealed'?`<span class="badge badge-sealed-tag">Sealed</span>`:item.condition?`<span class="badge badge-condition">${item.condition}</span>`:'');
     document.getElementById('modal-cm-link').href=cmUrl(item);
     document.getElementById('modal-ebay-link').href=ebaySoldUrl(item);
     modalFullHistory=item.priceHistory||[]; modalRangeDays=30;
@@ -521,10 +524,10 @@
     const varCls=pnl===null?'cv-neu':isPos?'cv-pos':'cv-neg';
     const varArrow=isPos?'▲':pnl!==null?'▼':'';
     const varTxt=pct!==null?((pct>=0?'+':'')+pct.toFixed(1)+'%'):'';
-    return `<div class="card" data-id="${item.id}">
-      <div class="card-cover"><img src="${item.image}" alt="${item.name}" loading="lazy" onerror="this.style.opacity='0.08'"/><span class="pill ${pillCls}">${pillTxt}</span><div class="card-gloss"></div><button class="cx-card-delete-x" title="Delete card" onclick="event.stopPropagation(); window.CardexQuickDelete('${item.dbId}', '${item.name.replace(/'/g,"\\'")}')">✕</button></div>
+    return `<div class="card" data-id="${item.id}" data-dbid="${item.dbId}">
+      <div class="card-cover"><input type="checkbox" class="card-select-cb" data-dbid="${item.dbId}" onclick="event.stopPropagation()"/><img src="${item.image}" alt="${item.name}" loading="lazy" onerror="this.style.opacity='0.08'"/><span class="pill ${pillCls}">${pillTxt}</span><div class="card-gloss"></div><button class="cx-card-delete-x" title="Delete card" onclick="event.stopPropagation(); window.CardexQuickDelete('${item.dbId}', '${item.name.replace(/'/g,"\\'")}')">✕</button></div>
       <div class="card-body">
-        <div class="card-badge-row">${item.set?`<span class="badge ${badgeClass(item.set)}">${item.set}</span>`:''}${item.condition==='Sealed'?`<span class="badge badge-sealed-tag">Sealed</span>`:''}</div>
+        <div class="card-badge-row">${item.set?`<span class="badge ${badgeClass(item.set)}">${item.set}</span>`:''}${item.condition==='Sealed'?`<span class="badge badge-sealed-tag">Sealed</span>`:item.condition?`<span class="badge badge-condition">${item.condition}</span>`:''}</div>
         <div class="card-name">${item.name}</div>
         <div class="card-price-block">
           <div class="card-price-row"><span class="card-price-label">Buy Price</span><span class="card-price-buy">${isFree?'Free':fmt(item.buyPrice*qty)}</span></div>
@@ -557,7 +560,8 @@
     const pnlCls=pnlEur===null?'neu':(pos?'pos':'neg');
     const pnlTxt=pnlEur===null?'—':`${fmtPct(pnlPct)} (${fmtSign(pnlEur)})`;
     const dateTxt=item.buyDate?new Date(item.buyDate+'T12:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'2-digit'}):'—';
-    return `<tr data-id="${item.id}">
+    return `<tr data-id="${item.id}" data-dbid="${item.dbId}">
+      <td onclick="event.stopPropagation()" style="text-align:center;"><input type="checkbox" class="card-select-cb" data-dbid="${item.dbId}"/></td>
       <td>${item.cardNumber||'—'}</td>
       <td class="ht-name"><img src="${item.image}" alt="" onerror="this.style.opacity=0"/>${item.name}</td>
       <td>${item.set?`<span class="badge ${badgeClass(item.set)}">${item.set}</span>`:'—'}</td>
@@ -577,6 +581,7 @@
     document.querySelectorAll('#holding-table-body-a tr, #holding-table-body-b tr').forEach(tr=>{
       tr.addEventListener('click',()=>{ const item=allCards.find(c=>c.id===tr.dataset.id); if(item)openModal(item); });
     });
+    if (window.bulkSelector) window.bulkSelector.attach();
     document.querySelectorAll('.holding-table-head th[data-sort]').forEach(th=>{
       th.classList.toggle('sorted', th.dataset.sort===holdingSortField);
       const ex=th.querySelector('.sort-arrow'); if(ex)ex.remove();
@@ -588,6 +593,7 @@
     document.querySelectorAll(`#${gridId} .card`).forEach(el=>{
       el.addEventListener('click',()=>{ const item=allCards.find(c=>c.id===el.dataset.id); if(item)openModal(item); });
     });
+    if (window.bulkSelector) window.bulkSelector.attach();
   }
 
   function applyFilters(list){
@@ -792,6 +798,7 @@
   }
 
   window.CardexOnDataChange = render;
+  window.bulkSelector = window.CardexCreateBulkSelector({ showCondition: true, onChanged: render });
   window.__portfolioDataPromise.then(render);
 })();
 </script>

@@ -42,7 +42,8 @@
       trackingCode: row.tracking_code,
       trackingAdded: row.tracking_added,
       excludeFromCap: row.exclude_from_cap === true,
-      watchlistName: row.watchlist_name || 'General'
+      watchlistName: row.watchlist_name || 'General',
+      comment: row.comment || ''
     };
   }
 
@@ -54,7 +55,7 @@
         .then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; }),
       fetch(SUPABASE_URL + "/rest/v1/riftbound_retiros?select=*&order=withdrawal_date.desc", { headers: baseHeaders })
         .then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; }),
-      fetch(SUPABASE_URL + "/rest/v1/riftbound_watchlists?select=*&order=created_at", { headers: baseHeaders })
+      fetch(SUPABASE_URL + "/rest/v1/riftbound_watchlists?select=*&order=sort_order.asc.nullslast,created_at.asc", { headers: baseHeaders })
         .then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; })
     ]).then(function (results) {
       const rows = results[0];
@@ -68,13 +69,18 @@
         return (u && (!max || u > max)) ? u : max;
       }, null);
       const retirosTotal = retiros.reduce(function (s, r) { return s + Number(r.amount || 0); }, 0);
-      // Nombres de watchlist: los que existan como fila propia + cualquiera que aparezca
-      // ya en una carta (por si acaso) + "General" siempre presente.
-      const namesSet = {};
-      watchlistRows.forEach(function (w) { namesSet[w.name] = true; });
-      cards.forEach(function (c) { if (c.status === 'Watchlist') namesSet[c.watchlistName || 'General'] = true; });
-      namesSet['General'] = true;
-      const watchlists = Object.keys(namesSet).sort(function (a, b) { return a === 'General' ? -1 : b === 'General' ? 1 : a.localeCompare(b); });
+      // Nombres de watchlist: los que existan como fila propia (en el orden guardado en
+      // sort_order) + cualquiera que aparezca ya en una carta pero no tenga fila propia
+      // (se añade al final) + "General" siempre presente y siempre primero.
+      const orderedNames = watchlistRows.map(function (w) { return w.name; }).filter(function (n) { return n !== 'General'; });
+      const seen = {}; orderedNames.forEach(function (n) { seen[n] = true; });
+      cards.forEach(function (c) {
+        if (c.status === 'Watchlist') {
+          const n = c.watchlistName || 'General';
+          if (n !== 'General' && !seen[n]) { seen[n] = true; orderedNames.push(n); }
+        }
+      });
+      const watchlists = ['General'].concat(orderedNames);
       window.portfolioData = {
         updatedAt: updatedAt || new Date().toISOString().slice(0, 10),
         cards: cards, gastos: gastos, suppliesTotal: suppliesTotal,
@@ -123,6 +129,26 @@
       headers: writeHeaders
     }).then(function (r) { if (!r.ok) return r.text().then(function(t){throw new Error(t);}); return true; });
   }
+  // ---------- Operaciones en bloque (multiselect) ----------
+  function idsFilter(dbIds) {
+    // PostgREST: id=in.(a,b,c) - los UUID no necesitan comillas
+    return "id=in.(" + dbIds.map(encodeURIComponent).join(",") + ")";
+  }
+  function bulkUpdateCards(dbIds, patch) {
+    if (!dbIds.length) return Promise.resolve([]);
+    return fetch(SUPABASE_URL + "/rest/v1/riftbound_inversiones?" + idsFilter(dbIds), {
+      method: "PATCH",
+      headers: Object.assign({ "Prefer": "return=representation" }, writeHeaders),
+      body: JSON.stringify(patch)
+    }).then(function (r) { if (!r.ok) return r.text().then(function(t){throw new Error(t);}); return r.json(); });
+  }
+  function bulkDeleteCards(dbIds) {
+    if (!dbIds.length) return Promise.resolve(true);
+    return fetch(SUPABASE_URL + "/rest/v1/riftbound_inversiones?" + idsFilter(dbIds), {
+      method: "DELETE",
+      headers: writeHeaders
+    }).then(function (r) { if (!r.ok) return r.text().then(function(t){throw new Error(t);}); return true; });
+  }
 
   function insertWatchlist(name) {
     return fetch(SUPABASE_URL + "/rest/v1/riftbound_watchlists", {
@@ -137,6 +163,29 @@
       headers: writeHeaders
     }).then(function (r) { if (!r.ok) return r.text().then(function(t){throw new Error(t);}); return true; });
   }
+  // Guarda el nuevo orden tras arrastrar una pestaña de watchlist. "General" nunca se
+  // reordena (siempre va justo después de "All", que ni siquiera es una watchlist real).
+  function reorderWatchlists(orderedNames) {
+    const toSave = orderedNames.filter(function (n) { return n !== 'General' && n !== 'All'; });
+    return Promise.all(toSave.map(function (name, idx) {
+      return fetch(SUPABASE_URL + "/rest/v1/riftbound_watchlists?name=eq." + encodeURIComponent(name), {
+        method: "PATCH",
+        headers: writeHeaders,
+        body: JSON.stringify({ sort_order: idx + 1 })
+      });
+    }));
+  }
+  // Color determinista por nombre de watchlist - la misma lista siempre sale del mismo
+  // color, sin guardar nada en Supabase ni depender de que alguien elija uno a mano.
+  const WATCHLIST_PALETTE = ['#c99a3c', '#5aa9e6', '#e07a5f', '#81b29a', '#b185db', '#e8927c', '#6fb3b8', '#d4a5a5', '#9db4c0', '#c9ada7'];
+  function watchlistColor(name) {
+    if (!name || name === 'General') return 'var(--gold)';
+    if (name === 'All') return 'var(--text)';
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) { hash = (hash * 31 + name.charCodeAt(i)) >>> 0; }
+    return WATCHLIST_PALETTE[hash % WATCHLIST_PALETTE.length];
+  }
+  window.CardexWatchlistColor = watchlistColor;
 
   function insertRetiro(fields) {
     return fetch(SUPABASE_URL + "/rest/v1/riftbound_retiros", {
@@ -508,6 +557,17 @@
   .cx-form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .cx-card-delete-x{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(10,10,10,0.85);border:1px solid rgba(255,255,255,0.15);color:#c9c9c9;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;transition:color 0.15s,border-color 0.15s,background 0.15s;}
   .cx-card-delete-x:hover{color:#ff6b6b;border-color:rgba(255,107,107,0.5);background:rgba(40,10,10,0.9);}
+  .card-select-cb{position:absolute;top:6px;left:6px;width:18px;height:18px;z-index:6;accent-color:var(--gold);cursor:pointer;opacity:0.55;transition:opacity 0.15s;}
+  .card-select-cb:hover,.card-select-cb:checked{opacity:1;}
+  .card.cx-selected{outline:2px solid var(--gold);outline-offset:2px;border-radius:10px;}
+  .cx-bulk-bar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#161616;border:1px solid var(--gold);border-radius:10px;padding:10px 16px;display:none;align-items:center;gap:14px;z-index:150;box-shadow:0 12px 30px rgba(0,0,0,0.6);}
+  .cx-bulk-bar.open{display:flex;}
+  .cx-bulk-bar .cx-bulk-count{font-size:13px;font-weight:700;color:var(--text,#f2f2f2);}
+  .cx-bulk-bar button{background:rgba(255,255,255,0.06);border:1px solid rgba(184,145,46,0.3);color:var(--text,#f2f2f2);padding:7px 14px;border-radius:7px;font-size:12.5px;cursor:pointer;font-family:inherit;font-weight:600;}
+  .cx-bulk-bar button:hover{border-color:var(--gold);}
+  .cx-bulk-bar button.cx-bulk-delete{color:#ff6b6b;border-color:rgba(255,107,107,0.35);}
+  .cx-bulk-bar button.cx-bulk-delete:hover{border-color:#ff6b6b;background:rgba(40,10,10,0.5);}
+  .cx-bulk-bar button.cx-bulk-clear{background:transparent;border-color:transparent;color:var(--text-muted,#9a9a9a);}
   .cx-form-status-tabs{display:flex;gap:6px;margin-bottom:14px;}
   .cx-status-tab{flex:1;text-align:center;padding:8px;border-radius:7px;border:1px solid rgba(184,145,46,0.25);background:rgba(255,255,255,0.03);color:#9a9a9a;font-size:12.5px;font-weight:700;cursor:pointer;}
   .cx-status-tab.active{background:#b8912e;color:#000;border-color:#b8912e;}
@@ -620,12 +680,9 @@
       '<div class="cx-side-panel">' +
         '<div class="cx-side-logo">CARDEX</div>' +
         links +
-        '<button class="cx-side-add" id="cx-side-fix-images" style="margin-top:10px;background:transparent;border:1px solid rgba(184,145,46,0.4);color:var(--gold);">Fix missing images</button>' +
       '</div>';
     document.body.appendChild(overlay);
     overlay.addEventListener('click', function (e) { if (e.target.id === 'cx-side-overlay') closeMenu(); });
-    const fixBtn = overlay.querySelector('#cx-side-fix-images');
-    if (fixBtn) fixBtn.addEventListener('click', function () { closeMenu(); window.CardexFixMissingImages(); });
 
     const header = document.querySelector('header');
     if (header) {
@@ -733,22 +790,25 @@
     // de una carta ya guardada, ni siquiera abriendo su ficha - solo se pedía (opcional)
     // al darla de alta por primera vez. Sin numero, Fix Images no puede resolver su imagen.
     const cardNumberRow = '<div class="cx-form-row"><label>Card Number</label><input type="text" id="cx-f-cardnumber" value="' + (item.cardNumber != null ? item.cardNumber : '') + '" placeholder="e.g. 303 or OGN-303"/></div>';
+    // Nota libre por carta - p.ej. "wave 2" en una caja sellada de Origins, o cualquier
+    // matiz que no encaje en ningún otro campo. Se guarda tal cual, sin validar formato.
+    const commentRow = '<div class="cx-form-row"><label>Comment</label><textarea id="cx-f-comment" rows="2" placeholder="Optional note, e.g. \'wave 2\'">' + (item.comment ? item.comment.replace(/</g, '&lt;') : '') + '</textarea></div>';
     if (status === 'Holding') {
       return '<div class="cx-form-grid2">' +
         '<div class="cx-form-row"><label>Buy Price (€ / unit)</label><input type="number" step="0.01" id="cx-f-buyPrice" value="' + (item.buyPrice != null ? item.buyPrice : '') + '"/></div>' +
         '<div class="cx-form-row"><label>Buy Date</label><input type="date" id="cx-f-buyDate" value="' + (item.buyDate || '') + '"/></div>' +
-        '</div>' + qtyRow + conditionRow + cardNumberRow;
+        '</div>' + qtyRow + conditionRow + cardNumberRow + commentRow;
     }
     if (status === 'Sold') {
       return '<div class="cx-form-grid2">' +
         '<div class="cx-form-row"><label>Sell Price (€ / unit)</label><input type="number" step="0.01" id="cx-f-sellPrice" value="' + (item.sellPrice != null ? item.sellPrice : '') + '"/></div>' +
         '<div class="cx-form-row"><label>Sell Date</label><input type="date" id="cx-f-sellDate" value="' + (item.sellDate || '') + '"/></div>' +
-        '</div>' + qtyRow + conditionRow + cardNumberRow;
+        '</div>' + qtyRow + conditionRow + cardNumberRow + commentRow;
     }
     if (status === 'Watchlist') {
-      return '<div class="cx-form-row"><label>Watchlist</label><select id="cx-f-watchlist">' + watchlistOptionsHtml(item.watchlistName || 'General') + '</select></div>' + conditionRow + cardNumberRow;
+      return '<div class="cx-form-row"><label>Watchlist</label><select id="cx-f-watchlist">' + watchlistOptionsHtml(item.watchlistName || 'General') + '</select></div>' + conditionRow + cardNumberRow + commentRow;
     }
-    return conditionRow + cardNumberRow;
+    return conditionRow + cardNumberRow + commentRow;
   }
 
   const SELLER_COUNTRY_LIST = '1,2,3,33,35,5,6,8,9,11,12,7,14,15,37,16,17,36,21,18,19,20,22,23,24,25,26,27,29,31,30,10,28,4';
@@ -1081,6 +1141,8 @@
       const wlEl = document.getElementById('cx-f-watchlist');
       patch.watchlist_name = (wlEl && wlEl.value && wlEl.value !== '__new__') ? wlEl.value : 'General';
     }
+    const commentEl = document.getElementById('cx-f-comment');
+    if (commentEl) patch.comment = commentEl.value.trim() || null;
     const condEl = document.getElementById('cx-f-condition');
     if (condEl) {
       patch.condition = condEl.value;
@@ -1149,9 +1211,137 @@
     });
   }
 
+  // ---------- Modal genérico de edición en bloque (multiselect) ----------
+  // Reutilizable desde holding.html y watchlist.html: recibe qué campos mostrar y
+  // qué hacer al guardar. Usa el mismo overlay que Add/Move card para mantener el
+  // mismo estilo visual, en vez de duplicar CSS.
+  function openBulkEditModal(options) {
+    options = options || {};
+    let fieldsHtml = '';
+    if (options.showCondition) {
+      fieldsHtml += '<div class="cx-form-row"><label>Condition</label><select id="cx-bulk-condition"><option value="">Leave unchanged</option>' + conditionOptionsHtml('') + '</select></div>';
+    }
+    if (options.showWatchlist) {
+      fieldsHtml += '<div class="cx-form-row"><label>Move to Watchlist</label><select id="cx-bulk-watchlist"><option value="">Leave unchanged</option>' + watchlistOptionsHtml('') + '</select></div>';
+    }
+    fieldsHtml += '<div class="cx-form-row"><label>Comment</label><textarea id="cx-bulk-comment" rows="2" placeholder="Leave blank to not change - applies the same note to all selected"></textarea></div>';
+    openForm(
+      '<div class="cx-form-title">Edit ' + options.count + ' card' + (options.count === 1 ? '' : 's') + '</div>' +
+      '<div style="font-size:12px;color:var(--text-muted);margin:-10px 0 14px;">Only fields you fill in will be changed. Everything else stays as-is on each card.</div>' +
+      fieldsHtml +
+      '<div id="cx-bulk-error" style="color:#ff5a5a;font-size:12px;margin-top:4px;display:none;"></div>' +
+      '<div class="cx-form-actions">' +
+      '<button class="cx-btn cx-btn-ghost" id="cx-bulk-cancel">Cancel</button>' +
+      '<button class="cx-btn cx-btn-primary" id="cx-bulk-save">Apply</button>' +
+      '</div>'
+    );
+    document.getElementById('cx-bulk-cancel').addEventListener('click', closeForm);
+    document.getElementById('cx-bulk-save').addEventListener('click', function () {
+      const patch = {};
+      const condEl = document.getElementById('cx-bulk-condition');
+      if (condEl && condEl.value) patch.condition = condEl.value;
+      const wlEl = document.getElementById('cx-bulk-watchlist');
+      if (wlEl && wlEl.value && wlEl.value !== '__new__') patch.watchlist_name = wlEl.value;
+      const commentEl = document.getElementById('cx-bulk-comment');
+      if (commentEl && commentEl.value.trim()) patch.comment = commentEl.value.trim();
+      const errEl = document.getElementById('cx-bulk-error');
+      if (!Object.keys(patch).length) {
+        errEl.textContent = 'Fill in at least one field to apply.';
+        errEl.style.display = 'block';
+        return;
+      }
+      const saveBtn = document.getElementById('cx-bulk-save');
+      saveBtn.disabled = true; saveBtn.textContent = 'Applying...';
+      options.onSubmit(patch).then(function () {
+        closeForm();
+      }).catch(function (err) {
+        errEl.textContent = 'Error: ' + err.message;
+        errEl.style.display = 'block';
+        saveBtn.disabled = false; saveBtn.textContent = 'Apply';
+      });
+    });
+  }
+
+
   window.CardexAuth = { requirePassword: requirePassword, isUnlocked: isUnlocked };
-  window.CardexAPI = { insertCard: insertCard, updateCard: updateCard, deleteCard: deleteCard, insertRetiro: insertRetiro, deleteRetiro: deleteRetiro, insertWatchlist: insertWatchlist, deleteWatchlist: deleteWatchlist };
+
+  // ---------- Selección múltiple compartida (checkboxes + barra flotante) ----------
+  // Una sola barra en toda la página, reutilizada por cualquier grid que la use.
+  // El estado de selección vive en un Set de dbId (UUID de Supabase), no en el DOM,
+  // así que sobrevive a que el grid se vuelva a pintar al filtrar/ordenar - solo hay
+  // que llamar a attach() después de cada render para enganchar los checkboxes nuevos.
+  function createBulkSelector(opts) {
+    opts = opts || {};
+    const checkboxSelector = opts.checkboxSelector || '.card-select-cb';
+    const selected = new Set();
+    let bar = document.getElementById('cx-bulk-bar');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'cx-bulk-bar';
+      bar.className = 'cx-bulk-bar';
+      bar.innerHTML = '<span class="cx-bulk-count"></span>' +
+        (opts.hideEdit ? '' : '<button class="cx-bulk-edit">Edit</button>') +
+        '<button class="cx-bulk-delete">Delete</button>' +
+        '<button class="cx-bulk-clear">Clear</button>';
+      document.body.appendChild(bar);
+    }
+    function updateBar() {
+      const n = selected.size;
+      bar.classList.toggle('open', n > 0);
+      bar.querySelector('.cx-bulk-count').textContent = n + (n === 1 ? ' card selected' : ' cards selected');
+    }
+    function syncCheckboxes() {
+      document.querySelectorAll(checkboxSelector).forEach(function (cb) { cb.checked = selected.has(cb.dataset.dbid); });
+    }
+    bar.querySelector('.cx-bulk-clear').onclick = function () { selected.clear(); syncCheckboxes(); updateBar(); };
+    bar.querySelector('.cx-bulk-delete').onclick = function () {
+      requirePassword(function () {
+        if (!window.confirm('Delete ' + selected.size + ' card(s)? This cannot be undone.')) return;
+        bulkDeleteCards(Array.from(selected)).then(function () {
+          selected.clear(); updateBar();
+          return window.CardexReload();
+        }).then(function () {
+          if (typeof opts.onChanged === 'function') opts.onChanged();
+        }).catch(function (err) { window.alert('Error deleting: ' + err.message); });
+      });
+    };
+    const editBtn = bar.querySelector('.cx-bulk-edit');
+    if (editBtn) {
+      editBtn.onclick = function () {
+        if (!selected.size) return;
+        const ids = Array.from(selected);
+        window.CardexOpenBulkEdit({
+          count: ids.length,
+          showCondition: !!opts.showCondition,
+          showWatchlist: !!opts.showWatchlist,
+          onSubmit: function (patch) {
+            return bulkUpdateCards(ids, patch).then(function () {
+              selected.clear(); updateBar();
+              return window.CardexReload();
+            }).then(function () {
+              if (typeof opts.onChanged === 'function') opts.onChanged();
+            });
+          }
+        });
+      };
+    }
+    function attach() {
+      document.querySelectorAll(checkboxSelector).forEach(function (cb) {
+        cb.checked = selected.has(cb.dataset.dbid);
+        cb.onchange = function () {
+          if (cb.checked) selected.add(cb.dataset.dbid); else selected.delete(cb.dataset.dbid);
+          updateBar();
+        };
+      });
+    }
+    return { attach: attach, selected: selected, updateBar: updateBar, syncCheckboxes: syncCheckboxes };
+  }
+  window.CardexCreateBulkSelector = createBulkSelector;
+
+  window.CardexAPI = { insertCard: insertCard, updateCard: updateCard, deleteCard: deleteCard, bulkUpdateCards: bulkUpdateCards, bulkDeleteCards: bulkDeleteCards, insertRetiro: insertRetiro, deleteRetiro: deleteRetiro, insertWatchlist: insertWatchlist, deleteWatchlist: deleteWatchlist, reorderWatchlists: reorderWatchlists, watchlistColor: watchlistColor };
+
   window.CardexOpenMove = function (item) { requirePassword(function () { openMoveModal(item); }); };
+  window.CardexOpenBulkEdit = function (options) { requirePassword(function () { openBulkEditModal(options); }); };
   window.CardexOpenAdd = function (status) { requirePassword(function () { openAddModal(status); }); };
   window.CardexOpenRetiro = function () { requirePassword(function () { openRetiroModal(); }); };
   window.CardexQuickDelete = function (dbId, name) {

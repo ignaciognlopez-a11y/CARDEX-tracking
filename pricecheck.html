@@ -67,6 +67,7 @@
 <div class="panel actions-panel">
   <button class="btn" id="reload">Load DB</button>
   <button class="btn primary" id="bulk-start">Full Price Check</button>
+  <button class="btn" id="fix-images-btn" style="border-color:rgba(184,145,46,0.5);color:var(--gold);">Fix missing images</button>
 </div>
 
 <div class="progress" id="progress"></div>
@@ -402,6 +403,7 @@ document.getElementById('bulk-start').addEventListener('click', startBulkCheck);
 })();
 
 document.getElementById('reload').addEventListener('click', load);
+document.getElementById('fix-images-btn').addEventListener('click', () => window.CardexFixMissingImages());
 
 (async function init() {
   await loadWatchlistNames();
