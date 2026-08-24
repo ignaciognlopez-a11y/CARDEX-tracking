@@ -210,11 +210,10 @@
   // que ahora sabemos con certeza si una carta simplemente no está en ninguna fuente.
   //
   // La función prueba, en este orden: riftcodex.com por número exacto -> dotgg.gg por número ->
-  // riftcodex.com por nombre -> riftdecks.com por nombre -> Cardmarket (og:image), esta última
-  // solo relevante para productos SELLADOS. Nota honesta: Cardmarket bloquea el scraping con
-  // Cloudflare incluso desde servidor (comprobado en vivo, devuelve 403 "Just a moment..."), así
-  // que ese quinto paso rara vez tendrá éxito - los productos sellados sin card_number numérico
-  // no tienen ninguna fuente automática fiable en internet y pueden quedar sin imagen.
+  // riftcodex.com por nombre -> riftdecks.com por nombre -> TCGplayer.com por nombre -> Cardmarket
+  // (og:image). TCGplayer es la fuente clave para productos SELLADOS: verificado en vivo que su
+  // API de búsqueda y su CDN de imágenes no tienen bloqueo anti-bot, a diferencia de Cardmarket
+  // y Google (ambos probados y confirmados bloqueados incluso desde servidor).
   const RESOLVE_IMAGE_URL = SUPABASE_URL + "/functions/v1/resolve-card-image";
 
   function resolveCardImageServer(card) {
