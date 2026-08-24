@@ -496,11 +496,26 @@
                 return results;
               });
             }
-            results.skippedNames.push(c.name + ' (' + c.cardNumber + ')');
-            return results;
+            // dotgg.gg no tiene esta carta todavía (típico de sets recién lanzados, como
+            // Vendetta el primer mes: dotgg tarda en indexar). Antes de rendirnos, probamos
+            // riftcodex.com por NOMBRE como último recurso - solo tocamos card_image, el
+            // card_number que ya había guardado no se toca porque puede ser correcto.
+            return lookupRiftcodexByName(c.name).then(function (found) {
+              if (found && found.image) {
+                return updateCard(c.dbId, { card_image: found.image }).then(function () {
+                  results.fixedViaFallback = (results.fixedViaFallback || 0) + 1;
+                  return results;
+                }).catch(function (err) {
+                  results.errors.push(c.name + ' (' + c.cardNumber + '): ' + err.message);
+                  return results;
+                });
+              }
+              results.skippedNames.push(c.name + ' (' + c.cardNumber + ')');
+              return results;
+            });
           });
         });
-      }, Promise.resolve({ fixed: 0, skippedNames: [], errors: [], phase1: phase1Results }));
+      }, Promise.resolve({ fixed: 0, fixedViaFallback: 0, skippedNames: [], errors: [], phase1: phase1Results }));
     });
 
     chain.then(function (results) {
@@ -508,6 +523,7 @@
       let msg = 'Done.';
       if (p1.fixedViaName) msg += '\n\n' + p1.fixedViaName + ' card(s) resolved automatically by NAME (riftdecks.com) - Card Number, set and image filled in.';
       if (results.fixed) msg += '\n\n' + results.fixed + ' more image(s) filled in by Card Number (dotgg.gg).';
+      if (results.fixedViaFallback) msg += '\n\n' + results.fixedViaFallback + ' more image(s) filled in via riftcodex.com fallback (dotgg.gg did not have them yet).';
       if (p1.stillUnresolved.length) {
         msg += '\n\nCould not resolve by name (' + p1.stillUnresolved.length + '):\n' + p1.stillUnresolved.join('\n') +
           '\n\nEither riftdecks.com does not have these, or this browser cannot read cross-origin data from it. Paste this list to Claude in chat.';
