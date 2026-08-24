@@ -381,6 +381,27 @@
     return exact || relevant[0];
   }
 
+  // ---------- Consulta a riftcodex.com POR NUMERO (más precisa que por nombre) ----------
+  // El endpoint /cards/riftbound/{id} acepta coincidencia parcial e insensible a mayúsculas
+  // (según su documentación oficial: "ogn-011-298" o "ogn-011" valen igual). Como YA tenemos
+  // el card_number guardado, esta consulta es más fiable que buscar por nombre: evita el caso
+  // real que nos pasó con "Kai'Sa, Survivor" - existe una carta con ese mismo nombre en Origins
+  // (OGN-039) totalmente distinta a la Special Promo de Vendetta (VEN-SP1) que buscábamos, y
+  // buscar solo por nombre podía devolver la equivocada. Por número no hay ambigüedad posible.
+  function lookupRiftcodexByRiftboundId(cardNumber) {
+    const raw = String(cardNumber || '').trim();
+    if (!raw) return Promise.resolve(null);
+    return fetch('https://api.riftcodex.com/cards/riftbound/' + encodeURIComponent(raw))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        // la API puede devolver un array directo o un objeto {items:[...]}, según el endpoint
+        const item = Array.isArray(data) ? data[0] : (data && data.items && data.items[0]);
+        if (!item) return null;
+        return { image: (item.media && item.media.image_url) || null };
+      })
+      .catch(function () { return null; }); // CORS u otro fallo: se trata como "sin match"
+  }
+
   function lookupRiftcodexByName(cardName) {
     const clean = String(cardName || '').replace(/\([^)]*\)/g, '').replace(/[^a-zA-Z0-9\s]/g, ' ').trim();
     if (!clean) return Promise.resolve(null);
@@ -479,51 +500,68 @@
       });
     }, Promise.resolve({ fixedViaName: 0, stillUnresolved: [], errors: [] }));
 
-    // FASE 2: cartas que ya tenían card_number - matriz de candidatos en dotgg (como antes)
+    // FASE 2: cartas que ya tenían card_number.
+    // Orden de fuentes, de más a menos precisa:
+    //   1. riftcodex.com por NUMERO (riftbound_id) - sin ambigüedad posible, es el propio
+    //      identificador de la carta. Especialmente útil para sets nuevos que dotgg todavía
+    //      no ha indexado (p.ej. Vendetta el primer mes).
+    //   2. dotgg.gg - matriz de candidatos por número (como antes).
+    //   3. riftcodex.com por NOMBRE - último recurso; puede confundirse si dos cartas de sets
+    //      distintos comparten nombre, así que va detrás de la búsqueda por número.
     const chain = phase1.then(function (phase1Results) {
       return targets.reduce(function (p, c) {
         return p.then(function (results) {
-          return resolveImageForCard(c, prefixBySet).then(function (url) {
-            if (url) {
-              return updateCard(c.dbId, { card_image: url }).then(function () {
-                results.fixed++;
-                const file = url.slice(DOTGG_BASE.length).replace(/\.webp$/i, '');
-                const mm = file.match(/^(.*?)(\d{1,4})[a-z]?$/i);
-                if (mm) prefixBySet[(c.set || '').trim()] = mm[1];
+          return lookupRiftcodexByRiftboundId(c.cardNumber).then(function (foundById) {
+            if (foundById && foundById.image) {
+              return updateCard(c.dbId, { card_image: foundById.image }).then(function () {
+                results.fixedViaRiftcodexId = (results.fixedViaRiftcodexId || 0) + 1;
                 return results;
               }).catch(function (err) {
                 results.errors.push(c.name + ' (' + c.cardNumber + '): ' + err.message);
                 return results;
               });
             }
-            // dotgg.gg no tiene esta carta todavía (típico de sets recién lanzados, como
-            // Vendetta el primer mes: dotgg tarda en indexar). Antes de rendirnos, probamos
-            // riftcodex.com por NOMBRE como último recurso - solo tocamos card_image, el
-            // card_number que ya había guardado no se toca porque puede ser correcto.
-            return lookupRiftcodexByName(c.name).then(function (found) {
-              if (found && found.image) {
-                return updateCard(c.dbId, { card_image: found.image }).then(function () {
-                  results.fixedViaFallback = (results.fixedViaFallback || 0) + 1;
+            return resolveImageForCard(c, prefixBySet).then(function (url) {
+              if (url) {
+                return updateCard(c.dbId, { card_image: url }).then(function () {
+                  results.fixed++;
+                  const file = url.slice(DOTGG_BASE.length).replace(/\.webp$/i, '');
+                  const mm = file.match(/^(.*?)(\d{1,4})[a-z]?$/i);
+                  if (mm) prefixBySet[(c.set || '').trim()] = mm[1];
                   return results;
                 }).catch(function (err) {
                   results.errors.push(c.name + ' (' + c.cardNumber + '): ' + err.message);
                   return results;
                 });
               }
-              results.skippedNames.push(c.name + ' (' + c.cardNumber + ')');
-              return results;
+              // Ni riftcodex por número ni dotgg tienen esta carta. Último intento: riftcodex
+              // por NOMBRE - solo tocamos card_image, el card_number guardado no se toca.
+              return lookupRiftcodexByName(c.name).then(function (found) {
+                if (found && found.image) {
+                  return updateCard(c.dbId, { card_image: found.image }).then(function () {
+                    results.fixedViaFallback = (results.fixedViaFallback || 0) + 1;
+                    return results;
+                  }).catch(function (err) {
+                    results.errors.push(c.name + ' (' + c.cardNumber + '): ' + err.message);
+                    return results;
+                  });
+                }
+                results.skippedNames.push(c.name + ' (' + c.cardNumber + ')');
+                return results;
+              });
             });
           });
         });
-      }, Promise.resolve({ fixed: 0, fixedViaFallback: 0, skippedNames: [], errors: [], phase1: phase1Results }));
+      }, Promise.resolve({ fixed: 0, fixedViaFallback: 0, fixedViaRiftcodexId: 0, skippedNames: [], errors: [], phase1: phase1Results }));
     });
 
     chain.then(function (results) {
       const p1 = results.phase1;
       let msg = 'Done.';
       if (p1.fixedViaName) msg += '\n\n' + p1.fixedViaName + ' card(s) resolved automatically by NAME (riftdecks.com) - Card Number, set and image filled in.';
+      if (results.fixedViaRiftcodexId) msg += '\n\n' + results.fixedViaRiftcodexId + ' image(s) filled in via riftcodex.com by exact Card Number (fastest, most reliable match).';
       if (results.fixed) msg += '\n\n' + results.fixed + ' more image(s) filled in by Card Number (dotgg.gg).';
-      if (results.fixedViaFallback) msg += '\n\n' + results.fixedViaFallback + ' more image(s) filled in via riftcodex.com fallback (dotgg.gg did not have them yet).';
+      if (results.fixedViaFallback) msg += '\n\n' + results.fixedViaFallback + ' more image(s) filled in via riftcodex.com by name (dotgg.gg and exact number match did not have them).';
       if (p1.stillUnresolved.length) {
         msg += '\n\nCould not resolve by name (' + p1.stillUnresolved.length + '):\n' + p1.stillUnresolved.join('\n') +
           '\n\nEither riftdecks.com does not have these, or this browser cannot read cross-origin data from it. Paste this list to Claude in chat.';
